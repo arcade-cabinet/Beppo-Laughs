@@ -3,13 +3,16 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { Vector3, Euler, MathUtils } from 'three';
 import { PointerLockControls } from '@react-three/drei';
 import { useGameStore } from '../../game/store';
+import { resolveCollision } from '../../game/collision';
+import { MazeGenerator } from '../../game/MazeGenerator';
 
 interface PlayerProps {
   position?: [number, number, number];
   onMove?: (pos: Vector3) => void;
+  maze: MazeGenerator;
 }
 
-export function Player({ position = [1, 1, 1], onMove }: PlayerProps) {
+export function Player({ position = [1, 1, 1], onMove, maze }: PlayerProps) {
   const { camera } = useThree();
   const [locked, setLocked] = useState(false);
   const { isInverted, fear, decreaseFear } = useGameStore();
@@ -22,11 +25,11 @@ export function Player({ position = [1, 1, 1], onMove }: PlayerProps) {
   
   // Gyroscope state
   const isMobile = useRef(false);
-  const gyroEuler = useRef(new Euler(0, 0, 0, 'YXZ'));
+  const gyroEnabled = useRef(false);
 
   useEffect(() => {
-    // Initial Position
-    camera.position.set(...position);
+    // Initial Position - start in first cell
+    camera.position.set(0, 1, 0);
 
     // Detect Mobile
     isMobile.current = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -72,47 +75,26 @@ export function Player({ position = [1, 1, 1], onMove }: PlayerProps) {
           break;
       }
     };
+
+    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('keyup', onKeyUp);
     
-    // Gyroscope Handler
-    const handleOrientation = (event: DeviceOrientationEvent) => {
-      if (!event.alpha || !event.beta || !event.gamma) return;
-      
-      // Convert to radians
-      const alpha = event.alpha ? event.alpha * (Math.PI / 180) : 0;
-      const beta = event.beta ? event.beta * (Math.PI / 180) : 0;
-      const gamma = event.gamma ? event.gamma * (Math.PI / 180) : 0;
-      
-      gyroEuler.current.set(beta, alpha, -gamma);
-    };
-
-    if (isMobile.current) {
-        window.addEventListener('deviceorientation', handleOrientation);
-    } else {
-        document.addEventListener('keydown', onKeyDown);
-        document.addEventListener('keyup', onKeyUp);
-        
-        // Auto-lock on click for desktop
-        const handleClick = () => {
-            setLocked(true);
-        }
-        document.addEventListener('click', handleClick);
-        return () => {
-            document.removeEventListener('click', handleClick);
-            document.removeEventListener('keydown', onKeyDown);
-            document.removeEventListener('keyup', onKeyUp);
-        }
+    // Auto-lock on click for desktop
+    const handleClick = () => {
+      setLocked(true);
     }
-
+    document.addEventListener('click', handleClick);
+    
     return () => {
-      if (isMobile.current) {
-        window.removeEventListener('deviceorientation', handleOrientation);
-      }
+      document.removeEventListener('click', handleClick);
+      document.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener('keyup', onKeyUp);
     };
-  }, [position, camera]);
+  }, [camera]);
 
   useFrame((state, delta) => {
     // Fear recovery over time
-    if (Math.random() > 0.99) decreaseFear(0.1);
+    if (Math.random() > 0.995) decreaseFear(1);
 
     const speed = 4.0;
     const velocity = new Vector3();
@@ -130,42 +112,50 @@ export function Player({ position = [1, 1, 1], onMove }: PlayerProps) {
     if (moveForward.current || moveBackward.current) velocity.z -= direction.z * speed * delta;
     if (moveLeft.current || moveRight.current) velocity.x -= direction.x * speed * delta;
 
+    // Calculate target position
+    const currentPos = camera.position.clone();
+    
+    // Apply movement in camera space
+    const moveVec = new Vector3(velocity.x, 0, velocity.z);
+    moveVec.applyQuaternion(camera.quaternion);
+    moveVec.y = 0; // Keep on ground
+    
+    const targetPos = currentPos.clone().add(moveVec);
+    
+    // Collision detection and resolution
+    const resolvedPos = resolveCollision(currentPos, targetPos, maze);
+    
+    camera.position.x = resolvedPos.x;
+    camera.position.z = resolvedPos.z;
+    
     // PENALTY: Camera shake/wobble based on fear
     if (fear > 20) {
-        const shakeIntensity = (fear / 100) * 0.05;
-        camera.position.x += (Math.random() - 0.5) * shakeIntensity;
-        camera.position.y += (Math.random() - 0.5) * shakeIntensity;
+      const shakeIntensity = (fear / 100) * 0.03;
+      camera.position.x += (Math.random() - 0.5) * shakeIntensity;
     }
 
-    if (isMobile.current) {
-         // Apply gyro rotation to camera (simplified)
-         // In a real app we'd need quaternion math to combine initial offset + gyro
-         // For now, we'll assume desktop testing mostly or touch controls overlay
-    } else {
-         camera.translateX(velocity.x);
-         camera.translateZ(velocity.z); // Actually moves forward/back relative to lookDir
-    }
-    
     // Keep height constant (walking on ground) but allow bobbing
-    const walkBob = (moveForward.current || moveBackward.current || moveLeft.current || moveRight.current) 
-        ? Math.sin(state.clock.elapsedTime * 10) * 0.05 
-        : 0;
+    const isMoving = moveForward.current || moveBackward.current || moveLeft.current || moveRight.current;
+    const walkBob = isMoving ? Math.sin(state.clock.elapsedTime * 10) * 0.03 : 0;
     
     camera.position.y = MathUtils.lerp(camera.position.y, 1.0 + walkBob, 0.1);
     
     if (onMove) onMove(camera.position);
   });
 
+  // Mobile touch controls overlay
   if (isMobile.current) {
-    // Render Touch Controls overlay here if needed, but for now focusing on structure
-    return null; 
+    return (
+      <group>
+        {/* Touch controls would be rendered in HUD/HTML layer */}
+      </group>
+    );
   }
 
   return (
     <PointerLockControls 
-        isLocked={locked} 
-        onUnlock={() => setLocked(false)}
-        selector="#root" // Lock when clicking anywhere
+      onLock={() => setLocked(true)}
+      onUnlock={() => setLocked(false)}
     />
   );
 }
