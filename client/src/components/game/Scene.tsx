@@ -2,10 +2,11 @@ import { Canvas } from '@react-three/fiber';
 import { Sky, Stars } from '@react-three/drei';
 import { Suspense, useState, useEffect } from 'react';
 import { Maze } from './Maze';
-import { Player } from './Player';
+import { RailPlayer } from './RailPlayer';
 import { MazeGenerator } from '../../game/MazeGenerator';
 import { Villains } from './Villains';
 import { Collectibles } from './Collectibles';
+import { TapZones } from './TapZones';
 import { AudioManager } from './AudioManager';
 import { useGameStore } from '../../game/store';
 
@@ -19,21 +20,26 @@ export function Scene({ seed }: SceneProps) {
   const sanityLevel = useGameStore(state => state.getSanityLevel());
 
   useEffect(() => {
-    const newMaze = new MazeGenerator(12, 12, seed);
+    // 13x13 maze (odd for true center)
+    const newMaze = new MazeGenerator(13, 13, seed);
     setMaze(newMaze);
   }, [seed]);
 
-  // Atmosphere adjusts based on sanity
+  // Calculate insanity level (0 = sane, 1 = insane)
   const avgInsanity = (fear + despair) / 2 / maxSanity;
   
-  // Fog gets closer as insanity rises, but starts further away
-  const fogNear = Math.max(2, 8 - avgInsanity * 6);
-  const fogFar = Math.max(12, 25 - avgInsanity * 10);
+  // DAYLIGHT START: Fog is far when sane, closes in as sanity drops
+  const fogNear = Math.max(3, 15 - avgInsanity * 12);
+  const fogFar = Math.max(20, 40 - avgInsanity * 25);
   
-  // Color shifts at low sanity
-  const bgColor = sanityLevel < 50 
-    ? `hsl(${280 + (50 - sanityLevel)}, 15%, ${5 + avgInsanity * 3}%)` 
-    : '#0a0a0a';
+  // Sky color: bright day (sane) -> dark night (insane)
+  const skyBrightness = Math.max(0.1, 1 - avgInsanity * 0.9);
+  
+  // Background shifts from light blue (sane) to dark (insane)
+  const bgHue = 210; // Blue
+  const bgSaturation = 30 - avgInsanity * 20;
+  const bgLightness = Math.max(5, 50 - avgInsanity * 45);
+  const bgColor = `hsl(${bgHue}, ${bgSaturation}%, ${bgLightness}%)`;
 
   if (!maze) return null;
 
@@ -44,58 +50,73 @@ export function Scene({ seed }: SceneProps) {
       
       <Canvas 
         shadows 
-        camera={{ fov: 75 + avgInsanity * 10, near: 0.1, far: 100 }}
+        camera={{ fov: 70, near: 0.1, far: 100 }}
         style={{
           filter: sanityLevel < 30 
             ? `saturate(${0.5 + sanityLevel / 60}) contrast(${1 + avgInsanity * 0.3})` 
             : 'none'
         }}
       >
-        {/* Atmosphere */}
+        {/* Atmosphere - starts bright, darkens with insanity */}
         <color attach="background" args={[bgColor]} />
         <fog attach="fog" args={[bgColor, fogNear, fogFar]} /> 
         
-        <Sky sunPosition={[0, -1, 0]} turbidity={10} rayleigh={0.5 + avgInsanity} mieCoefficient={0.005} mieDirectionalG={0.8} />
-        <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1 + avgInsanity * 2} />
-
-        {/* Lighting - brighter base for visibility */}
-        <ambientLight intensity={0.25} color="#2a2a3a" />
-        <hemisphereLight intensity={0.3} color="#c0c8d0" groundColor="#1a1a2a" />
+        {/* Sky - sun position changes with sanity */}
+        <Sky 
+          sunPosition={[0, skyBrightness * 10, -5]} 
+          turbidity={2 + avgInsanity * 8} 
+          rayleigh={0.5 + avgInsanity * 2} 
+          mieCoefficient={0.005} 
+          mieDirectionalG={0.8} 
+        />
         
-        {/* Main directional light for shadows */}
+        {/* Stars only appear as sanity drops */}
+        {avgInsanity > 0.3 && (
+          <Stars 
+            radius={100} 
+            depth={50} 
+            count={Math.floor(avgInsanity * 5000)} 
+            factor={4} 
+            saturation={0} 
+            fade 
+            speed={1 + avgInsanity * 2} 
+          />
+        )}
+
+        {/* DAYLIGHT LIGHTING - bright when sane */}
+        <ambientLight intensity={0.4 + (1 - avgInsanity) * 0.4} color="#ffffff" />
+        <hemisphereLight 
+          intensity={0.5 + (1 - avgInsanity) * 0.3} 
+          color="#87ceeb" 
+          groundColor="#3d5c3d" 
+        />
+        
+        {/* Sun light - strong when sane */}
         <directionalLight 
           position={[5, 10, 5]} 
-          intensity={0.4 * (0.5 + sanityLevel / 200)} 
+          intensity={0.8 * (1 - avgInsanity * 0.6)} 
           castShadow 
-          color="#c0c8d0"
+          color="#ffffd0"
+          shadow-mapSize-width={2048}
+          shadow-mapSize-height={2048}
         />
         
-        {/* Color-shifted lights at low sanity */}
-        {sanityLevel < 50 && (
+        {/* Horror lights only appear as sanity drops */}
+        {avgInsanity > 0.3 && (
           <>
-            <pointLight position={[-5, 3, -5]} intensity={0.2 * avgInsanity} color="#8b0000" distance={15} />
-            <pointLight position={[5, 3, 5]} intensity={0.2 * avgInsanity} color="#00008b" distance={15} />
+            <pointLight position={[-5, 3, -5]} intensity={avgInsanity * 0.3} color="#8b0000" distance={15} />
+            <pointLight position={[5, 3, 5]} intensity={avgInsanity * 0.3} color="#00008b" distance={15} />
           </>
         )}
-        
-        {/* Player flashlight effect */}
-        <spotLight 
-          position={[0, 3, 0]} 
-          angle={0.8} 
-          penumbra={0.5} 
-          intensity={0.6} 
-          castShadow 
-          color="#ffffee"
-          distance={20}
-        />
 
         <Suspense fallback={null}>
           <Maze maze={maze} />
           <Villains maze={maze} />
           <Collectibles maze={maze} />
+          <TapZones maze={maze} />
         </Suspense>
 
-        <Player position={[0, 1, 0]} maze={maze} />
+        <RailPlayer maze={maze} />
       </Canvas>
     </>
   );

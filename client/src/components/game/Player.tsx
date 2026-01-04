@@ -18,7 +18,7 @@ export function Player({ position = [1, 1, 1], onMove, maze }: PlayerProps) {
   const { 
     fear, 
     despair, 
-    updatePlayerPosition, 
+    visitNode,
     decreaseFear, 
     decreaseDespair, 
     isGameOver,
@@ -179,7 +179,7 @@ export function Player({ position = [1, 1, 1], onMove, maze }: PlayerProps) {
     
     if (cellX !== lastCellUpdate.current.x || cellZ !== lastCellUpdate.current.z) {
       lastCellUpdate.current = { x: cellX, z: cellZ };
-      updatePlayerPosition(camera.position.x, camera.position.z);
+      visitNode(`${cellX},${cellZ}`);
     }
     
     if (onMove) onMove(camera.position);

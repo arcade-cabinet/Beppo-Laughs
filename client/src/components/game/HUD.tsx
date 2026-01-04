@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { BrainMeter } from './BrainMeter';
 
 export function HUD() {
-  const { fear, despair, maxSanity, isGameOver, visitedCells } = useGameStore();
+  const { fear, despair, maxSanity, isGameOver, hasWon, visitedCells } = useGameStore();
   const isInverted = useGameStore(state => state.isInverted());
   const sanityLevel = useGameStore(state => state.getSanityLevel());
   
@@ -104,11 +104,10 @@ export function HUD() {
         )}
       </AnimatePresence>
 
-      {/* Instructions */}
+      {/* Instructions - TAP BASED */}
       <div className="absolute bottom-6 right-6 text-white/30 font-mono text-xs text-right">
-        <p>WASD / Arrows to move</p>
-        <p>Mouse to look</p>
-        <p>Click to lock cursor</p>
+        <p>TAP markers to move</p>
+        <p>Find the EXIT to escape</p>
       </div>
       
       {/* Exploration Counter */}
@@ -116,6 +115,36 @@ export function HUD() {
         <p>CELLS EXPLORED: {cellsExplored}</p>
         <p>SANITY: {Math.floor(sanityLevel)}%</p>
       </div>
+      
+      {/* WIN Overlay */}
+      <AnimatePresence>
+        {hasWon && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="absolute inset-0 bg-gradient-to-b from-green-900/90 to-black/90 flex flex-col items-center justify-center z-50"
+          >
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.3, type: 'spring' }}
+            >
+              <h1 className="font-horror text-6xl md:text-8xl text-green-400 mb-4">
+                ESCAPED!
+              </h1>
+              <p className="text-white/70 font-creepy text-2xl text-center">
+                You found your way out of the nightmare.
+              </p>
+              <p className="text-white/40 font-mono text-sm mt-8 text-center">
+                Cells explored: {cellsExplored}
+              </p>
+              <p className="text-white/40 font-mono text-sm mt-2 text-center">
+                Final sanity: {Math.floor(sanityLevel)}%
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       {/* Game Over Overlay */}
       <AnimatePresence>

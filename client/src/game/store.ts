@@ -16,11 +16,11 @@ interface GameState {
   // Path Tracking
   visitedCells: Map<string, VisitedCell>;
   pathHistory: Array<{ x: number, z: number, timestamp: number }>;
-  currentCell: { x: number, z: number } | null;
   
   // Game State
   seed: string;
   isGameOver: boolean;
+  hasWon: boolean;
   gameOverReason: 'fear' | 'despair' | 'both' | null;
   
   // Blockades (villain-created obstacles)
@@ -29,9 +29,17 @@ interface GameState {
   // Collected Items
   collectedItems: Set<string>;
   
+  // Rail Navigation State
+  currentNode: string;        // Current position node ID
+  targetNode: string | null;  // Node we're moving toward
+  isMoving: boolean;          // Currently in transit
+  moveProgress: number;       // 0-1 progress along edge
+  moveSpeed: number;          // Speed multiplier (1 = normal, 1.5 = run, 0.7 = slow)
+  cameraRotation: number;     // Camera Y rotation in radians
+  
   // Actions
   setSeed: (seed: string) => void;
-  updatePlayerPosition: (x: number, z: number) => void;
+  visitNode: (nodeId: string) => void;
   increaseFear: (amount: number) => void;
   increaseDespair: (amount: number) => void;
   decreaseFear: (amount: number) => void;
@@ -40,47 +48,63 @@ interface GameState {
   removeBlockade: (cellKey: string) => void;
   collectItem: (itemId: string) => void;
   checkGameOver: () => void;
+  triggerWin: () => void;
   resetGame: () => void;
+  
+  // Rail Navigation Actions
+  setCurrentNode: (nodeId: string) => void;
+  startMoveTo: (targetNodeId: string, speed?: number) => void;
+  updateMoveProgress: (progress: number) => void;
+  completeMove: () => void;
+  setCameraRotation: (rotation: number) => void;
   
   // Computed
   getSanityLevel: () => number;
   isInverted: () => boolean;
 }
 
-const cellKey = (x: number, z: number) => `${Math.floor(x / 2)},${Math.floor(z / 2)}`;
+const cellKey = (nodeId: string) => nodeId;
 
 export const useGameStore = create<GameState>((set, get) => ({
-  fear: 0,
-  despair: 0,
+  fear: 0,      // Start fully sane
+  despair: 0,   // Start fully sane
   maxSanity: 100,
   
   visitedCells: new Map(),
   pathHistory: [],
-  currentCell: null,
   
   seed: '',
   isGameOver: false,
+  hasWon: false,
   gameOverReason: null,
   
   blockades: new Set(),
   collectedItems: new Set(),
   
+  // Rail navigation - initialized empty, set by maze
+  currentNode: '',
+  targetNode: null,
+  isMoving: false,
+  moveProgress: 0,
+  moveSpeed: 1,
+  cameraRotation: 0,
+  
   setSeed: (seed) => set({ seed }),
   
-  updatePlayerPosition: (x, z) => {
-    const key = cellKey(x, z);
+  visitNode: (nodeId) => {
     const state = get();
     const now = Date.now();
+    const [xStr, zStr] = nodeId.split(',');
+    const x = parseInt(xStr);
+    const z = parseInt(zStr);
     
-    // Check if this is a new cell or retread
-    const existingCell = state.visitedCells.get(key);
+    const existingCell = state.visitedCells.get(nodeId);
     
     if (!existingCell) {
-      // NEW CELL - Exploring the unknown increases FEAR
+      // NEW NODE - Exploring the unknown increases FEAR
       const newVisited = new Map(state.visitedCells);
-      newVisited.set(key, { 
-        x: Math.floor(x / 2), 
-        z: Math.floor(z / 2), 
+      newVisited.set(nodeId, { 
+        x, z, 
         visitCount: 1, 
         firstVisitTime: now 
       });
@@ -88,25 +112,23 @@ export const useGameStore = create<GameState>((set, get) => ({
       set({ 
         visitedCells: newVisited,
         pathHistory: [...state.pathHistory, { x, z, timestamp: now }],
-        currentCell: { x: Math.floor(x / 2), z: Math.floor(z / 2) }
       });
       
       // Increase fear for exploring unknown
-      get().increaseFear(0.5);
+      get().increaseFear(1);
     } else {
-      // RETREAD - Walking in circles increases DESPAIR
+      // REVISIT - Walking in circles increases DESPAIR
       const newVisited = new Map(state.visitedCells);
       const updatedCell = { ...existingCell, visitCount: existingCell.visitCount + 1 };
-      newVisited.set(key, updatedCell);
+      newVisited.set(nodeId, updatedCell);
       
       set({ 
         visitedCells: newVisited,
         pathHistory: [...state.pathHistory, { x, z, timestamp: now }],
-        currentCell: { x: Math.floor(x / 2), z: Math.floor(z / 2) }
       });
       
-      // Increase despair based on how many times visited
-      const despairIncrease = Math.min(updatedCell.visitCount * 0.3, 2);
+      // Increase despair based on revisit count
+      const despairIncrease = Math.min(updatedCell.visitCount * 0.5, 3);
       get().increaseDespair(despairIncrease);
     }
     
@@ -144,7 +166,6 @@ export const useGameStore = create<GameState>((set, get) => ({
   collectItem: (itemId) => set((state) => {
     const newItems = new Set(state.collectedItems);
     newItems.add(itemId);
-    // Collecting items reduces both meters slightly
     return { 
       collectedItems: newItems,
       fear: Math.max(state.fear - 5, 0),
@@ -163,27 +184,65 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
   },
   
+  triggerWin: () => set({ hasWon: true }),
+  
   resetGame: () => set({
     fear: 0,
     despair: 0,
     visitedCells: new Map(),
     pathHistory: [],
-    currentCell: null,
     isGameOver: false,
+    hasWon: false,
     gameOverReason: null,
     blockades: new Set(),
     collectedItems: new Set(),
+    currentNode: '',
+    targetNode: null,
+    isMoving: false,
+    moveProgress: 0,
+    moveSpeed: 1,
+    cameraRotation: 0,
   }),
+  
+  // Rail Navigation Actions
+  setCurrentNode: (nodeId) => set({ currentNode: nodeId }),
+  
+  startMoveTo: (targetNodeId, speed = 1) => set({
+    targetNode: targetNodeId,
+    isMoving: true,
+    moveProgress: 0,
+    moveSpeed: speed
+  }),
+  
+  updateMoveProgress: (progress) => set({ moveProgress: Math.min(1, progress) }),
+  
+  completeMove: () => {
+    const state = get();
+    const targetNode = state.targetNode;
+    
+    if (targetNode) {
+      set({
+        currentNode: targetNode,
+        targetNode: null,
+        isMoving: false,
+        moveProgress: 0
+      });
+      
+      // Record visit to new node
+      get().visitNode(targetNode);
+    }
+  },
+  
+  setCameraRotation: (rotation) => set({ cameraRotation: rotation }),
   
   getSanityLevel: () => {
     const state = get();
-    const avgSanity = (state.fear + state.despair) / 2;
-    return 100 - avgSanity; // 100 = sane, 0 = insane
+    const avgInsanity = (state.fear + state.despair) / 2;
+    return 100 - avgInsanity; // 100 = sane, 0 = insane
   },
   
   isInverted: () => {
     const state = get();
-    // Controls invert at high combined sanity loss
-    return (state.fear + state.despair) > 120 && Math.random() > 0.7;
+    return (state.fear + state.despair) > 140;
   },
 }));

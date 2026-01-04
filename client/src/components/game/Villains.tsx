@@ -360,16 +360,24 @@ export function Villains({ maze }: VillainsProps) {
   
   const villains = useMemo(() => {
     const spawned: { x: number, y: number, isBlockade: boolean, cellKey: string }[] = [];
-    const count = Math.floor((maze.width * maze.height) / 6);
+    const count = Math.floor((maze.width * maze.height) / 8);
+
+    // Avoid center and exits
+    const avoidNodes = new Set([
+      maze.railGraph.centerNode,
+      ...maze.railGraph.exitNodes
+    ]);
 
     for (let i = 0; i < count; i++) {
       let x: number, y: number;
+      let nodeId: string;
       let attempts = 0;
       do {
         x = Math.floor(Math.random() * maze.width);
         y = Math.floor(Math.random() * maze.height);
+        nodeId = `${x},${y}`;
         attempts++;
-      } while ((x === 0 && y === 0 || spawned.some(v => v.x === x && v.y === y)) && attempts < 50);
+      } while ((avoidNodes.has(nodeId) || spawned.some(v => v.x === x && v.y === y)) && attempts < 50);
 
       if (attempts < 50) {
         const isBlockade = Math.random() > 0.5;
@@ -377,8 +385,14 @@ export function Villains({ maze }: VillainsProps) {
           x,
           y,
           isBlockade,
-          cellKey: `${x},${y}`
+          cellKey: nodeId
         });
+        
+        // Mark node as having villain
+        const node = maze.railGraph.nodes.get(nodeId);
+        if (node) {
+          node.hasVillain = true;
+        }
       }
     }
     return spawned;

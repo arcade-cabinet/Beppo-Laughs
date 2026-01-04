@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useTexture, Billboard, Text } from '@react-three/drei';
 import { Group, MathUtils } from 'three';
@@ -18,6 +18,7 @@ interface CollectibleItem {
   id: string;
   x: number;
   z: number;
+  nodeId: string;
   textureIndex: number;
 }
 
@@ -25,10 +26,10 @@ function Collectible({ item, onCollect }: { item: CollectibleItem, onCollect: (i
   const texture = useTexture(ITEM_TEXTURES[item.textureIndex]);
   const groupRef = useRef<Group>(null);
   const [collected, setCollected] = useState(false);
-  const [scale, setScale] = useState(0.8);
-  const [collectAnimation, setCollectAnimation] = useState(0);
+  const scaleRef = useRef(0.8);
+  const collectAnimRef = useRef(0);
   const { camera } = useThree();
-  const { blockades } = useGameStore();
+  const { blockades, currentNode } = useGameStore();
   
   const hasBlockades = blockades.size > 0;
   
@@ -37,17 +38,16 @@ function Collectible({ item, onCollect }: { item: CollectibleItem, onCollect: (i
     
     if (collected) {
       // Collection animation
-      setCollectAnimation(prev => prev + 0.1);
-      setScale(MathUtils.lerp(scale, 0, 0.2));
+      collectAnimRef.current += 0.1;
+      scaleRef.current = MathUtils.lerp(scaleRef.current, 0, 0.2);
       groupRef.current.position.y += 0.1;
       groupRef.current.rotation.y += 0.3;
+      groupRef.current.scale.setScalar(scaleRef.current);
       return;
     }
     
-    const dist = groupRef.current.position.distanceTo(camera.position);
-    
-    // Collection range
-    if (dist < 1.5) {
+    // Check if player is at this node
+    if (currentNode === item.nodeId) {
       setCollected(true);
       onCollect(item.id);
       
@@ -66,16 +66,16 @@ function Collectible({ item, onCollect }: { item: CollectibleItem, onCollect: (i
     // Pulsing glow - more intense if there are blockades
     const pulseIntensity = hasBlockades ? 0.2 : 0.1;
     const pulse = 0.8 + Math.sin(state.clock.elapsedTime * 3) * pulseIntensity;
-    setScale(pulse);
+    groupRef.current.scale.setScalar(pulse);
   });
   
   // Remove after collection animation
-  if (collected && collectAnimation > 2) return null;
+  if (collected && collectAnimRef.current > 2) return null;
   
   return (
     <group ref={groupRef} position={[item.x * 2, 0.8, item.z * 2]}>
       <Billboard>
-        <group scale={[scale, scale, scale]}>
+        <group>
           <mesh>
             <planeGeometry args={[0.7, 0.9]} />
             <meshStandardMaterial 
@@ -123,28 +123,43 @@ function Collectible({ item, onCollect }: { item: CollectibleItem, onCollect: (i
 export function Collectibles({ maze }: CollectiblesProps) {
   const { collectItem, collectedItems, removeBlockade, blockades } = useGameStore();
   
-  // Generate items at random locations
+  // Generate items at random locations and mark rail nodes
   const items = useMemo(() => {
     const generated: CollectibleItem[] = [];
-    const itemCount = Math.floor((maze.width * maze.height) / 10); // More items
+    const itemCount = Math.floor((maze.width * maze.height) / 8); // More items
+    
+    // Avoid center and exits
+    const avoidNodes = new Set([
+      maze.railGraph.centerNode,
+      ...maze.railGraph.exitNodes
+    ]);
     
     for (let i = 0; i < itemCount; i++) {
       let x: number, z: number;
+      let nodeId: string;
       let attempts = 0;
       
       do {
         x = Math.floor(Math.random() * maze.width);
         z = Math.floor(Math.random() * maze.height);
+        nodeId = `${x},${z}`;
         attempts++;
-      } while ((x === 0 && z === 0 || generated.some(it => it.x === x && it.z === z)) && attempts < 50);
+      } while ((avoidNodes.has(nodeId) || generated.some(it => it.nodeId === nodeId)) && attempts < 50);
       
       if (attempts < 50) {
         generated.push({
           id: `item-${x}-${z}`,
           x,
           z,
+          nodeId,
           textureIndex: Math.floor(Math.random() * ITEM_TEXTURES.length)
         });
+        
+        // Mark node as having collectible
+        const node = maze.railGraph.nodes.get(nodeId);
+        if (node) {
+          node.hasCollectible = true;
+        }
       }
     }
     
@@ -159,9 +174,6 @@ export function Collectibles({ maze }: CollectiblesProps) {
     if (blockadeArray.length > 0) {
       const randomBlockade = blockadeArray[Math.floor(Math.random() * blockadeArray.length)];
       removeBlockade(randomBlockade);
-      
-      // Feedback that a path was cleared
-      console.log('Path cleared at:', randomBlockade);
     }
   };
   
