@@ -37,7 +37,7 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
         if (firstConnection) {
           const lookDir = Math.atan2(
             firstConnection.worldX - centerNode.worldX,
-            firstConnection.worldZ - centerNode.worldZ
+            -(firstConnection.worldZ - centerNode.worldZ)
           );
           camera.rotation.y = lookDir;
           camera.rotation.x = 0.1;
@@ -58,7 +58,7 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
   const getDirectionRotation = (fromNode: RailNode, toNode: RailNode): number => {
     const dx = toNode.worldX - fromNode.worldX;
     const dz = toNode.worldZ - fromNode.worldZ;
-    return Math.atan2(dx, dz);
+    return Math.atan2(dx, -dz);
   };
   
   useFrame((state, delta) => {
