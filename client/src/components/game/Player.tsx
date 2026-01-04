@@ -38,8 +38,9 @@ export function Player({ position = [1, 1, 1], onMove, maze }: PlayerProps) {
   const isMobile = useRef(false);
 
   useEffect(() => {
-    // Initial Position - start in first cell
-    camera.position.set(0, 1, 0);
+    // Initial Position - start in first cell, looking into the maze
+    camera.position.set(1, 1.6, 1);
+    camera.lookAt(3, 1.6, 3);
 
     // Detect Mobile
     isMobile.current = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
