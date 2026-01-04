@@ -25,6 +25,9 @@ export function RailPlayer({ maze }: RailPlayerProps) {
       camera.position.set(centerNode.worldX, 1.4, centerNode.worldZ);
       currentPos.current.set(centerNode.worldX, 1.4, centerNode.worldZ);
       
+      // Reset camera rotation to look straight ahead
+      camera.rotation.set(0, 0, 0);
+      
       // Look toward first available path
       if (centerNode.connections.length > 0) {
         const firstConnection = maze.railGraph.nodes.get(centerNode.connections[0]);
@@ -34,10 +37,13 @@ export function RailPlayer({ maze }: RailPlayerProps) {
             firstConnection.worldZ - centerNode.worldZ
           );
           camera.rotation.y = lookDir;
+          camera.rotation.x = 0; // Ensure looking straight ahead, not up/down
+          camera.rotation.z = 0; // No roll
           useGameStore.getState().setCameraRotation(lookDir);
         }
       }
       
+      console.log('Player initialized at:', centerNode.worldX, centerNode.worldZ, 'looking:', camera.rotation.y);
       initialized.current = true;
     }
   }, [maze, camera]);

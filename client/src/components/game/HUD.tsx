@@ -4,6 +4,16 @@ import { BrainMeter } from './BrainMeter';
 import { useRef, useEffect, useState } from 'react';
 import beppoVideoUrl from '@assets/generated_videos/beppo_clown_emerging_laughing_game_over.mp4';
 
+function DebugInfo() {
+  const { currentNode, isMoving, targetNode } = useGameStore();
+  return (
+    <div className="mt-2 text-yellow-400/60">
+      <p>NODE: {currentNode}</p>
+      <p>MOVING: {isMoving ? `→ ${targetNode}` : 'no'}</p>
+    </div>
+  );
+}
+
 export function HUD() {
   const { fear, despair, maxSanity, isGameOver, hasWon, visitedCells } = useGameStore();
   const isInverted = useGameStore(state => state.isInverted());
@@ -121,10 +131,11 @@ export function HUD() {
         <p>Find the EXIT to escape</p>
       </div>
       
-      {/* Exploration Counter */}
+      {/* Exploration Counter + Debug Info */}
       <div className="absolute bottom-6 left-6 text-white/40 font-mono text-xs">
         <p>CELLS EXPLORED: {cellsExplored}</p>
         <p>SANITY: {Math.floor(sanityLevel)}%</p>
+        <DebugInfo />
       </div>
       
       {/* WIN Overlay */}
