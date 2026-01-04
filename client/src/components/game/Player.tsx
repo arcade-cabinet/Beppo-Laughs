@@ -1,7 +1,8 @@
 import { useRef, useEffect, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Vector3, Euler } from 'three';
+import { Vector3, Euler, MathUtils } from 'three';
 import { PointerLockControls } from '@react-three/drei';
+import { useGameStore } from '../../game/store';
 
 interface PlayerProps {
   position?: [number, number, number];
@@ -11,6 +12,7 @@ interface PlayerProps {
 export function Player({ position = [1, 1, 1], onMove }: PlayerProps) {
   const { camera } = useThree();
   const [locked, setLocked] = useState(false);
+  const { isInverted, fear, decreaseFear } = useGameStore();
   
   // Movement state
   const moveForward = useRef(false);
@@ -108,18 +110,32 @@ export function Player({ position = [1, 1, 1], onMove }: PlayerProps) {
     };
   }, [position, camera]);
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
+    // Fear recovery over time
+    if (Math.random() > 0.99) decreaseFear(0.1);
+
     const speed = 4.0;
     const velocity = new Vector3();
     const direction = new Vector3();
 
     // Calculate movement direction relative to camera
-    direction.z = Number(moveForward.current) - Number(moveBackward.current);
-    direction.x = Number(moveRight.current) - Number(moveLeft.current);
+    // PENALTY: Inverted controls if fear is high
+    const forward = Number(moveForward.current) - Number(moveBackward.current);
+    const side = Number(moveRight.current) - Number(moveLeft.current);
+
+    direction.z = isInverted ? -forward : forward;
+    direction.x = isInverted ? -side : side;
     direction.normalize(); 
 
     if (moveForward.current || moveBackward.current) velocity.z -= direction.z * speed * delta;
     if (moveLeft.current || moveRight.current) velocity.x -= direction.x * speed * delta;
+
+    // PENALTY: Camera shake/wobble based on fear
+    if (fear > 20) {
+        const shakeIntensity = (fear / 100) * 0.05;
+        camera.position.x += (Math.random() - 0.5) * shakeIntensity;
+        camera.position.y += (Math.random() - 0.5) * shakeIntensity;
+    }
 
     if (isMobile.current) {
          // Apply gyro rotation to camera (simplified)
@@ -130,8 +146,12 @@ export function Player({ position = [1, 1, 1], onMove }: PlayerProps) {
          camera.translateZ(velocity.z); // Actually moves forward/back relative to lookDir
     }
     
-    // Keep height constant (walking on ground)
-    camera.position.y = 1.0; 
+    // Keep height constant (walking on ground) but allow bobbing
+    const walkBob = (moveForward.current || moveBackward.current || moveLeft.current || moveRight.current) 
+        ? Math.sin(state.clock.elapsedTime * 10) * 0.05 
+        : 0;
+    
+    camera.position.y = MathUtils.lerp(camera.position.y, 1.0 + walkBob, 0.1);
     
     if (onMove) onMove(camera.position);
   });

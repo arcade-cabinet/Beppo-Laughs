@@ -3,6 +3,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { useTexture, Text, Billboard } from '@react-three/drei';
 import { Vector3, Group, MathUtils } from 'three';
 import { MazeGenerator } from '../../game/MazeGenerator';
+import { useGameStore } from '../../game/store';
 import beppoUrl from '@assets/generated_images/paper_mache_beppo_sad_clown_cutout.png';
 import barkerUrl from '@assets/generated_images/manic_boardwalk_barker_cutout.png';
 import operaClownUrl from '@assets/generated_images/vintage_opera_clown_cutout.png';
@@ -36,6 +37,7 @@ function Villain({ position, textureUrl, playerPos }: { position: [number, numbe
   const [isVisible, setIsVisible] = useState(false);
   const [hasPopped, setHasPopped] = useState(false);
   const [scale, setScale] = useState(0);
+  const increaseFear = useGameStore(state => state.increaseFear);
   
   // Random "laugh" text
   const laughText = useMemo(() => LAUGHS[Math.floor(Math.random() * LAUGHS.length)], []);
@@ -46,10 +48,13 @@ function Villain({ position, textureUrl, playerPos }: { position: [number, numbe
     const dist = groupRef.current.position.distanceTo(playerPos);
     
     // Pop up logic
-    if (dist < 8 && !hasPopped) {
+    if (dist < 4 && !hasPopped) { // Reduced distance for more "jump scare" feel
       setHasPopped(true);
       setIsVisible(true);
-      // Play sound here if we had audio
+      increaseFear(20); // Spike fear!
+    } else if (dist > 15 && hasPopped) {
+        setIsVisible(false); // Hide if far away to reset surprise? Or keep them there? 
+        // Let's keep them visible once popped for now, or fade out.
     }
 
     // Animation
@@ -62,7 +67,7 @@ function Villain({ position, textureUrl, playerPos }: { position: [number, numbe
       groupRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 20) * 0.05;
       groupRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 15) * 0.1;
     } else {
-        setScale(0);
+        setScale(MathUtils.lerp(scale, 0, 0.1));
     }
   });
 
@@ -105,10 +110,10 @@ export function Villains({ maze }: VillainsProps) {
   // Spawn villains in random empty spots
   const villains = useMemo(() => {
     const spawned: { x: number, y: number, texture: string }[] = [];
-    const count = Math.floor((maze.width * maze.height) / 10); // Density
+    const count = Math.floor((maze.width * maze.height) / 8); // Higher Density
 
     for (let i = 0; i < count; i++) {
-      let x, y;
+      let x: number, y: number;
       let attempts = 0;
       do {
         x = Math.floor(Math.random() * maze.width);
