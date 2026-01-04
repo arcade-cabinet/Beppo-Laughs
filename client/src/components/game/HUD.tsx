@@ -1,19 +1,30 @@
 import { useGameStore } from '../../game/store';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BrainMeter } from './BrainMeter';
+import { useRef, useEffect, useState } from 'react';
+import beppoVideoUrl from '@assets/generated_videos/beppo_clown_emerging_laughing_game_over.mp4';
 
 export function HUD() {
   const { fear, despair, maxSanity, isGameOver, hasWon, visitedCells } = useGameStore();
   const isInverted = useGameStore(state => state.isInverted());
   const sanityLevel = useGameStore(state => state.getSanityLevel());
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoEnded, setVideoEnded] = useState(false);
   
-  // Calculate insanity effects
   const avgInsanity = (fear + despair) / 2 / maxSanity;
   const redOverlayOpacity = Math.min(fear / 300, 0.2);
   const blueOverlayOpacity = Math.min(despair / 300, 0.2);
-  
-  // Exploration stats
   const cellsExplored = visitedCells.size;
+
+  useEffect(() => {
+    if (isGameOver && videoRef.current) {
+      videoRef.current.play().catch(() => {});
+    }
+  }, [isGameOver]);
+
+  const handleVideoEnd = () => {
+    setVideoEnded(true);
+  };
 
   return (
     <div className="pointer-events-none absolute inset-0 z-40">
@@ -48,7 +59,7 @@ export function HUD() {
         />
       )}
       
-      {/* Noise/Grain Overlay - intensifies with insanity */}
+      {/* Noise/Grain Overlay */}
       <div 
         className="absolute inset-0 mix-blend-overlay pointer-events-none"
         style={{ 
@@ -104,7 +115,7 @@ export function HUD() {
         )}
       </AnimatePresence>
 
-      {/* Instructions - TAP BASED */}
+      {/* Instructions */}
       <div className="absolute bottom-6 right-6 text-white/30 font-mono text-xs text-right">
         <p>TAP markers to move</p>
         <p>Find the EXIT to escape</p>
@@ -146,20 +157,40 @@ export function HUD() {
         )}
       </AnimatePresence>
       
-      {/* Game Over Overlay */}
+      {/* GAME OVER - Beppo Video Climax */}
       <AnimatePresence>
         {isGameOver && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="absolute inset-0 bg-black/90 flex flex-col items-center justify-center z-50"
+            className="absolute inset-0 bg-black flex flex-col items-center justify-center z-50"
           >
+            {/* Video plays first */}
+            {!videoEnded && (
+              <video
+                ref={videoRef}
+                src={beppoVideoUrl}
+                className="absolute inset-0 w-full h-full object-cover"
+                onEnded={handleVideoEnd}
+                playsInline
+                muted={false}
+                style={{
+                  filter: 'contrast(1.2) saturate(0.8)'
+                }}
+              />
+            )}
+            
+            {/* Text appears after video */}
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.5, type: 'spring' }}
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ 
+                opacity: videoEnded ? 1 : 0, 
+                scale: videoEnded ? 1 : 0 
+              }}
+              transition={{ delay: 0.3, type: 'spring' }}
+              className="relative z-10 text-center"
             >
-              <h1 className="font-horror text-6xl md:text-8xl text-red-600 mb-4 animate-pulse">
+              <h1 className="font-horror text-6xl md:text-8xl text-red-600 mb-4 animate-pulse drop-shadow-[0_0_30px_rgba(139,0,0,0.8)]">
                 BEPPO FOUND YOU
               </h1>
               <p className="text-white/60 font-creepy text-2xl text-center">
@@ -169,6 +200,26 @@ export function HUD() {
                 Cells explored: {cellsExplored}
               </p>
             </motion.div>
+            
+            {/* Kaleidoscopic overlay during video */}
+            {!videoEnded && (
+              <motion.div 
+                className="absolute inset-0 pointer-events-none"
+                animate={{ 
+                  rotate: [0, 360],
+                  scale: [1, 1.2, 0.8, 1]
+                }}
+                transition={{ 
+                  duration: 6, 
+                  ease: "easeInOut",
+                  repeat: 0
+                }}
+                style={{
+                  background: 'radial-gradient(circle, transparent 30%, rgba(139,0,0,0.3) 100%)',
+                  mixBlendMode: 'overlay'
+                }}
+              />
+            )}
           </motion.div>
         )}
       </AnimatePresence>
