@@ -1,24 +1,13 @@
 import { useMemo, useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { useTexture, Text, Billboard } from '@react-three/drei';
-import { Vector3, Group, MathUtils } from 'three';
+import { Text, Billboard } from '@react-three/drei';
+import { Vector3, Group, MathUtils, Color, ShaderMaterial, Mesh } from 'three';
 import { MazeGenerator } from '../../game/MazeGenerator';
 import { useGameStore } from '../../game/store';
-import beppoUrl from '@assets/generated_images/paper_mache_beppo_sad_clown_cutout.png';
-import barkerUrl from '@assets/generated_images/manic_boardwalk_barker_cutout.png';
-import operaClownUrl from '@assets/generated_images/vintage_opera_clown_cutout.png';
-import freakShowBeppoUrl from '@assets/generated_images/vintage_coney_island_freak_show_beppo_cutout.png';
 
 interface VillainsProps {
   maze: MazeGenerator;
 }
-
-const VILLAIN_TEXTURES = [
-  beppoUrl,
-  barkerUrl,
-  operaClownUrl,
-  freakShowBeppoUrl
-];
 
 const LAUGHS = [
   "HA HA HA",
@@ -33,29 +22,241 @@ const LAUGHS = [
   "NO ESCAPE"
 ];
 
+// SDF-based procedural villain rendering - optimized for performance
+function SDFVillainMesh({ 
+  position, 
+  isVisible, 
+  fearLevel,
+  isBlockade
+}: { 
+  position: [number, number, number],
+  isVisible: boolean,
+  fearLevel: number,
+  isBlockade: boolean
+}) {
+  const meshRef = useRef<Mesh>(null);
+  const materialRef = useRef<ShaderMaterial>(null);
+  const currentScale = useRef(0);
+  
+  // SDF Fragment Shader for surreal villain
+  const fragmentShader = `
+    uniform float uTime;
+    uniform float uFear;
+    uniform vec3 uColor1;
+    uniform vec3 uColor2;
+    
+    varying vec2 vUv;
+    
+    float sdSphere(vec3 p, float r) {
+      return length(p) - r;
+    }
+    
+    float sdBox(vec3 p, vec3 b) {
+      vec3 q = abs(p) - b;
+      return length(max(q, 0.0)) + min(max(q.x, max(q.y, q.z)), 0.0);
+    }
+    
+    float opSmoothUnion(float d1, float d2, float k) {
+      float h = clamp(0.5 + 0.5 * (d2 - d1) / k, 0.0, 1.0);
+      return mix(d2, d1, h) - k * h * (1.0 - h);
+    }
+    
+    float opSmoothSubtraction(float d1, float d2, float k) {
+      float h = clamp(0.5 - 0.5 * (d2 + d1) / k, 0.0, 1.0);
+      return mix(d2, -d1, h) + k * h * (1.0 - h);
+    }
+    
+    vec3 meltDistort(vec3 p, float t, float intensity) {
+      p.x += sin(p.y * 4.0 + t * 2.0) * intensity * 0.15;
+      p.z += cos(p.y * 3.0 + t * 1.5) * intensity * 0.1;
+      return p;
+    }
+    
+    float hash(vec3 p) {
+      return fract(sin(dot(p, vec3(12.9898, 78.233, 45.164))) * 43758.5453);
+    }
+    
+    float sdClownFace(vec3 p, float t, float fear) {
+      p = meltDistort(p, t, fear);
+      
+      // Head
+      float head = sdSphere(p * vec3(1.0, 0.85, 1.0), 0.45);
+      
+      // Eye sockets - deep and dark
+      vec3 eyeL = p - vec3(-0.12, 0.08, 0.32);
+      vec3 eyeR = p - vec3(0.12, 0.08, 0.32);
+      head = opSmoothSubtraction(sdSphere(eyeL, 0.1), head, 0.04);
+      head = opSmoothSubtraction(sdSphere(eyeR, 0.1), head, 0.04);
+      
+      // Glowing eyeballs
+      float eyeScale = 0.06 + fear * 0.03;
+      float eyes = min(sdSphere(eyeL, eyeScale), sdSphere(eyeR, eyeScale));
+      
+      // Big red nose
+      vec3 noseP = p - vec3(0.0, -0.02, 0.4);
+      float noseSize = 0.1 + sin(t * 6.0) * 0.015 * fear;
+      float nose = sdSphere(noseP, noseSize);
+      head = opSmoothUnion(head, nose, 0.06);
+      
+      // Wide creepy grin - gets wider with fear
+      vec3 mouthP = p - vec3(0.0, -0.18, 0.28);
+      mouthP.x *= 0.5 + fear * 0.25;
+      float mouth = sdBox(mouthP, vec3(0.22 + fear * 0.1, 0.04, 0.08));
+      head = opSmoothSubtraction(mouth, head, 0.04);
+      
+      return opSmoothUnion(head, eyes * 0.5, 0.02);
+    }
+    
+    float sdVillain(vec3 p, float t, float fear) {
+      // Head
+      vec3 headP = p - vec3(0.0, 0.55, 0.0);
+      float d = sdClownFace(headP, t, fear);
+      
+      // Body - elongated cone shape
+      vec3 bodyP = p - vec3(0.0, 0.0, 0.0);
+      bodyP = meltDistort(bodyP, t * 0.5, fear * 0.4);
+      float body = sdBox(bodyP * vec3(1.0, 0.6, 1.0), vec3(0.2, 0.4, 0.15));
+      d = opSmoothUnion(d, body, 0.12);
+      
+      // Organic distortion
+      d += (hash(p * 15.0 + t) - 0.5) * 0.01 * (1.0 + fear);
+      
+      return d;
+    }
+    
+    vec3 calcNormal(vec3 p, float t, float fear) {
+      float h = 0.001;
+      vec2 k = vec2(1.0, -1.0);
+      return normalize(
+        k.xyy * sdVillain(p + k.xyy * h, t, fear) +
+        k.yyx * sdVillain(p + k.yyx * h, t, fear) +
+        k.yxy * sdVillain(p + k.yxy * h, t, fear) +
+        k.xxx * sdVillain(p + k.xxx * h, t, fear)
+      );
+    }
+    
+    void main() {
+      vec2 uv = vUv * 2.0 - 1.0;
+      vec3 ro = vec3(0.0, 0.3, 2.0);
+      vec3 rd = normalize(vec3(uv * 0.7, -1.0));
+      
+      float t = 0.0;
+      float d;
+      vec3 p;
+      
+      for (int i = 0; i < 48; i++) {
+        p = ro + rd * t;
+        d = sdVillain(p, uTime, uFear);
+        if (d < 0.002 || t > 8.0) break;
+        t += d * 0.9;
+      }
+      
+      if (t < 8.0) {
+        vec3 normal = calcNormal(p, uTime, uFear);
+        vec3 lightDir = normalize(vec3(0.5, 1.0, 0.8));
+        
+        float diff = max(dot(normal, lightDir), 0.0);
+        float spec = pow(max(dot(reflect(-lightDir, normal), -rd), 0.0), 16.0);
+        float rim = pow(1.0 - max(dot(normal, -rd), 0.0), 2.5);
+        
+        // Color gradient
+        vec3 color = mix(uColor1, uColor2, p.y + 0.3);
+        
+        // Pulsing glow
+        float pulse = sin(uTime * 4.0) * 0.5 + 0.5;
+        
+        vec3 finalColor = color * (0.25 + diff * 0.5);
+        finalColor += vec3(1.0, 0.8, 0.6) * spec * 0.25;
+        finalColor += uColor1 * rim * 0.5;
+        finalColor += uColor1 * pulse * uFear * 0.2;
+        
+        // Eye glow
+        if (p.y > 0.5 && abs(p.x) < 0.15 && p.z > 0.3) {
+          finalColor += vec3(1.0, 0.0, 0.0) * 0.5;
+        }
+        
+        gl_FragColor = vec4(finalColor, 1.0);
+      } else {
+        discard;
+      }
+    }
+  `;
+  
+  const vertexShader = `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `;
+  
+  const uniforms = useMemo(() => ({
+    uTime: { value: 0 },
+    uFear: { value: 0 },
+    uColor1: { value: new Color('#8b0000') },
+    uColor2: { value: new Color(isBlockade ? '#ff4400' : '#ffcc00') },
+  }), [isBlockade]);
+  
+  useFrame((state) => {
+    if (!materialRef.current || !meshRef.current) return;
+    
+    // Update uniforms directly (no React state)
+    materialRef.current.uniforms.uTime.value = state.clock.elapsedTime;
+    materialRef.current.uniforms.uFear.value = MathUtils.lerp(
+      materialRef.current.uniforms.uFear.value,
+      isVisible ? fearLevel : 0,
+      0.05
+    );
+    
+    // Animate scale directly on mesh (no React state)
+    const targetScale = isVisible ? 1.8 + Math.sin(state.clock.elapsedTime * 6) * 0.1 : 0;
+    currentScale.current = MathUtils.lerp(currentScale.current, targetScale, 0.08);
+    
+    meshRef.current.scale.set(
+      currentScale.current, 
+      currentScale.current * 1.2, 
+      1
+    );
+    
+    // Hide mesh when scaled down
+    meshRef.current.visible = currentScale.current > 0.05;
+  });
+  
+  return (
+    <Billboard follow={true}>
+      <mesh ref={meshRef} position={position}>
+        <planeGeometry args={[2, 2.5]} />
+        <shaderMaterial
+          ref={materialRef}
+          vertexShader={vertexShader}
+          fragmentShader={fragmentShader}
+          uniforms={uniforms}
+          transparent
+        />
+      </mesh>
+    </Billboard>
+  );
+}
+
 function Villain({ 
   position, 
-  textureUrl, 
   playerPos,
   isBlockade,
   cellKey 
 }: { 
   position: [number, number, number], 
-  textureUrl: string, 
   playerPos: Vector3,
   isBlockade: boolean,
   cellKey: string
 }) {
-  const texture = useTexture(textureUrl);
   const groupRef = useRef<Group>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [hasPopped, setHasPopped] = useState(false);
-  const [scale, setScale] = useState(0);
-  const { increaseFear, addBlockade, blockades } = useGameStore();
+  const { fear, maxSanity, increaseFear, addBlockade, blockades } = useGameStore();
   
   const laughText = useMemo(() => LAUGHS[Math.floor(Math.random() * LAUGHS.length)], []);
+  const fearLevel = fear / maxSanity;
   
-  // Check if this blockade has been cleared (was added but now removed)
   const isBlocked = blockades.has(cellKey);
   const wasCleared = hasPopped && isBlockade && !isBlocked;
 
@@ -64,113 +265,91 @@ function Villain({
 
     const dist = groupRef.current.position.distanceTo(playerPos);
     
-    // Pop up logic - triggers when player gets close
     if (dist < 5 && !hasPopped) {
       setHasPopped(true);
       setIsVisible(true);
       increaseFear(15);
       
-      // Create blockade if this is a blocking villain
       if (isBlockade) {
         addBlockade(cellKey);
       }
       
-      // Haptic feedback
       if (navigator.vibrate) {
         navigator.vibrate([100, 50, 200]);
       }
     }
 
-    // Animation
+    if (wasCleared && isVisible) {
+      setIsVisible(false);
+    }
+    
+    // Monty Python jitter - directly on group (no state)
     if (isVisible && !wasCleared) {
-      const targetScale = 1.8 + Math.sin(state.clock.elapsedTime * 8) * 0.15;
-      setScale(MathUtils.lerp(scale, targetScale, 0.1));
-      
-      // Monty Python jitter
-      groupRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 25) * 0.08;
-      groupRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 18) * 0.15;
-      
-      // Random jump
-      if (Math.random() > 0.995) {
-        groupRef.current.position.y += 0.3;
-      }
-    } else if (wasCleared) {
-      // Fade out and collapse when cleared
-      setScale(MathUtils.lerp(scale, 0, 0.15));
-      if (groupRef.current) {
-        groupRef.current.rotation.z += 0.1; // Spin away
-      }
-    } else {
-      setScale(MathUtils.lerp(scale, 0, 0.1));
+      groupRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 20) * 0.06;
+      groupRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 15) * 0.1;
     }
   });
 
-  // Don't render if fully cleared and scaled down
-  if (wasCleared && scale < 0.05) return null;
+  if (wasCleared) return null;
 
   return (
     <group ref={groupRef} position={position}>
-      <Billboard follow={true} lockX={false} lockY={false} lockZ={false}>
-        <group scale={[scale, scale, scale]}>
-          <mesh castShadow receiveShadow>
-            <planeGeometry args={[2.5, 3.5]} />
-            <meshStandardMaterial 
-              map={texture} 
-              transparent 
-              alphaTest={0.5} 
-              roughness={0.8}
-              emissive={isBlocked ? "#ff0000" : "#1a1a1a"}
-              emissiveIntensity={isBlocked ? 0.5 : 0.2}
-            />
-          </mesh>
-          
-          {/* Floating Laugh Text */}
+      {/* SDF Ray-marched villain */}
+      <SDFVillainMesh 
+        position={[0, 0, 0]} 
+        isVisible={isVisible} 
+        fearLevel={fearLevel}
+        isBlockade={isBlockade}
+      />
+      
+      {/* Floating Laugh Text */}
+      {isVisible && (
+        <Billboard>
           <Text
-            position={[0.9 + Math.random() * 0.3, 2.0, 0.1]}
-            fontSize={0.5}
+            position={[0.8, 2.2, 0]}
+            fontSize={0.45}
             color={isBlocked ? "#ff0000" : "#8b0000"}
             anchorX="center"
-            anchorY="middle"
           >
             {laughText}
           </Text>
-          
-          {/* Blockade indicator */}
-          {isBlocked && (
-            <>
-              <Text
-                position={[0, -2.0, 0.1]}
-                fontSize={0.25}
-                color="#ffcc00"
-                anchorX="center"
-              >
-                PATH BLOCKED
-              </Text>
-              <Text
-                position={[0, -2.4, 0.1]}
-                fontSize={0.18}
-                color="#ffffff"
-                anchorX="center"
-              >
-                Find a circus item to pass
-              </Text>
-            </>
-          )}
-        </group>
-      </Billboard>
+        </Billboard>
+      )}
       
-      {/* Visual blockade barrier */}
+      {/* Blockade indicator */}
       {isBlocked && (
-        <mesh position={[0, 0.5, 0]} rotation={[0, 0, 0]}>
-          <boxGeometry args={[2, 2, 0.1]} />
-          <meshStandardMaterial 
-            color="#8b0000" 
-            transparent 
-            opacity={0.3}
-            emissive="#ff0000"
-            emissiveIntensity={0.3}
-          />
-        </mesh>
+        <>
+          <Billboard>
+            <Text
+              position={[0, -1.8, 0]}
+              fontSize={0.22}
+              color="#ffcc00"
+              anchorX="center"
+            >
+              PATH BLOCKED
+            </Text>
+            <Text
+              position={[0, -2.1, 0]}
+              fontSize={0.15}
+              color="#ffffff"
+              anchorX="center"
+            >
+              Find a circus item to pass
+            </Text>
+          </Billboard>
+          
+          {/* Visual barrier */}
+          <mesh position={[0, 0.3, 0]}>
+            <boxGeometry args={[1.8, 1.8, 0.1]} />
+            <meshStandardMaterial 
+              color="#8b0000" 
+              transparent 
+              opacity={0.25}
+              emissive="#ff0000"
+              emissiveIntensity={0.4}
+            />
+          </mesh>
+        </>
       )}
     </group>
   );
@@ -180,7 +359,7 @@ export function Villains({ maze }: VillainsProps) {
   const { camera } = useThree();
   
   const villains = useMemo(() => {
-    const spawned: { x: number, y: number, texture: string, isBlockade: boolean, cellKey: string }[] = [];
+    const spawned: { x: number, y: number, isBlockade: boolean, cellKey: string }[] = [];
     const count = Math.floor((maze.width * maze.height) / 6);
 
     for (let i = 0; i < count; i++) {
@@ -193,13 +372,10 @@ export function Villains({ maze }: VillainsProps) {
       } while ((x === 0 && y === 0 || spawned.some(v => v.x === x && v.y === y)) && attempts < 50);
 
       if (attempts < 50) {
-        // 50% chance to be a blocking villain
         const isBlockade = Math.random() > 0.5;
-        
         spawned.push({
           x,
           y,
-          texture: VILLAIN_TEXTURES[Math.floor(Math.random() * VILLAIN_TEXTURES.length)],
           isBlockade,
           cellKey: `${x},${y}`
         });
@@ -214,7 +390,6 @@ export function Villains({ maze }: VillainsProps) {
         <Villain 
           key={i} 
           position={[v.x * 2, 1.5, v.y * 2]}
-          textureUrl={v.texture}
           playerPos={camera.position}
           isBlockade={v.isBlockade}
           cellKey={v.cellKey}

@@ -6,6 +6,7 @@ import { Player } from './Player';
 import { MazeGenerator } from '../../game/MazeGenerator';
 import { Villains } from './Villains';
 import { Collectibles } from './Collectibles';
+import { AudioManager } from './AudioManager';
 import { useGameStore } from '../../game/store';
 
 interface SceneProps {
@@ -34,50 +35,55 @@ export function Scene({ seed }: SceneProps) {
   if (!maze) return null;
 
   return (
-    <Canvas 
-      shadows 
-      camera={{ fov: 75 + avgInsanity * 10, near: 0.1, far: 100 }} // FOV distorts with insanity
-      style={{
-        filter: sanityLevel < 30 
-          ? `saturate(${0.5 + sanityLevel / 60}) contrast(${1 + avgInsanity * 0.3})` 
-          : 'none'
-      }}
-    >
-      {/* Atmosphere */}
-      <color attach="background" args={[bgColor]} />
-      <fog attach="fog" args={[bgColor, 0, Math.max(5, fogDensity)]} /> 
+    <>
+      {/* Procedural Audio System */}
+      <AudioManager />
       
-      <Sky sunPosition={[0, -1, 0]} turbidity={10} rayleigh={0.5 + avgInsanity} mieCoefficient={0.005} mieDirectionalG={0.8} />
-      <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1 + avgInsanity * 2} />
+      <Canvas 
+        shadows 
+        camera={{ fov: 75 + avgInsanity * 10, near: 0.1, far: 100 }}
+        style={{
+          filter: sanityLevel < 30 
+            ? `saturate(${0.5 + sanityLevel / 60}) contrast(${1 + avgInsanity * 0.3})` 
+            : 'none'
+        }}
+      >
+        {/* Atmosphere */}
+        <color attach="background" args={[bgColor]} />
+        <fog attach="fog" args={[bgColor, 0, Math.max(5, fogDensity)]} /> 
+        
+        <Sky sunPosition={[0, -1, 0]} turbidity={10} rayleigh={0.5 + avgInsanity} mieCoefficient={0.005} mieDirectionalG={0.8} />
+        <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1 + avgInsanity * 2} />
 
-      {/* Lighting - dims with insanity */}
-      <ambientLight intensity={0.08 * (sanityLevel / 100 + 0.3)} color="#1a1a1a" />
-      <pointLight position={[10, 10, 10]} intensity={0.1} color="#2d4a2b" />
-      
-      {/* Color-shifted lights at low sanity */}
-      {sanityLevel < 50 && (
-        <>
-          <pointLight position={[-5, 3, -5]} intensity={0.1 * avgInsanity} color="#8b0000" />
-          <pointLight position={[5, 3, 5]} intensity={0.1 * avgInsanity} color="#00008b" />
-        </>
-      )}
-      
-      <spotLight 
-        position={[0, 5, 0]} 
-        angle={0.6} 
-        penumbra={1} 
-        intensity={0.4 * (sanityLevel / 100 + 0.2)} 
-        castShadow 
-        color="#c0c8d0"
-      />
+        {/* Lighting - dims with insanity */}
+        <ambientLight intensity={0.08 * (sanityLevel / 100 + 0.3)} color="#1a1a1a" />
+        <pointLight position={[10, 10, 10]} intensity={0.1} color="#2d4a2b" />
+        
+        {/* Color-shifted lights at low sanity */}
+        {sanityLevel < 50 && (
+          <>
+            <pointLight position={[-5, 3, -5]} intensity={0.1 * avgInsanity} color="#8b0000" />
+            <pointLight position={[5, 3, 5]} intensity={0.1 * avgInsanity} color="#00008b" />
+          </>
+        )}
+        
+        <spotLight 
+          position={[0, 5, 0]} 
+          angle={0.6} 
+          penumbra={1} 
+          intensity={0.4 * (sanityLevel / 100 + 0.2)} 
+          castShadow 
+          color="#c0c8d0"
+        />
 
-      <Suspense fallback={null}>
-        <Maze maze={maze} />
-        <Villains maze={maze} />
-        <Collectibles maze={maze} />
-      </Suspense>
+        <Suspense fallback={null}>
+          <Maze maze={maze} />
+          <Villains maze={maze} />
+          <Collectibles maze={maze} />
+        </Suspense>
 
-      <Player position={[0, 1, 0]} maze={maze} />
-    </Canvas>
+        <Player position={[0, 1, 0]} maze={maze} />
+      </Canvas>
+    </>
   );
 }
