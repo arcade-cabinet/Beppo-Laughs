@@ -2,7 +2,8 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { Suspense, useState, useEffect, useRef } from 'react';
 import { Maze } from './Maze';
 import { RailPlayer } from './RailPlayer';
-import { MazeGenerator } from '../../game/MazeGenerator';
+import { generateMaze, MazeLayout } from '../../game/maze/core';
+import { buildGeometry, MazeGeometry, DEFAULT_CONFIG } from '../../game/maze/geometry';
 import { Villains } from './Villains';
 import { Collectibles } from './Collectibles';
 import { TapZones } from './TapZones';
@@ -43,30 +44,34 @@ function FlickeringLight({ position, color, intensity, distance }: {
 }
 
 export function Scene({ seed }: SceneProps) {
-  const [maze, setMaze] = useState<MazeGenerator | null>(null);
+  const [mazeData, setMazeData] = useState<{ layout: MazeLayout; geometry: MazeGeometry } | null>(null);
   const { fear, despair, maxSanity } = useGameStore();
   const sanityLevel = useGameStore(state => state.getSanityLevel());
 
   useEffect(() => {
-    const newMaze = new MazeGenerator(13, 13, seed);
-    setMaze(newMaze);
+    const layout = generateMaze(13, 13, seed);
+    const geometry = buildGeometry(layout, DEFAULT_CONFIG);
+    setMazeData({ layout, geometry });
+    console.log('Generated 2D maze:', layout.width, 'x', layout.height);
+    console.log('Center:', layout.center, 'Exits:', layout.exits);
+    console.log('Rail nodes:', geometry.railNodes.size);
   }, [seed]);
 
   const avgInsanity = (fear + despair) / 2 / maxSanity;
   
-  // CIRCUS TENT INTERIOR: Warm amber fog, closer when insane
   const fogNear = Math.max(2, 12 - avgInsanity * 8);
   const fogFar = Math.max(15, 35 - avgInsanity * 20);
   
-  // Warm sepia/amber background - darkens with insanity
   const bgBrightness = Math.max(8, 25 - avgInsanity * 17);
   const bgColor = `hsl(30, 40%, ${bgBrightness}%)`;
   
-  // Fog color shifts from warm amber to sickly green as insanity rises
   const fogHue = 30 + avgInsanity * 60;
   const fogColor = `hsl(${fogHue}, ${30 - avgInsanity * 15}%, ${20 - avgInsanity * 10}%)`;
 
-  if (!maze) return null;
+  if (!mazeData) return null;
+
+  const { layout, geometry } = mazeData;
+  const centerWorld = { x: geometry.floor.x, z: geometry.floor.z };
 
   return (
     <>
@@ -81,22 +86,18 @@ export function Scene({ seed }: SceneProps) {
             : `sepia(${avgInsanity * 0.15})`
         }}
       >
-        {/* Dark circus tent interior */}
         <color attach="background" args={[bgColor]} />
         <fog attach="fog" args={[fogColor, fogNear, fogFar]} /> 
         
-        {/* Base ambient - dim tungsten warmth */}
         <ambientLight intensity={0.15 + (1 - avgInsanity) * 0.15} color="#ffd4a0" />
         
-        {/* Overhead warm lights - like old circus lanterns */}
         <FlickeringLight 
-          position={[maze.width, 4, maze.height]} 
+          position={[centerWorld.x, 4, centerWorld.z]} 
           color="#ffaa55" 
           intensity={1.2 * (1 - avgInsanity * 0.4)} 
           distance={30}
         />
         
-        {/* Scattered warm point lights throughout tent */}
         <FlickeringLight 
           position={[4, 3.5, 4]} 
           color="#ff9944" 
@@ -104,35 +105,34 @@ export function Scene({ seed }: SceneProps) {
           distance={15}
         />
         <FlickeringLight 
-          position={[maze.width * 2 - 4, 3.5, 4]} 
+          position={[centerWorld.x * 2 - 4, 3.5, 4]} 
           color="#ffaa66" 
           intensity={0.7 * (1 - avgInsanity * 0.3)} 
           distance={15}
         />
         <FlickeringLight 
-          position={[4, 3.5, maze.height * 2 - 4]} 
+          position={[4, 3.5, centerWorld.z * 2 - 4]} 
           color="#ff8833" 
           intensity={0.7 * (1 - avgInsanity * 0.3)} 
           distance={15}
         />
         <FlickeringLight 
-          position={[maze.width * 2 - 4, 3.5, maze.height * 2 - 4]} 
+          position={[centerWorld.x * 2 - 4, 3.5, centerWorld.z * 2 - 4]} 
           color="#ffbb77" 
           intensity={0.8 * (1 - avgInsanity * 0.3)} 
           distance={15}
         />
         
-        {/* Horror accent lights - appear as sanity drops */}
         {avgInsanity > 0.2 && (
           <>
             <pointLight 
-              position={[maze.width - 5, 2, maze.height - 5]} 
+              position={[centerWorld.x - 5, 2, centerWorld.z - 5]} 
               intensity={avgInsanity * 0.5} 
               color="#8b0000" 
               distance={12} 
             />
             <pointLight 
-              position={[maze.width + 5, 2, maze.height + 5]} 
+              position={[centerWorld.x + 5, 2, centerWorld.z + 5]} 
               intensity={avgInsanity * 0.4} 
               color="#4a0066" 
               distance={12} 
@@ -140,27 +140,26 @@ export function Scene({ seed }: SceneProps) {
           </>
         )}
         
-        {/* Creepy spotlight from above at high insanity */}
         {avgInsanity > 0.5 && (
           <spotLight
-            position={[maze.width, 6, maze.height]}
+            position={[centerWorld.x, 6, centerWorld.z]}
             angle={0.4}
             penumbra={0.8}
             intensity={avgInsanity * 2}
             color="#ff4400"
             distance={20}
-            target-position={[maze.width, 0, maze.height]}
+            target-position={[centerWorld.x, 0, centerWorld.z]}
           />
         )}
 
         <Suspense fallback={null}>
-          <Maze maze={maze} />
-          <Villains maze={maze} />
-          <Collectibles maze={maze} />
-          <TapZones maze={maze} />
+          <Maze geometry={geometry} />
+          <Villains geometry={geometry} />
+          <Collectibles geometry={geometry} />
+          <TapZones geometry={geometry} />
         </Suspense>
 
-        <RailPlayer maze={maze} />
+        <RailPlayer geometry={geometry} />
       </Canvas>
     </>
   );

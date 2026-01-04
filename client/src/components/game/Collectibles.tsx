@@ -1,14 +1,14 @@
-import { useMemo, useRef, useState, useEffect } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
+import { useMemo, useRef, useState } from 'react';
+import { useFrame } from '@react-three/fiber';
 import { useTexture, Billboard, Text } from '@react-three/drei';
 import { Group, MathUtils } from 'three';
-import { MazeGenerator } from '../../game/MazeGenerator';
+import { MazeGeometry, DEFAULT_CONFIG } from '../../game/maze/geometry';
 import { useGameStore } from '../../game/store';
 import ticketUrl from '@assets/generated_images/paper_mache_circus_ticket_item.png';
 import keyUrl from '@assets/generated_images/paper_mache_key_item.png';
 
 interface CollectiblesProps {
-  maze: MazeGenerator;
+  geometry: MazeGeometry;
 }
 
 const ITEM_TEXTURES = [ticketUrl, keyUrl];
@@ -16,8 +16,8 @@ const ITEM_NAMES = ['CIRCUS TICKET', 'MYSTERY KEY'];
 
 interface CollectibleItem {
   id: string;
-  x: number;
-  z: number;
+  worldX: number;
+  worldZ: number;
   nodeId: string;
   textureIndex: number;
 }
@@ -28,7 +28,6 @@ function Collectible({ item, onCollect }: { item: CollectibleItem, onCollect: (i
   const [collected, setCollected] = useState(false);
   const scaleRef = useRef(0.8);
   const collectAnimRef = useRef(0);
-  const { camera } = useThree();
   const { blockades, currentNode } = useGameStore();
   
   const hasBlockades = blockades.size > 0;
@@ -37,7 +36,6 @@ function Collectible({ item, onCollect }: { item: CollectibleItem, onCollect: (i
     if (!groupRef.current) return;
     
     if (collected) {
-      // Collection animation
       collectAnimRef.current += 0.1;
       scaleRef.current = MathUtils.lerp(scaleRef.current, 0, 0.2);
       groupRef.current.position.y += 0.1;
@@ -46,34 +44,27 @@ function Collectible({ item, onCollect }: { item: CollectibleItem, onCollect: (i
       return;
     }
     
-    // Check if player is at this node
     if (currentNode === item.nodeId) {
       setCollected(true);
       onCollect(item.id);
       
-      // Haptic feedback
       if (navigator.vibrate) {
         navigator.vibrate([50, 30, 50, 30, 100]);
       }
     }
     
-    // Floating/bobbing animation
-    groupRef.current.position.y = 0.8 + Math.sin(state.clock.elapsedTime * 2 + item.x) * 0.15;
-    
-    // Gentle rotation
+    groupRef.current.position.y = 0.8 + Math.sin(state.clock.elapsedTime * 2 + item.worldX) * 0.15;
     groupRef.current.rotation.y = state.clock.elapsedTime * 0.5;
     
-    // Pulsing glow - more intense if there are blockades
     const pulseIntensity = hasBlockades ? 0.2 : 0.1;
     const pulse = 0.8 + Math.sin(state.clock.elapsedTime * 3) * pulseIntensity;
     groupRef.current.scale.setScalar(pulse);
   });
   
-  // Remove after collection animation
   if (collected && collectAnimRef.current > 2) return null;
   
   return (
-    <group ref={groupRef} position={[item.x * 2, 0.8, item.z * 2]}>
+    <group ref={groupRef} position={[item.worldX, 0.8, item.worldZ]}>
       <Billboard>
         <group>
           <mesh>
@@ -87,7 +78,6 @@ function Collectible({ item, onCollect }: { item: CollectibleItem, onCollect: (i
             />
           </mesh>
           
-          {/* Glow ring */}
           <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
             <ringGeometry args={[0.35, 0.45, 16]} />
             <meshBasicMaterial color="#ffcc00" transparent opacity={hasBlockades ? 0.5 : 0.3} />
@@ -95,7 +85,6 @@ function Collectible({ item, onCollect }: { item: CollectibleItem, onCollect: (i
         </group>
       </Billboard>
       
-      {/* Item name floating above */}
       <Text
         position={[0, 0.9, 0]}
         fontSize={0.15}
@@ -105,7 +94,6 @@ function Collectible({ item, onCollect }: { item: CollectibleItem, onCollect: (i
         {ITEM_NAMES[item.textureIndex]}
       </Text>
       
-      {/* Hint when blockades exist */}
       {hasBlockades && (
         <Text
           position={[0, 0.6, 0]}
@@ -120,56 +108,46 @@ function Collectible({ item, onCollect }: { item: CollectibleItem, onCollect: (i
   );
 }
 
-export function Collectibles({ maze }: CollectiblesProps) {
+export function Collectibles({ geometry }: CollectiblesProps) {
   const { collectItem, collectedItems, removeBlockade, blockades } = useGameStore();
   
-  // Generate items at random locations and mark rail nodes
   const items = useMemo(() => {
     const generated: CollectibleItem[] = [];
-    const itemCount = Math.floor((maze.width * maze.height) / 8); // More items
+    const nodes = Array.from(geometry.railNodes.values());
+    const itemCount = Math.floor(nodes.length / 8);
     
-    // Avoid center and exits
     const avoidNodes = new Set([
-      maze.railGraph.centerNode,
-      ...maze.railGraph.exitNodes
+      geometry.centerNodeId,
+      ...geometry.exitNodeIds
     ]);
     
     for (let i = 0; i < itemCount; i++) {
-      let x: number, z: number;
-      let nodeId: string;
+      let selectedNode: typeof nodes[0] | null = null;
       let attempts = 0;
       
       do {
-        x = Math.floor(Math.random() * maze.width);
-        z = Math.floor(Math.random() * maze.height);
-        nodeId = `${x},${z}`;
+        const idx = Math.floor(Math.random() * nodes.length);
+        selectedNode = nodes[idx];
         attempts++;
-      } while ((avoidNodes.has(nodeId) || generated.some(it => it.nodeId === nodeId)) && attempts < 50);
+      } while (selectedNode && (avoidNodes.has(selectedNode.id) || generated.some(it => it.nodeId === selectedNode!.id)) && attempts < 50);
       
-      if (attempts < 50) {
+      if (attempts < 50 && selectedNode) {
         generated.push({
-          id: `item-${x}-${z}`,
-          x,
-          z,
-          nodeId,
+          id: `item-${selectedNode.id}`,
+          worldX: selectedNode.worldX,
+          worldZ: selectedNode.worldZ,
+          nodeId: selectedNode.id,
           textureIndex: Math.floor(Math.random() * ITEM_TEXTURES.length)
         });
-        
-        // Mark node as having collectible
-        const node = maze.railGraph.nodes.get(nodeId);
-        if (node) {
-          node.hasCollectible = true;
-        }
       }
     }
     
     return generated;
-  }, [maze]);
+  }, [geometry]);
   
   const handleCollect = (id: string) => {
     collectItem(id);
     
-    // Remove a random blockade if any exist
     const blockadeArray = Array.from(blockades);
     if (blockadeArray.length > 0) {
       const randomBlockade = blockadeArray[Math.floor(Math.random() * blockadeArray.length)];

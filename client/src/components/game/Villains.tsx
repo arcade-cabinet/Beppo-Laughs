@@ -2,11 +2,11 @@ import { useMemo, useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Text, Billboard } from '@react-three/drei';
 import { Vector3, Group, MathUtils, Color, ShaderMaterial, Mesh } from 'three';
-import { MazeGenerator } from '../../game/MazeGenerator';
+import { MazeGeometry, DEFAULT_CONFIG } from '../../game/maze/geometry';
 import { useGameStore } from '../../game/store';
 
 interface VillainsProps {
-  maze: MazeGenerator;
+  geometry: MazeGeometry;
 }
 
 const LAUGHS = [
@@ -22,7 +22,6 @@ const LAUGHS = [
   "NO ESCAPE"
 ];
 
-// SDF-based procedural villain rendering - optimized for performance
 function SDFVillainMesh({ 
   position, 
   isVisible, 
@@ -38,7 +37,6 @@ function SDFVillainMesh({
   const materialRef = useRef<ShaderMaterial>(null);
   const currentScale = useRef(0);
   
-  // SDF Fragment Shader for surreal villain
   const fragmentShader = `
     uniform float uTime;
     uniform float uFear;
@@ -79,26 +77,21 @@ function SDFVillainMesh({
     float sdClownFace(vec3 p, float t, float fear) {
       p = meltDistort(p, t, fear);
       
-      // Head
       float head = sdSphere(p * vec3(1.0, 0.85, 1.0), 0.45);
       
-      // Eye sockets - deep and dark
       vec3 eyeL = p - vec3(-0.12, 0.08, 0.32);
       vec3 eyeR = p - vec3(0.12, 0.08, 0.32);
       head = opSmoothSubtraction(sdSphere(eyeL, 0.1), head, 0.04);
       head = opSmoothSubtraction(sdSphere(eyeR, 0.1), head, 0.04);
       
-      // Glowing eyeballs
       float eyeScale = 0.06 + fear * 0.03;
       float eyes = min(sdSphere(eyeL, eyeScale), sdSphere(eyeR, eyeScale));
       
-      // Big red nose
       vec3 noseP = p - vec3(0.0, -0.02, 0.4);
       float noseSize = 0.1 + sin(t * 6.0) * 0.015 * fear;
       float nose = sdSphere(noseP, noseSize);
       head = opSmoothUnion(head, nose, 0.06);
       
-      // Wide creepy grin - gets wider with fear
       vec3 mouthP = p - vec3(0.0, -0.18, 0.28);
       mouthP.x *= 0.5 + fear * 0.25;
       float mouth = sdBox(mouthP, vec3(0.22 + fear * 0.1, 0.04, 0.08));
@@ -108,17 +101,14 @@ function SDFVillainMesh({
     }
     
     float sdVillain(vec3 p, float t, float fear) {
-      // Head
       vec3 headP = p - vec3(0.0, 0.55, 0.0);
       float d = sdClownFace(headP, t, fear);
       
-      // Body - elongated cone shape
       vec3 bodyP = p - vec3(0.0, 0.0, 0.0);
       bodyP = meltDistort(bodyP, t * 0.5, fear * 0.4);
       float body = sdBox(bodyP * vec3(1.0, 0.6, 1.0), vec3(0.2, 0.4, 0.15));
       d = opSmoothUnion(d, body, 0.12);
       
-      // Organic distortion
       d += (hash(p * 15.0 + t) - 0.5) * 0.01 * (1.0 + fear);
       
       return d;
@@ -159,10 +149,8 @@ function SDFVillainMesh({
         float spec = pow(max(dot(reflect(-lightDir, normal), -rd), 0.0), 16.0);
         float rim = pow(1.0 - max(dot(normal, -rd), 0.0), 2.5);
         
-        // Color gradient
         vec3 color = mix(uColor1, uColor2, p.y + 0.3);
         
-        // Pulsing glow
         float pulse = sin(uTime * 4.0) * 0.5 + 0.5;
         
         vec3 finalColor = color * (0.25 + diff * 0.5);
@@ -170,7 +158,6 @@ function SDFVillainMesh({
         finalColor += uColor1 * rim * 0.5;
         finalColor += uColor1 * pulse * uFear * 0.2;
         
-        // Eye glow
         if (p.y > 0.5 && abs(p.x) < 0.15 && p.z > 0.3) {
           finalColor += vec3(1.0, 0.0, 0.0) * 0.5;
         }
@@ -200,7 +187,6 @@ function SDFVillainMesh({
   useFrame((state) => {
     if (!materialRef.current || !meshRef.current) return;
     
-    // Update uniforms directly (no React state)
     materialRef.current.uniforms.uTime.value = state.clock.elapsedTime;
     materialRef.current.uniforms.uFear.value = MathUtils.lerp(
       materialRef.current.uniforms.uFear.value,
@@ -208,7 +194,6 @@ function SDFVillainMesh({
       0.05
     );
     
-    // Animate scale directly on mesh (no React state)
     const targetScale = isVisible ? 1.8 + Math.sin(state.clock.elapsedTime * 6) * 0.1 : 0;
     currentScale.current = MathUtils.lerp(currentScale.current, targetScale, 0.08);
     
@@ -218,7 +203,6 @@ function SDFVillainMesh({
       1
     );
     
-    // Hide mesh when scaled down
     meshRef.current.visible = currentScale.current > 0.05;
   });
   
@@ -239,12 +223,14 @@ function SDFVillainMesh({
 }
 
 function Villain({ 
-  position, 
+  worldX,
+  worldZ,
   playerPos,
   isBlockade,
   cellKey 
 }: { 
-  position: [number, number, number], 
+  worldX: number,
+  worldZ: number,
   playerPos: Vector3,
   isBlockade: boolean,
   cellKey: string
@@ -283,9 +269,8 @@ function Villain({
       setIsVisible(false);
     }
     
-    // Monty Python jitter - directly on group (no state)
     if (isVisible && !wasCleared) {
-      groupRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 20) * 0.06;
+      groupRef.current.position.y = 1.5 + Math.sin(state.clock.elapsedTime * 20) * 0.06;
       groupRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 15) * 0.1;
     }
   });
@@ -293,8 +278,7 @@ function Villain({
   if (wasCleared) return null;
 
   return (
-    <group ref={groupRef} position={position}>
-      {/* SDF Ray-marched villain */}
+    <group ref={groupRef} position={[worldX, 1.5, worldZ]}>
       <SDFVillainMesh 
         position={[0, 0, 0]} 
         isVisible={isVisible} 
@@ -302,7 +286,6 @@ function Villain({
         isBlockade={isBlockade}
       />
       
-      {/* Floating Laugh Text */}
       {isVisible && (
         <Billboard>
           <Text
@@ -316,7 +299,6 @@ function Villain({
         </Billboard>
       )}
       
-      {/* Blockade indicator */}
       {isBlocked && (
         <>
           <Billboard>
@@ -338,7 +320,6 @@ function Villain({
             </Text>
           </Billboard>
           
-          {/* Visual barrier */}
           <mesh position={[0, 0.3, 0]}>
             <boxGeometry args={[1.8, 1.8, 0.1]} />
             <meshStandardMaterial 
@@ -355,55 +336,48 @@ function Villain({
   );
 }
 
-export function Villains({ maze }: VillainsProps) {
+export function Villains({ geometry }: VillainsProps) {
   const { camera } = useThree();
   
   const villains = useMemo(() => {
-    const spawned: { x: number, y: number, isBlockade: boolean, cellKey: string }[] = [];
-    const count = Math.floor((maze.width * maze.height) / 8);
+    const spawned: { worldX: number, worldZ: number, isBlockade: boolean, cellKey: string }[] = [];
+    const nodes = Array.from(geometry.railNodes.values());
+    const count = Math.floor(nodes.length / 8);
 
-    // Avoid center and exits
     const avoidNodes = new Set([
-      maze.railGraph.centerNode,
-      ...maze.railGraph.exitNodes
+      geometry.centerNodeId,
+      ...geometry.exitNodeIds
     ]);
 
     for (let i = 0; i < count; i++) {
-      let x: number, y: number;
-      let nodeId: string;
+      let selectedNode: typeof nodes[0] | null = null;
       let attempts = 0;
       do {
-        x = Math.floor(Math.random() * maze.width);
-        y = Math.floor(Math.random() * maze.height);
-        nodeId = `${x},${y}`;
+        const idx = Math.floor(Math.random() * nodes.length);
+        selectedNode = nodes[idx];
         attempts++;
-      } while ((avoidNodes.has(nodeId) || spawned.some(v => v.x === x && v.y === y)) && attempts < 50);
+      } while (selectedNode && (avoidNodes.has(selectedNode.id) || spawned.some(v => v.cellKey === selectedNode!.id)) && attempts < 50);
 
-      if (attempts < 50) {
+      if (attempts < 50 && selectedNode) {
         const isBlockade = Math.random() > 0.5;
         spawned.push({
-          x,
-          y,
+          worldX: selectedNode.worldX,
+          worldZ: selectedNode.worldZ,
           isBlockade,
-          cellKey: nodeId
+          cellKey: selectedNode.id
         });
-        
-        // Mark node as having villain
-        const node = maze.railGraph.nodes.get(nodeId);
-        if (node) {
-          node.hasVillain = true;
-        }
       }
     }
     return spawned;
-  }, [maze]);
+  }, [geometry]);
 
   return (
     <group>
       {villains.map((v, i) => (
         <Villain 
           key={i} 
-          position={[v.x * 2, 1.5, v.y * 2]}
+          worldX={v.worldX}
+          worldZ={v.worldZ}
           playerPos={camera.position}
           isBlockade={v.isBlockade}
           cellKey={v.cellKey}

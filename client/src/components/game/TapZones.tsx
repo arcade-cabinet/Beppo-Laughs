@@ -1,30 +1,25 @@
 import { useMemo } from 'react';
-import { useThree } from '@react-three/fiber';
-import { Html, Billboard, Text } from '@react-three/drei';
-import { Vector3 } from 'three';
-import { MazeGenerator, RailNode } from '../../game/MazeGenerator';
+import { Billboard, Text } from '@react-three/drei';
+import { MazeGeometry, RailNode, DEFAULT_CONFIG } from '../../game/maze/geometry';
 import { useGameStore } from '../../game/store';
 
 interface TapZonesProps {
-  maze: MazeGenerator;
+  geometry: MazeGeometry;
 }
 
 interface TapZoneProps {
   node: RailNode;
   direction: string;
   isExit: boolean;
-  hasCollectible: boolean;
-  hasVillain: boolean;
   onTap: () => void;
 }
 
-function TapZone({ node, direction, isExit, hasCollectible, hasVillain, onTap }: TapZoneProps) {
+function TapZone({ node, direction, isExit, onTap }: TapZoneProps) {
   const { isMoving, blockades } = useGameStore();
   const isBlocked = blockades.has(node.id);
   
   if (isMoving || isBlocked) return null;
   
-  // Determine zone styling based on content
   let bgColor = 'rgba(255,255,255,0.2)';
   let borderColor = 'rgba(255,255,255,0.5)';
   let label = 'GO';
@@ -33,17 +28,8 @@ function TapZone({ node, direction, isExit, hasCollectible, hasVillain, onTap }:
     bgColor = 'rgba(0,255,0,0.3)';
     borderColor = 'rgba(0,255,0,0.8)';
     label = 'EXIT';
-  } else if (hasCollectible) {
-    bgColor = 'rgba(255,215,0,0.3)';
-    borderColor = 'rgba(255,215,0,0.8)';
-    label = 'ITEM';
-  } else if (hasVillain) {
-    bgColor = 'rgba(139,0,0,0.3)';
-    borderColor = 'rgba(139,0,0,0.8)';
-    label = '???';
   }
   
-  // Direction arrow
   const arrows: Record<string, string> = {
     north: '↑',
     south: '↓',
@@ -53,19 +39,16 @@ function TapZone({ node, direction, isExit, hasCollectible, hasVillain, onTap }:
   
   return (
     <group position={[node.worldX, 0.1, node.worldZ]}>
-      {/* Ground marker */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} onClick={onTap}>
         <circleGeometry args={[0.6, 32]} />
         <meshBasicMaterial color={borderColor} transparent opacity={0.5} />
       </mesh>
       
-      {/* Inner circle */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} onClick={onTap}>
         <circleGeometry args={[0.4, 32]} />
         <meshBasicMaterial color={bgColor.replace('0.3', '0.6')} transparent opacity={0.7} />
       </mesh>
       
-      {/* Floating label */}
       <Billboard follow={true} lockX={false} lockY={false} lockZ={false}>
         <Text
           position={[0, 1.5, 0]}
@@ -79,7 +62,6 @@ function TapZone({ node, direction, isExit, hasCollectible, hasVillain, onTap }:
         </Text>
       </Billboard>
       
-      {/* Pulsing ring effect */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
         <ringGeometry args={[0.5, 0.6, 32]} />
         <meshBasicMaterial color={borderColor} transparent opacity={0.3} />
@@ -88,36 +70,41 @@ function TapZone({ node, direction, isExit, hasCollectible, hasVillain, onTap }:
   );
 }
 
-export function TapZones({ maze }: TapZonesProps) {
+function getDirection(fromNode: RailNode, toNode: RailNode): 'north' | 'south' | 'east' | 'west' {
+  const dx = toNode.gridX - fromNode.gridX;
+  const dy = toNode.gridY - fromNode.gridY;
+  
+  if (dy < 0) return 'north';
+  if (dy > 0) return 'south';
+  if (dx > 0) return 'east';
+  return 'west';
+}
+
+export function TapZones({ geometry }: TapZonesProps) {
   const { currentNode, isMoving, startMoveTo, blockades } = useGameStore();
   
-  // Get available moves from current position
   const availableMoves = useMemo(() => {
     if (!currentNode || isMoving) return [];
     
-    const current = maze.railGraph.nodes.get(currentNode);
+    const current = geometry.railNodes.get(currentNode);
     if (!current) return [];
     
     const moves: { node: RailNode; direction: string }[] = [];
     
     for (const connId of current.connections) {
-      const node = maze.railGraph.nodes.get(connId);
+      const node = geometry.railNodes.get(connId);
       if (!node) continue;
-      if (blockades.has(connId)) continue; // Skip blocked nodes
+      if (blockades.has(connId)) continue;
       
-      const direction = maze.getDirection(currentNode, connId) || 'north';
+      const direction = getDirection(current, node);
       moves.push({ node, direction });
     }
     
     return moves;
-  }, [currentNode, isMoving, maze, blockades]);
+  }, [currentNode, isMoving, geometry, blockades]);
   
-  const handleTap = (nodeId: string, hasCollectible: boolean, hasVillain: boolean) => {
-    // Speed varies: faster toward collectibles, slower toward villains
-    let speed = 1.0;
-    if (hasCollectible) speed = 1.5; // Run toward items
-    if (hasVillain) speed = 0.7; // Hesitant toward threats
-    startMoveTo(nodeId, speed);
+  const handleTap = (nodeId: string) => {
+    startMoveTo(nodeId, 1.0);
   };
   
   if (isMoving) return null;
@@ -128,11 +115,9 @@ export function TapZones({ maze }: TapZonesProps) {
         <TapZone
           key={node.id}
           node={node}
-          direction={direction || 'north'}
+          direction={direction}
           isExit={node.isExit}
-          hasCollectible={node.hasCollectible}
-          hasVillain={node.hasVillain}
-          onTap={() => handleTap(node.id, node.hasCollectible, node.hasVillain)}
+          onTap={() => handleTap(node.id)}
         />
       ))}
     </group>
