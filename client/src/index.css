@@ -24,8 +24,10 @@
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
   
-  --font-horror: 'Nosifer', cursive;
+  --font-horror: 'Butcherman', cursive;
   --font-creepy: 'Creepster', cursive;
+  --font-eater: 'Eater', cursive;
+  --font-nosifer: 'Nosifer', cursive;
   --font-ui: 'Roboto', sans-serif;
 
   --radius: 0.5rem;
@@ -42,14 +44,14 @@
   --popover: 0 0% 10%;
   --popover-foreground: 210 14% 78%;
 
-  --primary: 120 26% 23%; /* #2d4a2b - Dark Hedge Green */
+  --primary: 30 30% 20%; /* Dark Sepia Brown - Circus tent */
   --primary-foreground: 0 0% 95%;
 
   --secondary: 0 100% 27%; /* #8b0000 - Blood Red */
   --secondary-foreground: 0 0% 95%;
 
-  --muted: 120 12% 33%; /* #4a5f4a - Misty Green-Grey */
-  --muted-foreground: 210 14% 60%;
+  --muted: 30 20% 25%; /* Warm Brown-Grey */
+  --muted-foreground: 30 20% 60%;
 
   --accent: 0 100% 27%; /* Blood Red */
   --accent-foreground: 0 0% 98%;
