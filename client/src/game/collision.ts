@@ -5,9 +5,13 @@ const CELL_SIZE = 2;
 const PLAYER_RADIUS = 0.3;
 const WALL_THICKNESS = 0.2;
 
+// Helper to get cell key
+const cellKey = (gridX: number, gridZ: number) => `${gridX},${gridZ}`;
+
 export function checkCollision(
   position: Vector3, 
-  maze: MazeGenerator
+  maze: MazeGenerator,
+  blockades?: Set<string>
 ): boolean {
   // Convert world position to grid coordinates
   const gridX = Math.floor((position.x + CELL_SIZE / 2) / CELL_SIZE);
@@ -42,31 +46,55 @@ export function checkCollision(
     return true;
   }
 
+  // Check blockades - villain-created obstacles
+  if (blockades && blockades.size > 0) {
+    const key = cellKey(gridX, gridZ);
+    if (blockades.has(key)) {
+      return true;
+    }
+    
+    // Check adjacent cells for blockades
+    const adjacentKeys = [
+      cellKey(gridX + 1, gridZ),
+      cellKey(gridX - 1, gridZ),
+      cellKey(gridX, gridZ + 1),
+      cellKey(gridX, gridZ - 1),
+    ];
+    
+    for (const adjKey of adjacentKeys) {
+      if (blockades.has(adjKey)) {
+        const [adjX, adjZ] = adjKey.split(',').map(Number);
+        const dx = adjX - gridX;
+        const dz = adjZ - gridZ;
+        
+        if (dx === 1 && localX > halfCell - PLAYER_RADIUS - 0.1) return true;
+        if (dx === -1 && localX < -halfCell + PLAYER_RADIUS + 0.1) return true;
+        if (dz === 1 && localZ > halfCell - PLAYER_RADIUS - 0.1) return true;
+        if (dz === -1 && localZ < -halfCell + PLAYER_RADIUS + 0.1) return true;
+      }
+    }
+  }
+
   return false;
 }
 
 export function resolveCollision(
   currentPos: Vector3,
   targetPos: Vector3,
-  maze: MazeGenerator
+  maze: MazeGenerator,
+  blockades?: Set<string>
 ): Vector3 {
-  // Try X movement only
-  const xOnly = new Vector3(targetPos.x, currentPos.y, currentPos.z);
-  const canMoveX = !checkCollision(xOnly, maze);
-
-  // Try Z movement only
-  const zOnly = new Vector3(currentPos.x, currentPos.y, targetPos.z);
-  const canMoveZ = !checkCollision(zOnly, maze);
-
-  // Try full movement
-  if (!checkCollision(targetPos, maze)) {
+  if (!checkCollision(targetPos, maze, blockades)) {
     return targetPos;
   }
 
-  // Slide along walls
+  const xOnly = new Vector3(targetPos.x, currentPos.y, currentPos.z);
+  const canMoveX = !checkCollision(xOnly, maze, blockades);
+
+  const zOnly = new Vector3(currentPos.x, currentPos.y, targetPos.z);
+  const canMoveZ = !checkCollision(zOnly, maze, blockades);
+
   if (canMoveX && canMoveZ) {
-    // Both directions allowed separately but not together - corner case
-    // Pick the direction with more movement
     const xDist = Math.abs(targetPos.x - currentPos.x);
     const zDist = Math.abs(targetPos.z - currentPos.z);
     return xDist > zDist ? xOnly : zOnly;
@@ -76,6 +104,5 @@ export function resolveCollision(
     return zOnly;
   }
 
-  // Can't move at all
   return currentPos;
 }

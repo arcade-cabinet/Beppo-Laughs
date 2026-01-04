@@ -7,25 +7,26 @@ import { useGameStore } from '@/game/store';
 export default function Home() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [seed, setSeed] = useState<string>('');
-  const { setSeed: setStoreSeed, resetFear } = useGameStore();
+  const setSeedStore = useGameStore(state => state.setSeed);
+  const resetGame = useGameStore(state => state.resetGame);
+  const isGameOver = useGameStore(state => state.isGameOver);
 
   const handleStart = (selectedSeed: string) => {
-    // Reset game state for new session
-    resetFear();
-    setStoreSeed(selectedSeed);
+    resetGame();
+    setSeedStore(selectedSeed);
     setSeed(selectedSeed);
     setIsPlaying(true);
   };
 
   const handleExit = () => {
     setIsPlaying(false);
-    resetFear();
+    resetGame();
   };
 
   // Reset on mount
   useEffect(() => {
-    resetFear();
-  }, [resetFear]);
+    resetGame();
+  }, [resetGame]);
 
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden">
@@ -46,6 +47,17 @@ export default function Home() {
           >
             ESC
           </button>
+          
+          {/* Restart after game over */}
+          {isGameOver && (
+            <button 
+              onClick={handleExit}
+              className="absolute bottom-20 left-1/2 -translate-x-1/2 z-50 pointer-events-auto text-white hover:text-red-500 font-creepy text-2xl uppercase tracking-wider px-6 py-2 border border-white/30 hover:border-red-500 transition-all"
+              data-testid="button-restart"
+            >
+              TRY AGAIN
+            </button>
+          )}
         </>
       )}
     </div>

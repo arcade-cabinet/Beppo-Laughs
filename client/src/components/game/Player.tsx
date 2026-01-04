@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Vector3, Euler, MathUtils } from 'three';
+import { Vector3, MathUtils } from 'three';
 import { PointerLockControls } from '@react-three/drei';
 import { useGameStore } from '../../game/store';
 import { resolveCollision } from '../../game/collision';
@@ -15,7 +15,17 @@ interface PlayerProps {
 export function Player({ position = [1, 1, 1], onMove, maze }: PlayerProps) {
   const { camera } = useThree();
   const [locked, setLocked] = useState(false);
-  const { isInverted, fear, decreaseFear } = useGameStore();
+  const { 
+    fear, 
+    despair, 
+    updatePlayerPosition, 
+    decreaseFear, 
+    decreaseDespair, 
+    isGameOver,
+    blockades 
+  } = useGameStore();
+  const isInverted = useGameStore(state => state.isInverted());
+  const sanityLevel = useGameStore(state => state.getSanityLevel());
   
   // Movement state
   const moveForward = useRef(false);
@@ -23,9 +33,9 @@ export function Player({ position = [1, 1, 1], onMove, maze }: PlayerProps) {
   const moveLeft = useRef(false);
   const moveRight = useRef(false);
   
-  // Gyroscope state
+  // Position tracking for cell updates
+  const lastCellUpdate = useRef({ x: -999, z: -999 });
   const isMobile = useRef(false);
-  const gyroEnabled = useRef(false);
 
   useEffect(() => {
     // Initial Position - start in first cell
@@ -35,6 +45,7 @@ export function Player({ position = [1, 1, 1], onMove, maze }: PlayerProps) {
     isMobile.current = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
     const onKeyDown = (event: KeyboardEvent) => {
+      if (isGameOver) return;
       switch (event.code) {
         case 'ArrowUp':
         case 'KeyW':
@@ -79,9 +90,8 @@ export function Player({ position = [1, 1, 1], onMove, maze }: PlayerProps) {
     document.addEventListener('keydown', onKeyDown);
     document.addEventListener('keyup', onKeyUp);
     
-    // Auto-lock on click for desktop
     const handleClick = () => {
-      setLocked(true);
+      if (!isGameOver) setLocked(true);
     }
     document.addEventListener('click', handleClick);
     
@@ -90,18 +100,26 @@ export function Player({ position = [1, 1, 1], onMove, maze }: PlayerProps) {
       document.removeEventListener('keydown', onKeyDown);
       document.removeEventListener('keyup', onKeyUp);
     };
-  }, [camera]);
+  }, [camera, isGameOver]);
 
   useFrame((state, delta) => {
-    // Fear recovery over time
-    if (Math.random() > 0.995) decreaseFear(1);
+    if (isGameOver) return;
+    
+    // Slow sanity recovery
+    if (Math.random() > 0.998) {
+      decreaseFear(0.5);
+      decreaseDespair(0.5);
+    }
 
-    const speed = 4.0;
+    // Base speed affected by sanity
+    const sanityFactor = sanityLevel / 100;
+    const baseSpeed = 4.0;
+    const speed = baseSpeed * (0.5 + sanityFactor * 0.5);
+    
     const velocity = new Vector3();
     const direction = new Vector3();
 
-    // Calculate movement direction relative to camera
-    // PENALTY: Inverted controls if fear is high
+    // Calculate movement direction
     const forward = Number(moveForward.current) - Number(moveBackward.current);
     const side = Number(moveRight.current) - Number(moveLeft.current);
 
@@ -112,44 +130,62 @@ export function Player({ position = [1, 1, 1], onMove, maze }: PlayerProps) {
     if (moveForward.current || moveBackward.current) velocity.z -= direction.z * speed * delta;
     if (moveLeft.current || moveRight.current) velocity.x -= direction.x * speed * delta;
 
-    // Calculate target position
     const currentPos = camera.position.clone();
     
     // Apply movement in camera space
     const moveVec = new Vector3(velocity.x, 0, velocity.z);
     moveVec.applyQuaternion(camera.quaternion);
-    moveVec.y = 0; // Keep on ground
+    moveVec.y = 0;
+    
+    // Physics distortion at low sanity
+    if (sanityLevel < 50) {
+      const distortionFactor = (50 - sanityLevel) / 50;
+      moveVec.x += (Math.random() - 0.5) * 0.02 * distortionFactor;
+      moveVec.z += (Math.random() - 0.5) * 0.02 * distortionFactor;
+    }
     
     const targetPos = currentPos.clone().add(moveVec);
     
-    // Collision detection and resolution
-    const resolvedPos = resolveCollision(currentPos, targetPos, maze);
+    // Collision detection WITH BLOCKADES
+    const resolvedPos = resolveCollision(currentPos, targetPos, maze, blockades);
     
     camera.position.x = resolvedPos.x;
     camera.position.z = resolvedPos.z;
     
-    // PENALTY: Camera shake/wobble based on fear
-    if (fear > 20) {
-      const shakeIntensity = (fear / 100) * 0.03;
+    // Camera effects based on sanity
+    const avgInsanity = (fear + despair) / 2;
+    
+    if (avgInsanity > 20) {
+      const shakeIntensity = (avgInsanity / 100) * 0.03;
       camera.position.x += (Math.random() - 0.5) * shakeIntensity;
     }
+    
+    if (sanityLevel < 30) {
+      const tiltFactor = (30 - sanityLevel) / 30;
+      camera.rotation.z = Math.sin(state.clock.elapsedTime * 2) * 0.05 * tiltFactor;
+    } else {
+      camera.rotation.z = MathUtils.lerp(camera.rotation.z, 0, 0.1);
+    }
 
-    // Keep height constant (walking on ground) but allow bobbing
     const isMoving = moveForward.current || moveBackward.current || moveLeft.current || moveRight.current;
     const walkBob = isMoving ? Math.sin(state.clock.elapsedTime * 10) * 0.03 : 0;
     
     camera.position.y = MathUtils.lerp(camera.position.y, 1.0 + walkBob, 0.1);
     
+    // Update cell tracking
+    const cellX = Math.floor(camera.position.x / 2);
+    const cellZ = Math.floor(camera.position.z / 2);
+    
+    if (cellX !== lastCellUpdate.current.x || cellZ !== lastCellUpdate.current.z) {
+      lastCellUpdate.current = { x: cellX, z: cellZ };
+      updatePlayerPosition(camera.position.x, camera.position.z);
+    }
+    
     if (onMove) onMove(camera.position);
   });
 
-  // Mobile touch controls overlay
   if (isMobile.current) {
-    return (
-      <group>
-        {/* Touch controls would be rendered in HUD/HTML layer */}
-      </group>
-    );
+    return <group />;
   }
 
   return (
