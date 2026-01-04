@@ -7,6 +7,7 @@ import { useGameStore } from '@/game/store';
 export default function Home() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [seed, setSeed] = useState<string>('');
+  const [isMobile, setIsMobile] = useState(false);
   const setSeedStore = useGameStore(state => state.setSeed);
   const resetGame = useGameStore(state => state.resetGame);
   const isGameOver = useGameStore(state => state.isGameOver);
@@ -23,8 +24,9 @@ export default function Home() {
     resetGame();
   };
 
-  // Reset on mount
+  // Detect mobile and reset on mount
   useEffect(() => {
+    setIsMobile(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
     resetGame();
   }, [resetGame]);
 
@@ -39,14 +41,27 @@ export default function Home() {
           </div>
           <HUD />
           
-          {/* Exit Button */}
-          <button 
-            onClick={handleExit}
-            className="absolute top-4 right-4 z-50 pointer-events-auto text-white/50 hover:text-white font-mono text-xs uppercase tracking-wider px-3 py-1 border border-white/20 hover:border-white/50 transition-all"
-            data-testid="button-exit"
-          >
-            ESC
-          </button>
+          {/* Exit Button - hidden on mobile */}
+          {!isMobile && (
+            <button 
+              onClick={handleExit}
+              className="absolute top-4 right-4 z-50 pointer-events-auto text-white/50 hover:text-white font-mono text-xs uppercase tracking-wider px-3 py-1 border border-white/20 hover:border-white/50 transition-all"
+              data-testid="button-exit"
+            >
+              ESC
+            </button>
+          )}
+          
+          {/* Mobile Exit Button - touch-friendly */}
+          {isMobile && (
+            <button 
+              onClick={handleExit}
+              className="absolute top-4 right-4 z-50 pointer-events-auto text-white/70 font-mono text-sm uppercase px-4 py-2 bg-black/50 border border-white/30 rounded"
+              data-testid="button-exit-mobile"
+            >
+              EXIT
+            </button>
+          )}
           
           {/* Restart after game over */}
           {isGameOver && (

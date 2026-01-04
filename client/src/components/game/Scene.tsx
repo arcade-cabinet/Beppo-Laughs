@@ -25,12 +25,15 @@ export function Scene({ seed }: SceneProps) {
 
   // Atmosphere adjusts based on sanity
   const avgInsanity = (fear + despair) / 2 / maxSanity;
-  const fogDensity = 15 - avgInsanity * 10;
+  
+  // Fog gets closer as insanity rises, but starts further away
+  const fogNear = Math.max(2, 8 - avgInsanity * 6);
+  const fogFar = Math.max(12, 25 - avgInsanity * 10);
   
   // Color shifts at low sanity
   const bgColor = sanityLevel < 50 
-    ? `hsl(${280 + (50 - sanityLevel)}, 20%, ${3 + avgInsanity * 2}%)` 
-    : '#050505';
+    ? `hsl(${280 + (50 - sanityLevel)}, 15%, ${5 + avgInsanity * 3}%)` 
+    : '#0a0a0a';
 
   if (!maze) return null;
 
@@ -50,30 +53,40 @@ export function Scene({ seed }: SceneProps) {
       >
         {/* Atmosphere */}
         <color attach="background" args={[bgColor]} />
-        <fog attach="fog" args={[bgColor, 0, Math.max(5, fogDensity)]} /> 
+        <fog attach="fog" args={[bgColor, fogNear, fogFar]} /> 
         
         <Sky sunPosition={[0, -1, 0]} turbidity={10} rayleigh={0.5 + avgInsanity} mieCoefficient={0.005} mieDirectionalG={0.8} />
         <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1 + avgInsanity * 2} />
 
-        {/* Lighting - dims with insanity */}
-        <ambientLight intensity={0.08 * (sanityLevel / 100 + 0.3)} color="#1a1a1a" />
-        <pointLight position={[10, 10, 10]} intensity={0.1} color="#2d4a2b" />
+        {/* Lighting - brighter base for visibility */}
+        <ambientLight intensity={0.25} color="#2a2a3a" />
+        <hemisphereLight intensity={0.3} color="#c0c8d0" groundColor="#1a1a2a" />
+        
+        {/* Main directional light for shadows */}
+        <directionalLight 
+          position={[5, 10, 5]} 
+          intensity={0.4 * (0.5 + sanityLevel / 200)} 
+          castShadow 
+          color="#c0c8d0"
+        />
         
         {/* Color-shifted lights at low sanity */}
         {sanityLevel < 50 && (
           <>
-            <pointLight position={[-5, 3, -5]} intensity={0.1 * avgInsanity} color="#8b0000" />
-            <pointLight position={[5, 3, 5]} intensity={0.1 * avgInsanity} color="#00008b" />
+            <pointLight position={[-5, 3, -5]} intensity={0.2 * avgInsanity} color="#8b0000" distance={15} />
+            <pointLight position={[5, 3, 5]} intensity={0.2 * avgInsanity} color="#00008b" distance={15} />
           </>
         )}
         
+        {/* Player flashlight effect */}
         <spotLight 
-          position={[0, 5, 0]} 
-          angle={0.6} 
-          penumbra={1} 
-          intensity={0.4 * (sanityLevel / 100 + 0.2)} 
+          position={[0, 3, 0]} 
+          angle={0.8} 
+          penumbra={0.5} 
+          intensity={0.6} 
           castShadow 
-          color="#c0c8d0"
+          color="#ffffee"
+          distance={20}
         />
 
         <Suspense fallback={null}>

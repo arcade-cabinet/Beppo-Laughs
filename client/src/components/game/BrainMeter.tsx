@@ -1,9 +1,8 @@
-import { useRef, useMemo } from 'react';
+import { useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { useTexture, Billboard, Text } from '@react-three/drei';
-import { Mesh, MeshStandardMaterial, Color, Vector3 } from 'three';
+import { Text } from '@react-three/drei';
+import { Mesh, MeshStandardMaterial, Color } from 'three';
 import { useGameStore } from '../../game/store';
-import brainTextureUrl from '@assets/generated_images/pale_brain_3d_asset.png';
 
 function BrainHemisphere({ side, value, maxValue }: { side: 'left' | 'right', value: number, maxValue: number }) {
   const meshRef = useRef<Mesh>(null);
@@ -49,16 +48,15 @@ function BrainHemisphere({ side, value, maxValue }: { side: 'left' | 'right', va
   return (
     <mesh 
       ref={meshRef} 
-      position={[isLeft ? -0.3 : 0.3, 0, 0]}
+      position={[isLeft ? -0.25 : 0.25, 0, 0]}
+      scale={[isLeft ? -1 : 1, 1, 1]}
     >
-      <sphereGeometry args={[0.4, 16, 16, isLeft ? Math.PI : 0, Math.PI]} />
+      <sphereGeometry args={[0.35, 24, 24]} />
       <meshStandardMaterial 
         ref={materialRef}
         color={baseColor}
-        roughness={0.7}
+        roughness={0.6}
         metalness={0.1}
-        transparent
-        opacity={0.9}
       />
     </mesh>
   );
@@ -66,10 +64,17 @@ function BrainHemisphere({ side, value, maxValue }: { side: 'left' | 'right', va
 
 function Brain3D() {
   const { fear, despair, maxSanity } = useGameStore();
-  const brainTexture = useTexture(brainTextureUrl);
+  const groupRef = useRef<any>(null);
+  
+  useFrame((state) => {
+    if (groupRef.current) {
+      // Gentle floating animation
+      groupRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.1;
+    }
+  });
   
   return (
-    <group>
+    <group ref={groupRef}>
       {/* Left Hemisphere - FEAR (Red) */}
       <BrainHemisphere side="left" value={fear} maxValue={maxSanity} />
       
@@ -77,46 +82,18 @@ function Brain3D() {
       <BrainHemisphere side="right" value={despair} maxValue={maxSanity} />
       
       {/* Brain stem/connection */}
-      <mesh position={[0, -0.3, 0]}>
-        <cylinderGeometry args={[0.1, 0.15, 0.3, 8]} />
+      <mesh position={[0, -0.35, 0]}>
+        <cylinderGeometry args={[0.08, 0.12, 0.25, 8]} />
         <meshStandardMaterial color="#d4c4c4" roughness={0.8} />
       </mesh>
       
-      {/* Labels */}
-      <Text
-        position={[-0.5, 0.6, 0]}
-        fontSize={0.15}
-        color="#8b0000"
-        anchorX="center"
-      >
-        FEAR
-      </Text>
-      <Text
-        position={[0.5, 0.6, 0]}
-        fontSize={0.15}
-        color="#00008b"
-        anchorX="center"
-      >
-        DESPAIR
-      </Text>
-      
-      {/* Percentage displays */}
-      <Text
-        position={[-0.3, -0.6, 0]}
-        fontSize={0.12}
-        color="#ffffff"
-        anchorX="center"
-      >
-        {Math.floor(fear)}%
-      </Text>
-      <Text
-        position={[0.3, -0.6, 0]}
-        fontSize={0.12}
-        color="#ffffff"
-        anchorX="center"
-      >
-        {Math.floor(despair)}%
-      </Text>
+      {/* Brain folds texture via additional smaller spheres */}
+      {[-0.15, 0.15].map((xOffset, i) => (
+        <mesh key={i} position={[xOffset, 0.15, 0.2]} scale={0.15}>
+          <sphereGeometry args={[1, 12, 12]} />
+          <meshStandardMaterial color="#dac8c8" roughness={0.7} />
+        </mesh>
+      ))}
     </group>
   );
 }
@@ -129,20 +106,34 @@ export function BrainMeter() {
   
   return (
     <div 
-      className="absolute top-4 left-4 w-40 h-32 z-50 pointer-events-none"
+      className="absolute top-4 left-4 w-44 h-36 z-50 pointer-events-none"
       style={{
-        filter: avgInsanity > 0.5 ? `blur(${avgInsanity * 2}px)` : 'none'
+        filter: avgInsanity > 0.5 ? `blur(${avgInsanity}px)` : 'none'
       }}
     >
-      <Canvas camera={{ position: [0, 0, 2], fov: 50 }} >
-        <ambientLight intensity={0.5} />
-        <pointLight position={[2, 2, 2]} intensity={0.5} />
-        <pointLight position={[-2, -2, 2]} intensity={0.3} color="#ff6666" />
-        <Brain3D />
-      </Canvas>
+      {/* Labels above the canvas */}
+      <div className="flex justify-between px-2 text-xs font-mono uppercase tracking-wider mb-1">
+        <span className="text-red-700">FEAR</span>
+        <span className="text-blue-700">DESPAIR</span>
+      </div>
+      
+      <div className="h-24">
+        <Canvas camera={{ position: [0, 0, 2.5], fov: 45 }}>
+          <ambientLight intensity={0.6} />
+          <pointLight position={[2, 2, 3]} intensity={0.8} />
+          <pointLight position={[-2, -1, 2]} intensity={0.4} color="#ff6666" />
+          <Brain3D />
+        </Canvas>
+      </div>
+      
+      {/* Percentage displays */}
+      <div className="flex justify-between px-4 text-xs font-mono">
+        <span className="text-white/70">{Math.floor(fear)}%</span>
+        <span className="text-white/70">{Math.floor(despair)}%</span>
+      </div>
       
       {/* Sanity label */}
-      <div className="absolute bottom-0 left-0 right-0 text-center text-white/50 font-mono text-xs uppercase tracking-widest">
+      <div className="text-center text-white/40 font-mono text-xs uppercase tracking-widest mt-1">
         SANITY
       </div>
     </div>
