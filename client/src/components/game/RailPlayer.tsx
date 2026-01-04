@@ -22,8 +22,8 @@ export function RailPlayer({ maze }: RailPlayerProps) {
     const centerNode = maze.railGraph.nodes.get(maze.railGraph.centerNode);
     if (centerNode) {
       useGameStore.getState().setCurrentNode(maze.railGraph.centerNode);
-      camera.position.set(centerNode.worldX, 1.6, centerNode.worldZ);
-      currentPos.current.set(centerNode.worldX, 1.6, centerNode.worldZ);
+      camera.position.set(centerNode.worldX, 1.4, centerNode.worldZ);
+      currentPos.current.set(centerNode.worldX, 1.4, centerNode.worldZ);
       
       // Look toward first available path
       if (centerNode.connections.length > 0) {
@@ -61,8 +61,8 @@ export function RailPlayer({ maze }: RailPlayerProps) {
     
     if (isMoving && fromNode && toNode) {
       // Update positions
-      currentPos.current.set(fromNode.worldX, 1.6, fromNode.worldZ);
-      targetPos.current.set(toNode.worldX, 1.6, toNode.worldZ);
+      currentPos.current.set(fromNode.worldX, 1.4, fromNode.worldZ);
+      targetPos.current.set(toNode.worldX, 1.4, toNode.worldZ);
       
       const distance = currentPos.current.distanceTo(targetPos.current);
       
@@ -99,12 +99,12 @@ export function RailPlayer({ maze }: RailPlayerProps) {
       
       // Walking bob
       const bobAmount = Math.sin(state.clock.elapsedTime * 12 * moveSpeed) * 0.04;
-      camera.position.y = 1.6 + bobAmount;
+      camera.position.y = 1.4 + bobAmount;
     } else if (fromNode && !isMoving) {
       // Idle at current node - ensure we're positioned correctly
       camera.position.x = MathUtils.lerp(camera.position.x, fromNode.worldX, 0.1);
       camera.position.z = MathUtils.lerp(camera.position.z, fromNode.worldZ, 0.1);
-      camera.position.y = MathUtils.lerp(camera.position.y, 1.6, 0.1);
+      camera.position.y = MathUtils.lerp(camera.position.y, 1.4, 0.1);
     }
     
     // Sanity-based camera effects

@@ -74,7 +74,7 @@ export function Scene({ seed }: SceneProps) {
       
       <Canvas 
         shadows 
-        camera={{ fov: 75, near: 0.1, far: 100 }}
+        camera={{ fov: 90, near: 0.1, far: 100 }}
         style={{
           filter: sanityLevel < 30 
             ? `saturate(${0.4 + sanityLevel / 50}) contrast(${1.1 + avgInsanity * 0.2}) sepia(${avgInsanity * 0.3})` 
