@@ -1,38 +1,39 @@
 # Beppo Laughs
 
-A 3D first-person survival horror game set in a procedurally generated hedge maze. Navigate through the darkness while encountering surreal SDF ray-marched villain figures inspired by Monty Python animation, Coney Island freak shows, and opera clowns.
+A 3D first-person survival horror game set in a surreal 1800s circus big top tent labyrinth. You are TRAPPED at the center of Beppo's nightmare carnival - navigate outward to escape while SDF ray-marched villain figures stalk you through the canvas corridors.
 
 ## Overview
 
 - **Genre**: Survival Horror / Maze Navigation
-- **Theme**: Vintage Coney Island freak show meets Monty Python absurdist horror
-- **Core Mechanic**: No combat - purely maze navigation with dual sanity meters
+- **Theme**: Victorian circus big top nightmare, Coney Island freak show meets Monty Python absurdist horror
+- **Core Mechanic**: Tap-based rail navigation with dual sanity meters (Fear/Despair)
+- **Goal**: Start at center, escape to perimeter exits before sanity runs out
 
 ## Architecture
 
 ### Frontend (client/)
 - **Framework**: React 19 with TypeScript
 - **3D Engine**: Three.js via @react-three/fiber and @react-three/drei
-- **State Management**: Zustand for game state (fear, despair, blockades, path tracking)
+- **State Management**: Zustand for game state (fear, despair, blockades, rail navigation)
 - **Styling**: Tailwind CSS v4 with custom horror theme
 - **Routing**: Wouter
 - **Audio**: Web Audio API procedural sound generation
 
 ### Key Components
 - `client/src/pages/Home.tsx` - Main game page with menu/game toggle
-- `client/src/components/game/Scene.tsx` - Three.js canvas and 3D scene
-- `client/src/components/game/Maze.tsx` - Procedural maze geometry
-- `client/src/components/game/Player.tsx` - First-person controls with sanity penalties
+- `client/src/components/game/Scene.tsx` - Three.js canvas with circus tent lighting
+- `client/src/components/game/Maze.tsx` - Circus tent canvas walls, sawdust floor, tent poles
+- `client/src/components/game/RailPlayer.tsx` - Tap-based rail movement controller
+- `client/src/components/game/TapZones.tsx` - Clickable navigation markers at crossroads
 - `client/src/components/game/Villains.tsx` - SDF ray-marched villain rendering
 - `client/src/components/game/Collectibles.tsx` - Paper mache items that clear blockades
 - `client/src/components/game/BrainMeter.tsx` - 3D brain HUD showing Fear/Despair
-- `client/src/components/game/HUD.tsx` - Sanity meters and UI overlays
+- `client/src/components/game/HUD.tsx` - Sanity meters, win/lose overlays with Beppo video
 - `client/src/components/game/AudioManager.tsx` - Reactive procedural audio
 - `client/src/components/game/MainMenu.tsx` - Seed selection menu
-- `client/src/game/MazeGenerator.ts` - Recursive backtracking maze algorithm
-- `client/src/game/store.ts` - Zustand store for dual sanity system
+- `client/src/game/MazeGenerator.ts` - Reverse-minotaur maze with rail graph
+- `client/src/game/store.ts` - Zustand store for dual sanity and rail navigation
 - `client/src/game/audio.ts` - Web Audio API procedural sound engine
-- `client/src/game/collision.ts` - Collision detection with blockade support
 
 ### Backend (server/)
 - **Framework**: Express.js
@@ -40,16 +41,27 @@ A 3D first-person survival horror game set in a procedurally generated hedge maz
 
 ## Game Mechanics
 
+### Reverse Minotaur Design
+- Player starts TRAPPED at maze center (13x13 odd-dimension grid)
+- Exits are on the perimeter edges
+- Navigate outward to escape Beppo's nightmare
+
+### Tap-Based Rail Navigation
+- No free movement - tap arrow markers to move between cells
+- Smooth lerped transitions along rail edges
+- Speed modifiers: 1.5x toward collectibles, 0.7x toward villains
+- Mobile-friendly touch controls
+
 ### Dual Sanity System
 - **FEAR (Red)** - Increases when exploring unknown cells
 - **DESPAIR (Blue)** - Increases when backtracking through visited cells
 - Both meters visualized as 3D melting brain hemispheres
 - When either meter reaches 100%, Beppo catches you (game over)
 
-### Path Tracking
-- Every cell visited is tracked with visit count and timestamp
-- New cells increase Fear, revisited cells increase Despair
-- More repeated visits = faster Despair accumulation
+### Win/Lose Conditions
+- **WIN**: Reach any exit node on the perimeter
+- **LOSE**: Either sanity meter hits 100%
+- Game over features cinematic Beppo video with kaleidoscopic effect
 
 ### Villain Blockades
 - Villains pop up when player approaches
@@ -63,12 +75,12 @@ A 3D first-person survival horror game set in a procedurally generated hedge maz
 - Fear level affects distortion intensity (more fear = more surreal)
 - Monty Python-style jitter animation
 
-### Perception Distortion (Low Sanity Effects)
-- Camera shake and tilt
-- FOV warping
-- Color desaturation and hue shift
-- Physics drift (random movement perturbation)
-- Control inversion at very low sanity
+### Circus Tent Atmosphere
+- Warm flickering tungsten lights (like old lanterns)
+- Amber fog that closes in as sanity drops
+- Striped canvas walls with distressed vintage texture
+- Sawdust floor, tent poles, decorative ropes
+- Horror accent lights appear as sanity drops
 
 ### Procedural Audio System
 - Creepy synthesized laughs (detuned oscillators + vibrato)
@@ -77,22 +89,16 @@ A 3D first-person survival horror game set in a procedurally generated hedge maz
 - Jump scare stingers on villain encounters
 - Sanity distortion whispers at low sanity
 
-### Collectible Items
-- Paper mache circus tickets and keys
-- Collecting items clears one random blockade
-- Items glow brighter when blockades exist
-- Slight sanity recovery on collection
-
 ## Style Guide
 
 ### Colors
-- Primary: #1a1a1a (Deep Black)
-- Secondary: #2d4a2b (Dark Hedge Green)
+- Primary: #1a1510 (Dark Sepia Black)
+- Canvas: #c4a882 (Aged Cream/Tan)
 - Accent: #8b0000 (Blood Red)
+- Warm Light: #ffaa55 (Tungsten Orange)
 - Fear: #8b0000 (Dark Red)
 - Despair: #00008b (Dark Blue)
-- Fog: #4a5f4a (Misty Green-Grey)
-- Moonlight: #c0c8d0 (Pale Blue-White)
+- Fog: Warm amber → Sickly green (based on sanity)
 
 ### Typography
 - Title: Nosifer (horror display)
@@ -100,14 +106,26 @@ A 3D first-person survival horror game set in a procedurally generated hedge maz
 - UI: Roboto
 
 ## Generated Assets
-All collectibles in `attached_assets/generated_images/`:
+
+### Textures (attached_assets/generated_images/)
+- vintage_circus_tent_canvas_texture.png - Striped canvas walls
+- circus_sawdust_floor_texture.png - Sawdust floor
+- pale_brain_3d_asset.png - Brain meter texture
+
+### Collectibles
 - paper_mache_circus_ticket_item.png
 - paper_mache_key_item.png
-- pale_brain_3d_asset.png
-- seamless_dark_hedge_texture.png
-- dark_muddy_grass_ground_texture.png
+
+### Videos (attached_assets/generated_videos/)
+- beppo_clown_emerging_laughing_game_over.mp4 - Game over climax
 
 ## Technical Notes
+
+### Rail Navigation System
+- RailGraph built from maze with nodes at every cell
+- Connections based on open walls between cells
+- Nodes marked with hasCollectible/hasVillain for speed modifiers
+- Uses getState() in useFrame for live state updates
 
 ### SDF Shader Performance
 - Villains use GLSL fragment shaders for ray marching
@@ -127,7 +145,6 @@ npm run dev
 Navigate to http://localhost:5000, enter a seed or randomize, and click "ENTER MAZE".
 
 ## Controls
-- WASD / Arrow Keys: Move
-- Mouse: Look around
-- Click: Lock cursor for mouse look
-- Walk into items to collect them
+- **TAP** arrow markers to move between cells
+- Find the **EXIT** markers on the perimeter to escape
+- Collect items to clear blockades
