@@ -23,7 +23,7 @@ export function Maze({ maze }: MazeProps) {
   }, [canvasTexture, sawdustTexture]);
 
   const WALL_HEIGHT = 4;
-  const CELL_SIZE = 2;
+  const CELL_SIZE = 3;
 
   const walls = useMemo(() => {
     const wallMeshes: React.ReactNode[] = [];
