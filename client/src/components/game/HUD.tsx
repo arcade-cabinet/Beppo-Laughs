@@ -14,6 +14,50 @@ function DebugInfo() {
   );
 }
 
+function NavigationControls() {
+  const { availableMoves, isMoving, startMoveTo, isGameOver, hasWon } = useGameStore();
+  
+  if (isMoving || isGameOver || hasWon) return null;
+  
+  const arrows: Record<string, string> = {
+    north: '↑',
+    south: '↓',
+    east: '→',
+    west: '←'
+  };
+  
+  const positions: Record<string, string> = {
+    north: 'top-1/4 left-1/2 -translate-x-1/2',
+    south: 'bottom-1/4 left-1/2 -translate-x-1/2',
+    east: 'top-1/2 right-8 -translate-y-1/2',
+    west: 'top-1/2 left-8 -translate-y-1/2'
+  };
+  
+  return (
+    <>
+      {availableMoves.map((move) => (
+        <button
+          key={move.direction}
+          className={`pointer-events-auto absolute ${positions[move.direction]} 
+            w-16 h-16 rounded-full border-2 flex items-center justify-center
+            ${move.isExit 
+              ? 'bg-green-600/40 border-green-400 text-green-200' 
+              : 'bg-yellow-600/30 border-yellow-400/60 text-yellow-200'}
+            hover:scale-110 active:scale-95 transition-all
+            text-3xl font-bold shadow-lg backdrop-blur-sm`}
+          onClick={() => startMoveTo(move.nodeId, 1.0)}
+          data-testid={`button-nav-${move.direction}`}
+        >
+          {arrows[move.direction]}
+          {move.isExit && (
+            <span className="absolute -bottom-5 text-xs text-green-400 font-mono">EXIT</span>
+          )}
+        </button>
+      ))}
+    </>
+  );
+}
+
 export function HUD() {
   const { fear, despair, maxSanity, isGameOver, hasWon, visitedCells } = useGameStore();
   const isInverted = useGameStore(state => state.isInverted());
@@ -80,6 +124,9 @@ export function HUD() {
 
       {/* 3D Brain Meter */}
       <BrainMeter />
+      
+      {/* On-Screen Navigation Controls */}
+      <NavigationControls />
       
       {/* Inverted Controls Warning */}
       <AnimatePresence>

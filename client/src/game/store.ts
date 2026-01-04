@@ -36,6 +36,7 @@ interface GameState {
   moveProgress: number;       // 0-1 progress along edge
   moveSpeed: number;          // Speed multiplier (1 = normal, 1.5 = run, 0.7 = slow)
   cameraRotation: number;     // Camera Y rotation in radians
+  availableMoves: { direction: 'north' | 'south' | 'east' | 'west'; nodeId: string; isExit: boolean }[];
   
   // Actions
   setSeed: (seed: string) => void;
@@ -57,6 +58,7 @@ interface GameState {
   updateMoveProgress: (progress: number) => void;
   completeMove: () => void;
   setCameraRotation: (rotation: number) => void;
+  setAvailableMoves: (moves: { direction: 'north' | 'south' | 'east' | 'west'; nodeId: string; isExit: boolean }[]) => void;
   
   // Computed
   getSanityLevel: () => number;
@@ -88,6 +90,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   moveProgress: 0,
   moveSpeed: 1,
   cameraRotation: 0,
+  availableMoves: [],
   
   setSeed: (seed) => set({ seed }),
   
@@ -202,6 +205,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     moveProgress: 0,
     moveSpeed: 1,
     cameraRotation: 0,
+    availableMoves: [],
   }),
   
   // Rail Navigation Actions
@@ -234,6 +238,8 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
   
   setCameraRotation: (rotation) => set({ cameraRotation: rotation }),
+  
+  setAvailableMoves: (moves) => set({ availableMoves: moves }),
   
   getSanityLevel: () => {
     const state = get();

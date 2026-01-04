@@ -26,6 +26,12 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
       
       camera.rotation.set(0, 0, 0);
       
+      console.log('=== PLAYER INIT ===');
+      console.log('Center node ID:', geometry.centerNodeId);
+      console.log('Center node grid:', centerNode.gridX, centerNode.gridY);
+      console.log('Center node world:', centerNode.worldX, centerNode.worldZ);
+      console.log('Connections:', centerNode.connections);
+      
       if (centerNode.connections.length > 0) {
         const firstConnection = geometry.railNodes.get(centerNode.connections[0]);
         if (firstConnection) {
@@ -34,13 +40,17 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
             firstConnection.worldZ - centerNode.worldZ
           );
           camera.rotation.y = lookDir;
-          camera.rotation.x = 0;
+          camera.rotation.x = 0.1;
           camera.rotation.z = 0;
           useGameStore.getState().setCameraRotation(lookDir);
+          
+          console.log('Looking toward:', firstConnection.id, 'at world:', firstConnection.worldX, firstConnection.worldZ);
+          console.log('Look direction (radians):', lookDir, '(degrees):', (lookDir * 180 / Math.PI));
         }
       }
       
-      console.log('Player at cell:', centerNode.gridX, centerNode.gridY, '-> world:', centerNode.worldX, centerNode.worldZ);
+      console.log('Camera position:', camera.position.x, camera.position.y, camera.position.z);
+      console.log('===================');
       initialized.current = true;
     }
   }, [geometry, camera]);

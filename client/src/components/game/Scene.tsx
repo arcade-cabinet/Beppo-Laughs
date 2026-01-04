@@ -43,10 +43,39 @@ function FlickeringLight({ position, color, intensity, distance }: {
   );
 }
 
+function getDirectionFromDelta(dx: number, dy: number): 'north' | 'south' | 'east' | 'west' {
+  if (dy < 0) return 'north';
+  if (dy > 0) return 'south';
+  if (dx > 0) return 'east';
+  return 'west';
+}
+
 export function Scene({ seed }: SceneProps) {
   const [mazeData, setMazeData] = useState<{ layout: MazeLayout; geometry: MazeGeometry } | null>(null);
-  const { fear, despair, maxSanity } = useGameStore();
+  const { fear, despair, maxSanity, currentNode, blockades, isMoving } = useGameStore();
   const sanityLevel = useGameStore(state => state.getSanityLevel());
+  
+  useEffect(() => {
+    if (!mazeData || !currentNode || isMoving) return;
+    
+    const { geometry } = mazeData;
+    const current = geometry.railNodes.get(currentNode);
+    if (!current) return;
+    
+    const moves: { direction: 'north' | 'south' | 'east' | 'west'; nodeId: string; isExit: boolean }[] = [];
+    for (const connId of current.connections) {
+      const node = geometry.railNodes.get(connId);
+      if (!node) continue;
+      if (blockades.has(connId)) continue;
+      
+      const dx = node.gridX - current.gridX;
+      const dy = node.gridY - current.gridY;
+      const direction = getDirectionFromDelta(dx, dy);
+      moves.push({ direction, nodeId: node.id, isExit: node.isExit });
+    }
+    
+    useGameStore.getState().setAvailableMoves(moves);
+  }, [mazeData, currentNode, blockades, isMoving]);
 
   useEffect(() => {
     const layout = generateMaze(13, 13, seed);
@@ -55,6 +84,30 @@ export function Scene({ seed }: SceneProps) {
     console.log('Generated 2D maze:', layout.width, 'x', layout.height);
     console.log('Center:', layout.center, 'Exits:', layout.exits);
     console.log('Rail nodes:', geometry.railNodes.size);
+    
+    const store = useGameStore.getState();
+    store.setCurrentNode(geometry.centerNodeId);
+    
+    const centerNode = geometry.railNodes.get(geometry.centerNodeId);
+    if (centerNode) {
+      const moves: { direction: 'north' | 'south' | 'east' | 'west'; nodeId: string; isExit: boolean }[] = [];
+      for (const connId of centerNode.connections) {
+        const node = geometry.railNodes.get(connId);
+        if (!node) continue;
+        
+        const dx = node.gridX - centerNode.gridX;
+        const dy = node.gridY - centerNode.gridY;
+        let direction: 'north' | 'south' | 'east' | 'west' = 'north';
+        if (dy < 0) direction = 'north';
+        else if (dy > 0) direction = 'south';
+        else if (dx > 0) direction = 'east';
+        else direction = 'west';
+        
+        moves.push({ direction, nodeId: node.id, isExit: node.isExit });
+      }
+      store.setAvailableMoves(moves);
+      console.log('Initial available moves:', moves);
+    }
   }, [seed]);
 
   const avgInsanity = (fear + despair) / 2 / maxSanity;
@@ -79,7 +132,7 @@ export function Scene({ seed }: SceneProps) {
       
       <Canvas 
         shadows 
-        camera={{ fov: 90, near: 0.1, far: 100 }}
+        camera={{ fov: 70, near: 0.1, far: 100 }}
         style={{
           filter: sanityLevel < 30 
             ? `saturate(${0.4 + sanityLevel / 50}) contrast(${1.1 + avgInsanity * 0.2}) sepia(${avgInsanity * 0.3})` 
