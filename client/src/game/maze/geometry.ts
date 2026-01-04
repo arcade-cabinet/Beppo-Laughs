@@ -47,17 +47,21 @@ export interface MazeGeometry {
   exitNodeIds: string[];
 }
 
-export function gridToWorld(gridX: number, gridY: number, config: MazeConfig): { x: number; z: number } {
+export function gridToWorld(gridX: number, gridY: number, config: MazeConfig, mazeWidth: number, mazeHeight: number): { x: number; z: number } {
+  const centerX = Math.floor(mazeWidth / 2);
+  const centerY = Math.floor(mazeHeight / 2);
   return {
-    x: gridX * config.cellSize,
-    z: gridY * config.cellSize,
+    x: (gridX - centerX) * config.cellSize,
+    z: (gridY - centerY) * config.cellSize,
   };
 }
 
-export function worldToGrid(worldX: number, worldZ: number, config: MazeConfig): { x: number; y: number } {
+export function worldToGrid(worldX: number, worldZ: number, config: MazeConfig, mazeWidth: number, mazeHeight: number): { x: number; y: number } {
+  const centerX = Math.floor(mazeWidth / 2);
+  const centerY = Math.floor(mazeHeight / 2);
   return {
-    x: Math.round(worldX / config.cellSize),
-    y: Math.round(worldZ / config.cellSize),
+    x: Math.round(worldX / config.cellSize) + centerX,
+    y: Math.round(worldZ / config.cellSize) + centerY,
   };
 }
 
@@ -71,7 +75,7 @@ export function buildGeometry(layout: MazeLayout, config: MazeConfig = DEFAULT_C
   for (let y = 0; y < layout.height; y++) {
     for (let x = 0; x < layout.width; x++) {
       const cell = layout.cells[y][x];
-      const { x: worldX, z: worldZ } = gridToWorld(x, y, config);
+      const { x: worldX, z: worldZ } = gridToWorld(x, y, config, layout.width, layout.height);
       
       if (cell.walls.north) {
         walls.push({
@@ -141,8 +145,8 @@ export function buildGeometry(layout: MazeLayout, config: MazeConfig = DEFAULT_C
   const floorWidth = layout.width * cellSize;
   const floorDepth = layout.height * cellSize;
   const floor: FloorTile = {
-    x: (layout.width - 1) * cellSize / 2,
-    z: (layout.height - 1) * cellSize / 2,
+    x: 0,
+    z: 0,
     width: floorWidth + cellSize,
     depth: floorDepth + cellSize,
   };

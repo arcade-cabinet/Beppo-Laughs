@@ -17,7 +17,7 @@ describe('buildGeometry', () => {
     const centerNode = geometry.railNodes.get(geometry.centerNodeId);
     expect(centerNode).toBeDefined();
     
-    const expectedWorld = gridToWorld(2, 2, DEFAULT_CONFIG);
+    const expectedWorld = gridToWorld(2, 2, DEFAULT_CONFIG, 5, 5);
     expect(centerNode!.worldX).toBe(expectedWorld.x);
     expect(centerNode!.worldZ).toBe(expectedWorld.z);
   });
@@ -144,56 +144,58 @@ describe('buildGeometry', () => {
 });
 
 describe('gridToWorld', () => {
-  it('converts grid coordinates to world coordinates', () => {
-    const pos = gridToWorld(0, 0, DEFAULT_CONFIG);
+  it('places center cell at origin', () => {
+    const pos = gridToWorld(2, 2, DEFAULT_CONFIG, 5, 5);
     expect(pos.x).toBe(0);
     expect(pos.z).toBe(0);
   });
 
-  it('correctly scales by cell size', () => {
-    const pos = gridToWorld(1, 2, DEFAULT_CONFIG);
+  it('correctly offsets from center', () => {
+    const pos = gridToWorld(3, 2, DEFAULT_CONFIG, 5, 5);
     expect(pos.x).toBe(DEFAULT_CONFIG.cellSize);
-    expect(pos.z).toBe(2 * DEFAULT_CONFIG.cellSize);
+    expect(pos.z).toBe(0);
   });
 
-  it('handles negative grid coordinates', () => {
-    const pos = gridToWorld(-1, -1, DEFAULT_CONFIG);
-    expect(pos.x).toBe(-DEFAULT_CONFIG.cellSize);
-    expect(pos.z).toBe(-DEFAULT_CONFIG.cellSize);
+  it('places corner cells symmetrically', () => {
+    const topLeft = gridToWorld(0, 0, DEFAULT_CONFIG, 5, 5);
+    const bottomRight = gridToWorld(4, 4, DEFAULT_CONFIG, 5, 5);
+    expect(topLeft.x).toBe(-bottomRight.x);
+    expect(topLeft.z).toBe(-bottomRight.z);
   });
 
   it('respects custom config', () => {
     const customConfig = { cellSize: 10, wallHeight: 5, wallThickness: 0.2 };
-    const pos = gridToWorld(2, 3, customConfig);
-    expect(pos.x).toBe(20);
-    expect(pos.z).toBe(30);
+    const pos = gridToWorld(3, 3, customConfig, 5, 5);
+    expect(pos.x).toBe(10);
+    expect(pos.z).toBe(10);
   });
 });
 
 describe('worldToGrid', () => {
-  it('converts world coordinates to grid coordinates', () => {
-    const pos = worldToGrid(0, 0, DEFAULT_CONFIG);
-    expect(pos.x).toBe(0);
-    expect(pos.y).toBe(0);
+  it('converts origin to center grid cell', () => {
+    const pos = worldToGrid(0, 0, DEFAULT_CONFIG, 5, 5);
+    expect(pos.x).toBe(2);
+    expect(pos.y).toBe(2);
   });
 
-  it('correctly divides by cell size', () => {
-    const pos = worldToGrid(DEFAULT_CONFIG.cellSize, 2 * DEFAULT_CONFIG.cellSize, DEFAULT_CONFIG);
-    expect(pos.x).toBe(1);
-    expect(pos.y).toBe(2);
+  it('correctly converts offset world position', () => {
+    const pos = worldToGrid(DEFAULT_CONFIG.cellSize, 2 * DEFAULT_CONFIG.cellSize, DEFAULT_CONFIG, 7, 7);
+    expect(pos.x).toBe(4);
+    expect(pos.y).toBe(5);
   });
 
   it('rounds to nearest grid cell', () => {
     const halfCell = DEFAULT_CONFIG.cellSize / 2;
-    const pos = worldToGrid(halfCell + 0.1, halfCell - 0.1, DEFAULT_CONFIG);
-    expect(pos.x).toBe(1);
-    expect(pos.y).toBe(0);
+    const pos = worldToGrid(halfCell + 0.1, halfCell - 0.1, DEFAULT_CONFIG, 5, 5);
+    expect(pos.x).toBe(3);
+    expect(pos.y).toBe(2);
   });
 
   it('is inverse of gridToWorld', () => {
     const gridX = 3, gridY = 5;
-    const world = gridToWorld(gridX, gridY, DEFAULT_CONFIG);
-    const grid = worldToGrid(world.x, world.z, DEFAULT_CONFIG);
+    const mazeW = 9, mazeH = 9;
+    const world = gridToWorld(gridX, gridY, DEFAULT_CONFIG, mazeW, mazeH);
+    const grid = worldToGrid(world.x, world.z, DEFAULT_CONFIG, mazeW, mazeH);
     expect(grid.x).toBe(gridX);
     expect(grid.y).toBe(gridY);
   });
