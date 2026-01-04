@@ -107,6 +107,15 @@ export function RailPlayer({ maze }: RailPlayerProps) {
       camera.position.y = MathUtils.lerp(camera.position.y, 1.4, 0.1);
     }
     
+    // Lock camera pitch to prevent looking outside tent
+    // Clamp vertical look to slight range (-15 to +10 degrees)
+    const maxPitchUp = -0.17; // ~10 degrees up
+    const maxPitchDown = 0.26; // ~15 degrees down
+    camera.rotation.x = Math.max(maxPitchUp, Math.min(maxPitchDown, camera.rotation.x));
+    
+    // Keep camera level on Z axis (no roll exploit)
+    camera.rotation.z = MathUtils.lerp(camera.rotation.z, 0, 0.2);
+    
     // Sanity-based camera effects
     const sanity = gameState.getSanityLevel();
     if (sanity < 50) {
@@ -114,8 +123,9 @@ export function RailPlayer({ maze }: RailPlayerProps) {
       camera.position.x += (Math.random() - 0.5) * shake;
       camera.position.z += (Math.random() - 0.5) * shake;
       
-      // Slight tilt at low sanity
-      camera.rotation.z = Math.sin(state.clock.elapsedTime * 2) * 0.03 * (1 - sanity / 50);
+      // Slight tilt at low sanity (within limits)
+      const tilt = Math.sin(state.clock.elapsedTime * 2) * 0.03 * (1 - sanity / 50);
+      camera.rotation.z = MathUtils.lerp(camera.rotation.z, tilt, 0.1);
     }
   });
   
