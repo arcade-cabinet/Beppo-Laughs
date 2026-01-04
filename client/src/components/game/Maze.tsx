@@ -22,8 +22,8 @@ export function Maze({ maze }: MazeProps) {
     sawdustTexture.repeat.set(12, 12);
   }, [canvasTexture, sawdustTexture]);
 
-  const WALL_HEIGHT = 4;
-  const CELL_SIZE = 3;
+  const WALL_HEIGHT = 3.5;
+  const CELL_SIZE = 5;
 
   const walls = useMemo(() => {
     const wallMeshes: React.ReactNode[] = [];

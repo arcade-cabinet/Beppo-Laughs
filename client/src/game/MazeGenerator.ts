@@ -178,7 +178,7 @@ export class MazeGenerator {
 
   // Build rail graph for tap-based navigation
   buildRailGraph() {
-    const CELL_SIZE = 3;
+    const CELL_SIZE = 5;
     const nodes = new Map<string, RailNode>();
     const edges: RailEdge[] = [];
 
