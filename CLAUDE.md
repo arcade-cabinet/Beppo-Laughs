@@ -95,18 +95,25 @@ pnpm run format    # Format code
 | `client/src/components/game/RailPlayer.tsx` | Player movement system |
 | `client/src/pages/Home.tsx` | Entry point with WebGL check |
 
-## Known Issues & TODOs
+## Design Decisions
 
-### Refactoring Needed
-- [ ] RailPlayer should use drei `MotionPathControls` instead of custom implementation
-- [ ] ClownCarCockpit camera attachment is hacky - research proper patterns
-- [ ] Horror effects could use drei post-processing instead of CSS filters
+### RailPlayer Implementation
+We evaluated `MotionPathControls` from drei but decided against it because:
+- MotionPathControls is designed for continuous predefined paths (bezier/catmull-rom curves)
+- Our maze uses discrete node-to-node navigation with dynamic path selection at forks
+- The current lerp-based approach is appropriate for grid-based maze navigation
+- Reference: https://drei.docs.pmnd.rs/controls/motion-path-controls
 
-### Best Practice Gaps
-- Research and adopt established r3f patterns from:
-  - https://drei.docs.pmnd.rs/
-  - https://github.com/pmndrs/react-three-fiber
-  - https://sbcode.net/react-three-fiber/
+### Post-Processing Effects
+Horror effects use `@react-three/postprocessing` (GPU-accelerated) instead of CSS filters:
+- Vignette, ChromaticAberration, Noise
+- Intensity scales with sanity (fear/despair)
+- See `HorrorEffects.tsx`
+
+### Best Practice Resources
+- https://drei.docs.pmnd.rs/
+- https://github.com/pmndrs/react-three-fiber
+- https://sbcode.net/react-three-fiber/
 
 ## Documentation
 

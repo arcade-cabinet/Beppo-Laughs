@@ -8,6 +8,7 @@ import { AudioManager } from './AudioManager';
 import { Collectibles } from './Collectibles';
 import { DriveControls } from './DriveControls';
 import { ForkPrompt } from './ForkPrompt';
+import { HorrorEffects } from './HorrorEffects';
 import { InteractionPrompt } from './InteractionPrompt';
 import { Maze } from './Maze';
 import { RailPlayer } from './RailPlayer';
@@ -62,7 +63,6 @@ export function Scene({ seed }: SceneProps) {
     null,
   );
   const { fear, despair, maxSanity, currentNode, blockades, isMoving } = useGameStore();
-  const sanityLevel = useGameStore((state) => state.getSanityLevel());
 
   useEffect(() => {
     if (!mazeData || !currentNode || isMoving) return;
@@ -150,12 +150,6 @@ export function Scene({ seed }: SceneProps) {
       <Canvas
         shadows
         camera={{ position: [0, 1.4, 0], fov: 70, near: 0.1, far: 100 }}
-        style={{
-          filter:
-            sanityLevel < 30
-              ? `saturate(${0.4 + sanityLevel / 50}) contrast(${1.1 + avgInsanity * 0.2}) sepia(${avgInsanity * 0.3})`
-              : `sepia(${avgInsanity * 0.15})`,
-        }}
       >
         <color attach="background" args={[bgColor]} />
         <fog attach="fog" args={[fogColor, fogNear, fogFar]} />
@@ -229,6 +223,9 @@ export function Scene({ seed }: SceneProps) {
           <RailPlayer geometry={geometry} />
           <Villains geometry={geometry} />
         </Suspense>
+
+        {/* GPU post-processing effects for horror atmosphere */}
+        <HorrorEffects />
       </Canvas>
 
       <DriveControls />
