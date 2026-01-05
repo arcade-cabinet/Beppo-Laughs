@@ -8,6 +8,7 @@ import { Villains } from './Villains';
 import { Collectibles } from './Collectibles';
 import { HintOverlay } from './HintOverlay';
 import { DriveControls } from './DriveControls';
+import { ForkPrompt } from './ForkPrompt';
 import { AudioManager } from './AudioManager';
 import { useGameStore } from '../../game/store';
 import { PointLight } from 'three';
@@ -243,6 +244,7 @@ export function Scene({ seed }: SceneProps) {
       </Canvas>
       
       <DriveControls />
+      <ForkPrompt />
     </>
   );
 }

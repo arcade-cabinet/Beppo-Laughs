@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Vector3, MathUtils } from 'three';
+import { MathUtils } from 'three';
 import { useGameStore } from '../../game/store';
 import { MazeGeometry, RailNode } from '../../game/maze/geometry';
 import { ClownCarCockpit } from './ClownCarCockpit';
@@ -16,7 +16,6 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
   const currentNodeRef = useRef<RailNode | null>(null);
   const targetNodeRef = useRef<RailNode | null>(null);
   const edgeProgress = useRef(0);
-  const selectedDirection = useRef(0);
   
   useEffect(() => {
     if (initialized.current) return;
@@ -40,12 +39,13 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
         useGameStore.getState().setCameraRotation(lookDir);
       }
       
-      updateAvailableMoves(centerNode);
+      checkForFork(centerNode);
       initialized.current = true;
     }
   }, [geometry, camera]);
   
-  const updateAvailableMoves = (node: RailNode) => {
+  const checkForFork = (node: RailNode) => {
+    const gameState = useGameStore.getState();
     const moves: { direction: 'north' | 'south' | 'east' | 'west'; nodeId: string; isExit: boolean }[] = [];
     
     for (const connId of node.connections) {
@@ -63,51 +63,47 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
       moves.push({ direction, nodeId: connNode.id, isExit: connNode.isExit });
     }
     
-    useGameStore.getState().setAvailableMoves(moves);
+    gameState.setAvailableMoves(moves);
+    
+    if (moves.length > 1) {
+      gameState.setPendingFork({ nodeId: node.id, options: moves });
+      gameState.setCarSpeed(0);
+    } else if (moves.length === 1) {
+      gameState.setPendingFork(null);
+      targetNodeRef.current = geometry.railNodes.get(moves[0].nodeId) || null;
+    } else {
+      gameState.setPendingFork(null);
+      targetNodeRef.current = null;
+    }
   };
   
   const getDirectionAngle = (from: RailNode, to: RailNode): number => {
     return Math.atan2(to.worldX - from.worldX, -(to.worldZ - from.worldZ));
   };
   
-  const pickNextTarget = (fromNode: RailNode, steeringAngle: number, currentRotation: number): RailNode | null => {
-    if (fromNode.connections.length === 0) return null;
-    
-    if (fromNode.connections.length === 1) {
-      return geometry.railNodes.get(fromNode.connections[0]) || null;
-    }
-    
-    let bestNode: RailNode | null = null;
-    let bestScore = -Infinity;
-    
-    for (const connId of fromNode.connections) {
-      const connNode = geometry.railNodes.get(connId);
-      if (!connNode) continue;
-      
-      const dirAngle = getDirectionAngle(fromNode, connNode);
-      let angleDiff = dirAngle - currentRotation;
-      while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
-      while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
-      
-      const forwardScore = 1 - Math.abs(angleDiff) / Math.PI;
-      const steeringMatch = -angleDiff * steeringAngle;
-      const score = forwardScore * 0.7 + steeringMatch * 0.3;
-      
-      if (score > bestScore) {
-        bestScore = score;
-        bestNode = connNode;
-      }
-    }
-    
-    return bestNode;
-  };
-  
   useFrame((state, delta) => {
     const gameState = useGameStore.getState();
-    const { carSpeed, steeringAngle, accelerating, braking, isGameOver, hasWon, cameraRotation } = gameState;
+    const { carSpeed, accelerating, braking, isGameOver, hasWon, pendingFork, targetNode } = gameState;
     
     if (isGameOver || hasWon) return;
     if (!currentNodeRef.current) return;
+    
+    if (pendingFork) {
+      camera.position.y = MathUtils.lerp(camera.position.y, 1.4, 0.1);
+      return;
+    }
+    
+    if (targetNode && !targetNodeRef.current) {
+      const newTarget = geometry.railNodes.get(targetNode);
+      if (newTarget) {
+        targetNodeRef.current = newTarget;
+        edgeProgress.current = 0;
+        
+        const targetRotation = getDirectionAngle(currentNodeRef.current, newTarget);
+        camera.rotation.y = MathUtils.lerp(camera.rotation.y, targetRotation, 0.3);
+        gameState.setCameraRotation(camera.rotation.y);
+      }
+    }
     
     let newSpeed = carSpeed;
     if (accelerating) {
@@ -117,66 +113,51 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
     } else {
       newSpeed = Math.max(0, carSpeed - delta * 1);
     }
-    
-    const dampedSteering = MathUtils.lerp(steeringAngle, 0, delta * 2);
-    gameState.setSteeringAngle(dampedSteering);
     gameState.setCarSpeed(newSpeed);
     
-    if (newSpeed > 0.05) {
-      if (!targetNodeRef.current) {
-        const nextTarget = pickNextTarget(currentNodeRef.current, steeringAngle, cameraRotation);
-        if (nextTarget) {
-          targetNodeRef.current = nextTarget;
-          edgeProgress.current = 0;
+    if (newSpeed > 0.05 && targetNodeRef.current && currentNodeRef.current) {
+      const fromNode = currentNodeRef.current;
+      const toNode = targetNodeRef.current;
+      
+      const dx = toNode.worldX - fromNode.worldX;
+      const dz = toNode.worldZ - fromNode.worldZ;
+      const edgeLength = Math.sqrt(dx * dx + dz * dz);
+      
+      const progressDelta = (newSpeed * delta) / edgeLength;
+      edgeProgress.current += progressDelta;
+      
+      if (edgeProgress.current >= 1) {
+        camera.position.x = toNode.worldX;
+        camera.position.z = toNode.worldZ;
+        
+        edgeProgress.current = 0;
+        currentNodeRef.current = toNode;
+        targetNodeRef.current = null;
+        
+        gameState.visitNode(toNode.id);
+        gameState.setCurrentNode(toNode.id);
+        gameState.setTargetNode(null);
+        
+        if (toNode.isExit) {
+          gameState.triggerWin();
+          return;
         }
+        
+        checkForFork(toNode);
+      } else {
+        const t = edgeProgress.current;
+        camera.position.x = fromNode.worldX + dx * t;
+        camera.position.z = fromNode.worldZ + dz * t;
       }
       
       if (targetNodeRef.current && currentNodeRef.current) {
-        const fromNode = currentNodeRef.current;
-        const toNode = targetNodeRef.current;
-        
-        const dx = toNode.worldX - fromNode.worldX;
-        const dz = toNode.worldZ - fromNode.worldZ;
-        const edgeLength = Math.sqrt(dx * dx + dz * dz);
-        
-        const progressDelta = (newSpeed * delta) / edgeLength;
-        edgeProgress.current += progressDelta;
-        
-        if (edgeProgress.current >= 1) {
-          camera.position.x = toNode.worldX;
-          camera.position.z = toNode.worldZ;
-          
-          edgeProgress.current = 0;
-          currentNodeRef.current = toNode;
-          
-          gameState.visitNode(toNode.id);
-          gameState.setCurrentNode(toNode.id);
-          updateAvailableMoves(toNode);
-          
-          if (toNode.isExit) {
-            gameState.triggerWin();
-            return;
-          }
-          
-          const nextTarget = pickNextTarget(toNode, steeringAngle, camera.rotation.y);
-          targetNodeRef.current = nextTarget;
-        } else {
-          const t = edgeProgress.current;
-          const posX = fromNode.worldX + dx * t;
-          const posZ = fromNode.worldZ + dz * t;
-          camera.position.x = posX;
-          camera.position.z = posZ;
-        }
-        
-        if (targetNodeRef.current && currentNodeRef.current) {
-          const targetRotation = getDirectionAngle(currentNodeRef.current, targetNodeRef.current);
-          camera.rotation.y = MathUtils.lerp(camera.rotation.y, targetRotation, delta * 5);
-          gameState.setCameraRotation(camera.rotation.y);
-        }
-        
-        const bobAmount = Math.sin(state.clock.elapsedTime * 8 * (newSpeed / 3)) * 0.03 * (newSpeed / 3);
-        camera.position.y = 1.4 + bobAmount;
+        const targetRotation = getDirectionAngle(currentNodeRef.current, targetNodeRef.current);
+        camera.rotation.y = MathUtils.lerp(camera.rotation.y, targetRotation, delta * 5);
+        gameState.setCameraRotation(camera.rotation.y);
       }
+      
+      const bobAmount = Math.sin(state.clock.elapsedTime * 8 * (newSpeed / 3)) * 0.03 * (newSpeed / 3);
+      camera.position.y = 1.4 + bobAmount;
     } else {
       camera.position.y = MathUtils.lerp(camera.position.y, 1.4, 0.1);
     }

@@ -1,23 +1,20 @@
-import { useCallback, useRef, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useGameStore } from '../../game/store';
 
 export function DriveControls() {
   const { 
     setAccelerating, 
     setBraking, 
-    setSteeringAngle,
+    carSpeed,
+    pendingFork,
     isGameOver,
     hasWon 
   } = useGameStore();
   
-  const steeringRef = useRef<HTMLDivElement>(null);
-  const isDraggingWheel = useRef(false);
-  const wheelCenterX = useRef(0);
-  
   const handleAcceleratorStart = useCallback(() => {
-    if (isGameOver || hasWon) return;
+    if (isGameOver || hasWon || pendingFork) return;
     setAccelerating(true);
-  }, [setAccelerating, isGameOver, hasWon]);
+  }, [setAccelerating, isGameOver, hasWon, pendingFork]);
   
   const handleAcceleratorEnd = useCallback(() => {
     setAccelerating(false);
@@ -32,142 +29,116 @@ export function DriveControls() {
     setBraking(false);
   }, [setBraking]);
   
-  const handleSteeringStart = useCallback((e: React.TouchEvent | React.MouseEvent) => {
-    if (isGameOver || hasWon) return;
-    isDraggingWheel.current = true;
-    
-    if (steeringRef.current) {
-      const rect = steeringRef.current.getBoundingClientRect();
-      wheelCenterX.current = rect.left + rect.width / 2;
-    }
-  }, [isGameOver, hasWon]);
-  
-  const handleSteeringMove = useCallback((clientX: number) => {
-    if (!isDraggingWheel.current) return;
-    
-    const offset = clientX - wheelCenterX.current;
-    const maxOffset = 100;
-    const normalizedSteering = Math.max(-1, Math.min(1, offset / maxOffset));
-    
-    setSteeringAngle(normalizedSteering);
-  }, [setSteeringAngle]);
-  
-  const handleSteeringEnd = useCallback(() => {
-    isDraggingWheel.current = false;
-    setSteeringAngle(0);
-  }, [setSteeringAngle]);
-  
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      handleSteeringMove(e.clientX);
-    };
-    
-    const handleTouchMove = (e: TouchEvent) => {
-      if (e.touches.length > 0) {
-        handleSteeringMove(e.touches[0].clientX);
-      }
-    };
-    
-    const handleEnd = () => {
-      if (isDraggingWheel.current) {
-        handleSteeringEnd();
-      }
-    };
-    
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleEnd);
-    window.addEventListener('touchmove', handleTouchMove);
-    window.addEventListener('touchend', handleEnd);
-    
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleEnd);
-      window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('touchend', handleEnd);
-    };
-  }, [handleSteeringMove, handleSteeringEnd]);
-  
   if (isGameOver || hasWon) return null;
+  
+  const speedPercent = Math.abs(carSpeed) / 5 * 100;
   
   return (
     <div className="absolute inset-0 pointer-events-none z-30">
-      {/* Brake Pedal (Left) */}
+      {/* Brake Pedal (Left) - Clown Shoe Style */}
       <button
         data-testid="button-brake"
-        className="pointer-events-auto absolute left-4 bottom-8 w-20 h-32 rounded-lg 
-                   bg-gradient-to-b from-red-600 to-red-800 border-4 border-red-900
-                   active:from-red-700 active:to-red-900 active:scale-95
-                   shadow-lg transition-transform touch-none select-none"
+        className="pointer-events-auto absolute left-4 bottom-8 w-28 h-40 
+                   flex flex-col items-center justify-end pb-4
+                   touch-none select-none transition-transform
+                   active:scale-95"
         onMouseDown={handleBrakeStart}
         onMouseUp={handleBrakeEnd}
         onMouseLeave={handleBrakeEnd}
         onTouchStart={handleBrakeStart}
         onTouchEnd={handleBrakeEnd}
+        style={{
+          background: 'linear-gradient(135deg, #cc2200 0%, #8b0000 50%, #660000 100%)',
+          borderRadius: '20px 20px 40px 40px',
+          border: '4px solid #4a0000',
+          boxShadow: '0 8px 20px rgba(0,0,0,0.5), inset 0 -5px 15px rgba(0,0,0,0.3)',
+        }}
       >
-        <div className="text-white font-bold text-sm text-center mt-2">BRAKE</div>
-        <div className="text-6xl text-center mt-2">🛑</div>
+        <div className="text-white font-bold text-lg tracking-wider drop-shadow-lg">
+          BRAKE
+        </div>
+        <div className="text-5xl mt-2" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}>
+          🛑
+        </div>
+        {/* Shoe toe bulge */}
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-20 h-8 rounded-b-full"
+             style={{ background: 'linear-gradient(to bottom, #8b0000, #660000)' }} />
       </button>
       
-      {/* Accelerator Pedal (Right) */}
+      {/* Accelerator Pedal (Right) - Clown Shoe Style */}
       <button
         data-testid="button-accelerate"
-        className="pointer-events-auto absolute right-4 bottom-8 w-20 h-32 rounded-lg 
-                   bg-gradient-to-b from-green-500 to-green-700 border-4 border-green-900
-                   active:from-green-600 active:to-green-800 active:scale-95
-                   shadow-lg transition-transform touch-none select-none"
+        disabled={!!pendingFork}
+        className={`pointer-events-auto absolute right-4 bottom-8 w-28 h-40 
+                   flex flex-col items-center justify-end pb-4
+                   touch-none select-none transition-transform
+                   ${pendingFork ? 'opacity-50 cursor-not-allowed' : 'active:scale-95'}`}
         onMouseDown={handleAcceleratorStart}
         onMouseUp={handleAcceleratorEnd}
         onMouseLeave={handleAcceleratorEnd}
         onTouchStart={handleAcceleratorStart}
         onTouchEnd={handleAcceleratorEnd}
+        style={{
+          background: pendingFork 
+            ? 'linear-gradient(135deg, #666 0%, #444 50%, #333 100%)'
+            : 'linear-gradient(135deg, #22cc22 0%, #008800 50%, #006600 100%)',
+          borderRadius: '20px 20px 40px 40px',
+          border: `4px solid ${pendingFork ? '#222' : '#004400'}`,
+          boxShadow: '0 8px 20px rgba(0,0,0,0.5), inset 0 -5px 15px rgba(0,0,0,0.3)',
+        }}
       >
-        <div className="text-white font-bold text-sm text-center mt-2">GAS</div>
-        <div className="text-6xl text-center mt-2">⚡</div>
+        <div className="text-white font-bold text-lg tracking-wider drop-shadow-lg">
+          GAS
+        </div>
+        <div className="text-5xl mt-2" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}>
+          ⚡
+        </div>
+        {/* Shoe toe bulge */}
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-20 h-8 rounded-b-full"
+             style={{ background: pendingFork ? '#333' : 'linear-gradient(to bottom, #008800, #006600)' }} />
       </button>
       
-      {/* Steering Wheel Control (Bottom Center) */}
-      <div
-        ref={steeringRef}
-        data-testid="control-steering"
-        className="pointer-events-auto absolute bottom-8 left-1/2 -translate-x-1/2 
-                   w-40 h-20 rounded-full bg-amber-900/80 border-4 border-amber-700
-                   flex items-center justify-center cursor-grab active:cursor-grabbing
-                   touch-none select-none"
-        onMouseDown={handleSteeringStart}
-        onTouchStart={handleSteeringStart}
-      >
-        <div className="text-amber-200 font-bold text-center">
-          <div className="text-xs">← STEER →</div>
-          <div className="text-2xl">🎡</div>
+      {/* Speed Indicator - Speedometer Style */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
+        <div className="relative w-36 h-20 rounded-t-full overflow-hidden"
+             style={{
+               background: 'linear-gradient(180deg, #1a1510 0%, #2a2520 100%)',
+               border: '3px solid #8b4513',
+               boxShadow: '0 4px 15px rgba(0,0,0,0.5), inset 0 2px 10px rgba(0,0,0,0.3)',
+             }}>
+          {/* Speed arc background */}
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-28 h-14 rounded-t-full"
+               style={{ background: 'linear-gradient(to right, #004400, #888800, #880000)' }} />
+          
+          {/* Speed needle */}
+          <div 
+            className="absolute bottom-1 left-1/2 w-1 h-12 origin-bottom transition-transform duration-100"
+            style={{ 
+              background: 'linear-gradient(to top, #ff4400, #ffcc00)',
+              transform: `translateX(-50%) rotate(${-90 + speedPercent * 1.8}deg)`,
+              boxShadow: '0 0 10px #ff4400',
+            }}
+          />
+          
+          {/* Center hub */}
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full"
+               style={{ background: '#ffcc00', boxShadow: '0 0 8px #ffcc00' }} />
+          
+          {/* SPEED label */}
+          <div className="absolute top-2 left-1/2 -translate-x-1/2 text-amber-400 text-xs font-bold">
+            SPEED
+          </div>
         </div>
-        
-        {/* Left arrow indicator */}
-        <div className="absolute left-2 text-2xl text-amber-300">◀</div>
-        
-        {/* Right arrow indicator */}
-        <div className="absolute right-2 text-2xl text-amber-300">▶</div>
       </div>
       
-      {/* Speed indicator */}
-      <SpeedIndicator />
-    </div>
-  );
-}
-
-function SpeedIndicator() {
-  const { carSpeed } = useGameStore();
-  
-  const speedPercent = Math.abs(carSpeed) / 5 * 100;
-  
-  return (
-    <div className="absolute bottom-44 left-1/2 -translate-x-1/2 text-center">
-      <div className="text-amber-400 font-mono text-sm mb-1">SPEED</div>
-      <div className="w-32 h-3 bg-gray-800 rounded-full overflow-hidden border border-amber-600">
-        <div 
-          className="h-full bg-gradient-to-r from-green-500 via-yellow-500 to-red-500 transition-all duration-100"
-          style={{ width: `${speedPercent}%` }}
-        />
-      </div>
+      {/* Instruction when at fork */}
+      {pendingFork && (
+        <div className="absolute bottom-52 left-1/2 -translate-x-1/2 text-center">
+          <div className="text-amber-400 text-sm font-bold animate-pulse">
+            Choose a direction first!
+          </div>
+        </div>
+      )}
     </div>
   );
 }

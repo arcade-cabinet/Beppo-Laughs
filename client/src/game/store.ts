@@ -44,9 +44,14 @@ interface GameState {
   
   // Clown Car Driving State
   carSpeed: number;           // Current speed (0-5)
-  steeringAngle: number;      // -1 (left) to 1 (right)
   accelerating: boolean;      // Is accelerator pressed
   braking: boolean;           // Is brake pressed
+  
+  // Fork Choice State (when at junction with multiple paths)
+  pendingFork: {
+    nodeId: string;
+    options: { direction: 'north' | 'south' | 'east' | 'west'; nodeId: string; isExit: boolean }[];
+  } | null;
   
   // Actions
   setSeed: (seed: string) => void;
@@ -64,6 +69,7 @@ interface GameState {
   
   // Rail Navigation Actions
   setCurrentNode: (nodeId: string) => void;
+  setTargetNode: (nodeId: string | null) => void;
   startMoveTo: (targetNodeId: string, speed?: number) => void;
   updateMoveProgress: (progress: number) => void;
   completeMove: () => void;
@@ -77,9 +83,12 @@ interface GameState {
   // Clown Car Driving Actions
   setAccelerating: (value: boolean) => void;
   setBraking: (value: boolean) => void;
-  setSteeringAngle: (angle: number) => void;
   setCarSpeed: (speed: number) => void;
   updateDriving: (delta: number) => void;
+  
+  // Fork Choice Actions
+  setPendingFork: (fork: { nodeId: string; options: { direction: 'north' | 'south' | 'east' | 'west'; nodeId: string; isExit: boolean }[] } | null) => void;
+  selectForkDirection: (nodeId: string) => void;
   
   // Computed
   getSanityLevel: () => number;
@@ -118,9 +127,11 @@ export const useGameStore = create<GameState>((set, get) => ({
   
   // Clown car driving
   carSpeed: 0,
-  steeringAngle: 0,
   accelerating: false,
   braking: false,
+  
+  // Fork choice
+  pendingFork: null,
   
   setSeed: (seed) => set({ seed }),
   
@@ -238,13 +249,14 @@ export const useGameStore = create<GameState>((set, get) => ({
     availableMoves: [],
     hintActive: false,
     carSpeed: 0,
-    steeringAngle: 0,
     accelerating: false,
     braking: false,
+    pendingFork: null,
   }),
   
   // Rail Navigation Actions
   setCurrentNode: (nodeId) => set({ currentNode: nodeId }),
+  setTargetNode: (nodeId) => set({ targetNode: nodeId }),
   
   startMoveTo: (targetNodeId, speed = 1) => {
     const state = get();
@@ -304,7 +316,12 @@ export const useGameStore = create<GameState>((set, get) => ({
   // Clown car driving actions
   setAccelerating: (value) => set({ accelerating: value }),
   setBraking: (value) => set({ braking: value }),
-  setSteeringAngle: (angle) => set({ steeringAngle: Math.max(-1, Math.min(1, angle)) }),
+  setPendingFork: (fork) => set({ pendingFork: fork }),
+  
+  selectForkDirection: (targetNodeId) => set({ 
+    pendingFork: null,
+    targetNode: targetNodeId 
+  }),
   setCarSpeed: (speed) => set({ carSpeed: Math.max(0, Math.min(5, speed)) }),
   
   updateDriving: (delta) => {
