@@ -7,11 +7,6 @@ interface MainMenuProps {
   onStart: (seed: string) => void;
 }
 
-const SEED_WORDS = ['dark', 'blood', 'shadow', 'maze', 'fear', 'run', 'hide', 'scream', 'whisper', 'death', 'green', 'hedge'];
-const SEED_PATTERN = /^[a-zA-Z]+(?:\s+[a-zA-Z]+){2}$/;
-
-export function MainMenu({ onStart }: MainMenuProps) {
-  const [seedInput, setSeedInput] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
   const normalizedSeed = useCallback(
@@ -25,8 +20,8 @@ export function MainMenu({ onStart }: MainMenuProps) {
   );
 
   const generateRandomSeed = useCallback(() => {
-    const shuffled = [...SEED_WORDS].sort(() => 0.5 - Math.random());
-    const generated = shuffled.slice(0, 3).join(' ');
+    const shuffled = [...SEED_WORDS].sort(() => Math.random() - 0.5);
+    const generated = `${shuffled[0]} ${shuffled[1]} ${shuffled[2]}`;
     setSeedInput(generated);
     setErrorMessage('');
   }, []);
