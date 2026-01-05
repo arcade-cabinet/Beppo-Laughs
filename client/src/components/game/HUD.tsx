@@ -3,6 +3,51 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { useGameStore } from '../../game/store';
 
+type MeterPanelProps = {
+  label: string;
+  percent: number;
+  color: string;
+  side: 'left' | 'right';
+};
+
+function DashMeterPanel({ label, percent, color, side }: MeterPanelProps) {
+  const clamped = Math.max(0, Math.min(100, Math.round(percent)));
+  const isLeft = side === 'left';
+
+  return (
+    <div
+      aria-hidden
+      className={`hud-dash-panel ${
+        isLeft ? 'hud-dash-panel--left' : 'hud-dash-panel--right'
+      } pointer-events-none select-none`}
+    >
+      <div className="hud-dash-hood" />
+      <div className="hud-dash-window">
+        <div className="hud-dash-label-row">
+          <span className="hud-dash-label">{label}</span>
+          <span className="hud-dash-value">{clamped}%</span>
+        </div>
+        <div className="hud-dash-meter-track">
+          <div
+            className="hud-dash-meter-fill"
+            style={{
+              width: `${clamped}%`,
+              background: `linear-gradient(90deg, ${color}, ${
+                isLeft ? '#ffcfb0' : '#c5ddff'
+              })`,
+              boxShadow: `0 0 22px ${color}66, 0 0 8px ${color}99`
+            }}
+          />
+          <div className="hud-dash-meter-grid" />
+        </div>
+        <div className="hud-dash-readout">
+          {isLeft ? 'FRONT HOOD — LEFT' : 'FRONT HOOD — RIGHT'}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function HintButton() {
   const { hintActive, toggleHint, isGameOver, hasWon } = useGameStore();
 
@@ -29,7 +74,9 @@ export function HUD() {
   const sanityLevel = useGameStore((state) => state.getSanityLevel());
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoEnded, setVideoEnded] = useState(false);
-
+  const fearPercent = (fear / maxSanity) * 100;
+  const despairPercent = (despair / maxSanity) * 100;
+  
   const avgInsanity = (fear + despair) / 2 / maxSanity;
   const redOverlayOpacity = Math.min(fear / 300, 0.2);
   const blueOverlayOpacity = Math.min(despair / 300, 0.2);
@@ -47,6 +94,12 @@ export function HUD() {
 
   return (
     <div className="pointer-events-none absolute inset-0 z-40">
+      {/* Clown car console view anchored to the corners */}
+      <div className="hud-cockpit-row">
+        <DashMeterPanel label="FEAR" percent={fearPercent} color="#ff2d2d" side="left" />
+        <DashMeterPanel label="DESPAIR" percent={despairPercent} color="#3b82f6" side="right" />
+      </div>
+
       {/* Vignette - intensifies with combined insanity */}
       <div
         className="absolute inset-0 transition-all duration-500"
