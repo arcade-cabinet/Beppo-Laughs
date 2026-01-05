@@ -53,6 +53,12 @@ interface GameState {
     options: { direction: 'north' | 'south' | 'east' | 'west'; nodeId: string; isExit: boolean }[];
   } | null;
   
+  // Interaction State (for collectibles and exits)
+  nearbyItem: { id: string; name: string; nodeId: string } | null;
+  nearbyExit: { nodeId: string } | null;
+  showCollectedPopup: { name: string; timestamp: number } | null;
+  itemInventory: number;  // Count of collected items
+  
   // Actions
   setSeed: (seed: string) => void;
   visitNode: (nodeId: string) => void;
@@ -89,6 +95,13 @@ interface GameState {
   // Fork Choice Actions
   setPendingFork: (fork: { nodeId: string; options: { direction: 'north' | 'south' | 'east' | 'west'; nodeId: string; isExit: boolean }[] } | null) => void;
   selectForkDirection: (nodeId: string) => void;
+  
+  // Interaction Actions
+  setNearbyItem: (item: { id: string; name: string; nodeId: string } | null) => void;
+  setNearbyExit: (exit: { nodeId: string } | null) => void;
+  collectNearbyItem: () => void;
+  triggerExitInteraction: () => void;
+  clearCollectedPopup: () => void;
   
   // Computed
   getSanityLevel: () => number;
@@ -132,6 +145,12 @@ export const useGameStore = create<GameState>((set, get) => ({
   
   // Fork choice
   pendingFork: null,
+  
+  // Interaction state
+  nearbyItem: null,
+  nearbyExit: null,
+  showCollectedPopup: null,
+  itemInventory: 0,
   
   setSeed: (seed) => set({ seed }),
   
@@ -252,6 +271,10 @@ export const useGameStore = create<GameState>((set, get) => ({
     accelerating: false,
     braking: false,
     pendingFork: null,
+    nearbyItem: null,
+    nearbyExit: null,
+    showCollectedPopup: null,
+    itemInventory: 0,
   }),
   
   // Rail Navigation Actions
@@ -340,6 +363,55 @@ export const useGameStore = create<GameState>((set, get) => ({
     
     set({ carSpeed: newSpeed });
   },
+  
+  // Interaction Actions
+  setNearbyItem: (item) => set({ nearbyItem: item }),
+  setNearbyExit: (exit) => set({ nearbyExit: exit }),
+  
+  collectNearbyItem: () => {
+    const state = get();
+    if (!state.nearbyItem) return;
+    
+    const itemName = state.nearbyItem.name;
+    const itemId = state.nearbyItem.id;
+    
+    // Add to collected items
+    const newItems = new Set(state.collectedItems);
+    newItems.add(itemId);
+    
+    // Remove a blockade if any exist
+    const blockadeArray = Array.from(state.blockades);
+    let newBlockades = state.blockades;
+    if (blockadeArray.length > 0) {
+      newBlockades = new Set(state.blockades);
+      const randomBlockade = blockadeArray[Math.floor(Math.random() * blockadeArray.length)];
+      newBlockades.delete(randomBlockade);
+    }
+    
+    set({
+      collectedItems: newItems,
+      blockades: newBlockades,
+      nearbyItem: null,
+      showCollectedPopup: { name: itemName, timestamp: Date.now() },
+      itemInventory: state.itemInventory + 1,
+      fear: Math.max(state.fear - 5, 0),
+      despair: Math.max(state.despair - 5, 0)
+    });
+    
+    // Haptic feedback
+    if (navigator.vibrate) {
+      navigator.vibrate([50, 30, 50, 30, 100]);
+    }
+  },
+  
+  triggerExitInteraction: () => {
+    const state = get();
+    if (state.nearbyExit) {
+      set({ hasWon: true });
+    }
+  },
+  
+  clearCollectedPopup: () => set({ showCollectedPopup: null }),
   
   getSanityLevel: () => {
     const state = get();

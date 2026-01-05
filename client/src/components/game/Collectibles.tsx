@@ -1,7 +1,7 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useTexture, Billboard, Text } from '@react-three/drei';
-import { Group, MathUtils } from 'three';
+import { Group } from 'three';
 import { MazeGeometry, DEFAULT_CONFIG } from '../../game/maze/geometry';
 import { useGameStore } from '../../game/store';
 import ticketUrl from '@assets/generated_images/paper_mache_circus_ticket_item.png';
@@ -20,48 +20,49 @@ interface CollectibleItem {
   worldZ: number;
   nodeId: string;
   textureIndex: number;
+  name: string;
 }
 
-function Collectible({ item, onCollect }: { item: CollectibleItem, onCollect: (id: string) => void }) {
+function Collectible({ item }: { item: CollectibleItem }) {
   const texture = useTexture(ITEM_TEXTURES[item.textureIndex]);
   const groupRef = useRef<Group>(null);
-  const [collected, setCollected] = useState(false);
-  const scaleRef = useRef(0.8);
-  const collectAnimRef = useRef(0);
-  const { blockades, currentNode } = useGameStore();
+  const { blockades, currentNode, collectedItems, setNearbyItem, nearbyItem } = useGameStore();
   
   const hasBlockades = blockades.size > 0;
+  const isCollected = collectedItems.has(item.id);
+  
+  useEffect(() => {
+    if (isCollected && nearbyItem?.id === item.id) {
+      setNearbyItem(null);
+    }
+  }, [isCollected, nearbyItem, item.id, setNearbyItem]);
   
   useFrame((state) => {
-    if (!groupRef.current) return;
+    if (!groupRef.current || isCollected) return;
     
-    if (collected) {
-      collectAnimRef.current += 0.1;
-      scaleRef.current = MathUtils.lerp(scaleRef.current, 0, 0.2);
-      groupRef.current.position.y += 0.1;
-      groupRef.current.rotation.y += 0.3;
-      groupRef.current.scale.setScalar(scaleRef.current);
-      return;
-    }
+    const gameState = useGameStore.getState();
     
-    if (currentNode === item.nodeId) {
-      setCollected(true);
-      onCollect(item.id);
-      
-      if (navigator.vibrate) {
-        navigator.vibrate([50, 30, 50, 30, 100]);
+    if (gameState.currentNode === item.nodeId && !gameState.collectedItems.has(item.id)) {
+      if (!gameState.nearbyItem || gameState.nearbyItem.id !== item.id) {
+        setNearbyItem({ id: item.id, name: item.name, nodeId: item.nodeId });
       }
+    } else if (gameState.nearbyItem?.id === item.id && gameState.currentNode !== item.nodeId) {
+      setNearbyItem(null);
     }
     
     groupRef.current.position.y = 0.8 + Math.sin(state.clock.elapsedTime * 2 + item.worldX) * 0.15;
     groupRef.current.rotation.y = state.clock.elapsedTime * 0.5;
     
-    const pulseIntensity = hasBlockades ? 0.2 : 0.1;
-    const pulse = 0.8 + Math.sin(state.clock.elapsedTime * 3) * pulseIntensity;
+    const isNearby = gameState.nearbyItem?.id === item.id;
+    const pulseIntensity = isNearby ? 0.3 : (hasBlockades ? 0.2 : 0.1);
+    const baseScale = isNearby ? 1.0 : 0.8;
+    const pulse = baseScale + Math.sin(state.clock.elapsedTime * (isNearby ? 5 : 3)) * pulseIntensity;
     groupRef.current.scale.setScalar(pulse);
   });
   
-  if (collected && collectAnimRef.current > 2) return null;
+  if (isCollected) return null;
+  
+  const isNearby = nearbyItem?.id === item.id;
   
   return (
     <group ref={groupRef} position={[item.worldX, 0.8, item.worldZ]}>
@@ -73,14 +74,18 @@ function Collectible({ item, onCollect }: { item: CollectibleItem, onCollect: (i
               map={texture} 
               transparent 
               alphaTest={0.5}
-              emissive={hasBlockades ? "#ffcc00" : "#ffaa00"}
-              emissiveIntensity={hasBlockades ? 0.5 : 0.3}
+              emissive={isNearby ? "#ffff00" : (hasBlockades ? "#ffcc00" : "#ffaa00")}
+              emissiveIntensity={isNearby ? 0.8 : (hasBlockades ? 0.5 : 0.3)}
             />
           </mesh>
           
           <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
             <ringGeometry args={[0.35, 0.45, 16]} />
-            <meshBasicMaterial color="#ffcc00" transparent opacity={hasBlockades ? 0.5 : 0.3} />
+            <meshBasicMaterial 
+              color={isNearby ? "#ffff00" : "#ffcc00"} 
+              transparent 
+              opacity={isNearby ? 0.8 : (hasBlockades ? 0.5 : 0.3)} 
+            />
           </mesh>
         </group>
       </Billboard>
@@ -88,13 +93,24 @@ function Collectible({ item, onCollect }: { item: CollectibleItem, onCollect: (i
       <Text
         position={[0, 0.9, 0]}
         fontSize={0.15}
-        color="#ffcc00"
+        color={isNearby ? "#ffff00" : "#ffcc00"}
         anchorX="center"
       >
-        {ITEM_NAMES[item.textureIndex]}
+        {item.name}
       </Text>
       
-      {hasBlockades && (
+      {isNearby && (
+        <Text
+          position={[0, 0.6, 0]}
+          fontSize={0.12}
+          color="#ffffff"
+          anchorX="center"
+        >
+          TAP TO COLLECT
+        </Text>
+      )}
+      
+      {hasBlockades && !isNearby && (
         <Text
           position={[0, 0.6, 0]}
           fontSize={0.1}
@@ -109,7 +125,7 @@ function Collectible({ item, onCollect }: { item: CollectibleItem, onCollect: (i
 }
 
 export function Collectibles({ geometry }: CollectiblesProps) {
-  const { collectItem, collectedItems, removeBlockade, blockades } = useGameStore();
+  const { collectedItems } = useGameStore();
   
   const items = useMemo(() => {
     const generated: CollectibleItem[] = [];
@@ -132,12 +148,14 @@ export function Collectibles({ geometry }: CollectiblesProps) {
       } while (selectedNode && (avoidNodes.has(selectedNode.id) || generated.some(it => it.nodeId === selectedNode!.id)) && attempts < 50);
       
       if (attempts < 50 && selectedNode) {
+        const textureIndex = Math.floor(Math.random() * ITEM_TEXTURES.length);
         generated.push({
           id: `item-${selectedNode.id}`,
           worldX: selectedNode.worldX,
           worldZ: selectedNode.worldZ,
           nodeId: selectedNode.id,
-          textureIndex: Math.floor(Math.random() * ITEM_TEXTURES.length)
+          textureIndex,
+          name: ITEM_NAMES[textureIndex]
         });
       }
     }
@@ -145,26 +163,12 @@ export function Collectibles({ geometry }: CollectiblesProps) {
     return generated;
   }, [geometry]);
   
-  const handleCollect = (id: string) => {
-    collectItem(id);
-    
-    const blockadeArray = Array.from(blockades);
-    if (blockadeArray.length > 0) {
-      const randomBlockade = blockadeArray[Math.floor(Math.random() * blockadeArray.length)];
-      removeBlockade(randomBlockade);
-    }
-  };
-  
   return (
     <group>
       {items
         .filter(item => !collectedItems.has(item.id))
         .map(item => (
-          <Collectible 
-            key={item.id} 
-            item={item} 
-            onCollect={handleCollect}
-          />
+          <Collectible key={item.id} item={item} />
         ))
       }
     </group>

@@ -65,6 +65,13 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
     
     gameState.setAvailableMoves(moves);
     
+    if (node.isExit) {
+      gameState.setPendingFork(null);
+      gameState.setCarSpeed(0);
+      targetNodeRef.current = null;
+      return;
+    }
+    
     if (moves.length > 1) {
       gameState.setPendingFork({ nodeId: node.id, options: moves });
       gameState.setCarSpeed(0);
@@ -83,12 +90,17 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
   
   useFrame((state, delta) => {
     const gameState = useGameStore.getState();
-    const { carSpeed, accelerating, braking, isGameOver, hasWon, pendingFork, targetNode } = gameState;
+    const { carSpeed, accelerating, braking, isGameOver, hasWon, pendingFork, targetNode, nearbyExit } = gameState;
     
     if (isGameOver || hasWon) return;
     if (!currentNodeRef.current) return;
     
     if (pendingFork) {
+      camera.position.y = MathUtils.lerp(camera.position.y, 1.4, 0.1);
+      return;
+    }
+    
+    if (nearbyExit) {
       camera.position.y = MathUtils.lerp(camera.position.y, 1.4, 0.1);
       return;
     }
@@ -139,8 +151,9 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
         gameState.setTargetNode(null);
         
         if (toNode.isExit) {
-          gameState.triggerWin();
-          return;
+          gameState.setNearbyExit({ nodeId: toNode.id });
+        } else {
+          gameState.setNearbyExit(null);
         }
         
         checkForFork(toNode);
