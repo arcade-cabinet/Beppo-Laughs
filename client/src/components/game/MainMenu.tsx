@@ -1,5 +1,5 @@
+import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -7,31 +7,48 @@ interface MainMenuProps {
   onStart: (seed: string) => void;
 }
 
+const SEED_WORDS = ['dark', 'blood', 'shadow', 'maze', 'fear', 'run', 'hide', 'scream', 'whisper', 'death', 'green', 'hedge'];
+const SEED_PATTERN = /^[a-zA-Z]+(?:\s+[a-zA-Z]+){2}$/;
+
 export function MainMenu({ onStart }: MainMenuProps) {
   const [seedInput, setSeedInput] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
-  // Generate random 3-word seed
-  const generateRandomSeed = () => {
-    const words = [
-      'dark',
-      'blood',
-      'shadow',
-      'maze',
-      'fear',
-      'run',
-      'hide',
-      'scream',
-      'whisper',
-      'death',
-      'green',
-      'hedge',
-    ];
-    const r = () => words[Math.floor(Math.random() * words.length)];
-    setSeedInput(`${r()} ${r()} ${r()}`);
+  const normalizedSeed = useCallback(
+    (value: string) => value.trim().replace(/\s+/g, ' ').toLowerCase(),
+    []
+  );
+
+  const isValidSeed = useCallback(
+    (value: string) => SEED_PATTERN.test(normalizedSeed(value)),
+    [normalizedSeed]
+  );
+
+  const generateRandomSeed = useCallback(() => {
+    const r = () => SEED_WORDS[Math.floor(Math.random() * SEED_WORDS.length)];
+    const generated = `${r()} ${r()} ${r()}`;
+    setSeedInput(generated);
+    setErrorMessage('');
+  }, []);
+
+  useEffect(() => {
+    generateRandomSeed();
+  }, [generateRandomSeed]);
+
+  const handleSeedChange = (value: string) => {
+    setSeedInput(value);
+    if (errorMessage && isValidSeed(value)) {
+      setErrorMessage('');
+    }
   };
 
   const handleStart = () => {
-    const seed = seedInput.trim() || 'beppo laughs';
+    if (!isValidSeed(seedInput)) {
+      setErrorMessage('Enter a three-word seed (e.g., "shadow maze whisper").');
+      return;
+    }
+
+    const seed = normalizedSeed(seedInput);
     onStart(seed);
   };
 
@@ -52,14 +69,19 @@ export function MainMenu({ onStart }: MainMenuProps) {
 
         <div className="space-y-4 pt-8">
           <div className="relative">
-            <Input
-              type="text"
-              placeholder="Enter Seed Words..."
+            <Input 
+              type="text" 
+              placeholder="Enter three seed words..." 
               value={seedInput}
-              onChange={(e) => setSeedInput(e.target.value)}
+              onChange={(e) => handleSeedChange(e.target.value)}
               className="bg-card/50 border-primary/30 text-center font-mono text-lg h-12"
               data-testid="input-seed"
             />
+            {errorMessage && (
+              <p className="mt-2 text-sm text-red-400" data-testid="text-seed-error">
+                {errorMessage}
+              </p>
+            )}
           </div>
 
           <div className="flex gap-4 justify-center">
@@ -76,6 +98,7 @@ export function MainMenu({ onStart }: MainMenuProps) {
               size="lg"
               onClick={handleStart}
               className="bg-secondary hover:bg-secondary/80 text-white font-creepy tracking-wider text-xl px-8"
+              disabled={!isValidSeed(seedInput)}
               data-testid="button-start-game"
             >
               ENTER MAZE
