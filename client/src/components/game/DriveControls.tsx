@@ -11,19 +11,10 @@ export function DriveControls() {
     hasWon 
   } = useGameStore();
   const [showLeverHint, setShowLeverHint] = useState(true);
-  const leverDisabled = useMemo(() => pendingFork || isGameOver || hasWon, [hasWon, isGameOver, pendingFork]);
-  
-  const handleLeverPullStart = useCallback(() => {
-    if (leverDisabled) return;
-    setAccelerating(true);
-    setBraking(false);
-    setShowLeverHint(false);
-  }, [leverDisabled, setAccelerating, setBraking]);
-  
-  const handleLeverPullEnd = useCallback(() => {
-    setAccelerating(false);
-    setBraking(true);
-  }, [setAccelerating, setBraking]);
+const handleLeverPullEnd = useCallback(() => {
+  setAccelerating(false);
+  setBraking(false);
+}, [setAccelerating, setBraking]);
   
   if (isGameOver || hasWon) return null;
 
