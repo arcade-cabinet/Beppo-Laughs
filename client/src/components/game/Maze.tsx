@@ -10,27 +10,17 @@ interface MazeProps {
   geometry: MazeGeometry;
 }
 
-interface TrackSegment {
-  x: number;
-  z: number;
-  width: number;
-  depth: number;
-  rotation: number;
-}
-
 export function Maze({ geometry }: MazeProps) {
   const canvasTexture = useTexture(canvasTextureUrl);
   const sawdustTexture = useTexture(sawdustTextureUrl);
-  const sawdustTextureDark = useTexture(sawdustTextureUrl);
 
   useMemo(() => {
-    [canvasTexture, sawdustTexture, sawdustTextureDark].forEach(t => {
+    [canvasTexture, sawdustTexture].forEach(t => {
       t.wrapS = t.wrapT = RepeatWrapping;
     });
     canvasTexture.repeat.set(1, 2);
     sawdustTexture.repeat.set(16, 16);
-    sawdustTextureDark.repeat.set(16, 16);
-  }, [canvasTexture, sawdustTexture, sawdustTextureDark]);
+  }, [canvasTexture, sawdustTexture]);
 
   const { wallHeight } = DEFAULT_CONFIG;
 
@@ -71,42 +61,9 @@ export function Maze({ geometry }: MazeProps) {
     return poles;
   }, [geometry, wallHeight]);
 
-  const { cellSize } = DEFAULT_CONFIG;
-  const trackWidth = cellSize * 0.35;
-  
-  const trackSegments = useMemo(() => {
-    const segments: TrackSegment[] = [];
-    const nodes = Array.from(geometry.railNodes.values());
-    
-    nodes.forEach((node) => {
-      node.connections.forEach((connId) => {
-        const connNode = geometry.railNodes.get(connId);
-        if (!connNode) return;
-        if (connNode.gridX < node.gridX || connNode.gridY < node.gridY) return;
-        
-        const midX = (node.worldX + connNode.worldX) / 2;
-        const midZ = (node.worldZ + connNode.worldZ) / 2;
-        const dx = connNode.worldX - node.worldX;
-        const dz = connNode.worldZ - node.worldZ;
-        const length = Math.sqrt(dx * dx + dz * dz);
-        const rotation = Math.atan2(dx, dz);
-        
-        segments.push({
-          x: midX,
-          z: midZ,
-          width: trackWidth,
-          depth: length + trackWidth,
-          rotation,
-        });
-      });
-    });
-    
-    return segments;
-  }, [geometry, trackWidth]);
-
   return (
     <group>
-      {/* Dark sawdust floor (sides) */}
+      {/* Consistent sawdust floor */}
       <mesh 
         rotation={[-Math.PI / 2, 0, 0]} 
         position={[geometry.floor.x, -0.02, geometry.floor.z]} 
@@ -114,28 +71,11 @@ export function Maze({ geometry }: MazeProps) {
       >
         <planeGeometry args={[geometry.floor.width, geometry.floor.depth]} />
         <meshStandardMaterial 
-          map={sawdustTextureDark} 
-          color="#5a4030"
-          roughness={1}
+          map={sawdustTexture} 
+          color="#8a7560"
+          roughness={0.95}
         />
       </mesh>
-      
-      {/* Light sawdust track (center paths) */}
-      {trackSegments.map((seg, idx) => (
-        <mesh 
-          key={`track-${idx}`}
-          rotation={[-Math.PI / 2, seg.rotation, 0]} 
-          position={[seg.x, -0.01, seg.z]} 
-          receiveShadow
-        >
-          <planeGeometry args={[seg.width, seg.depth]} />
-          <meshStandardMaterial 
-            map={sawdustTexture} 
-            color="#c4a878"
-            roughness={0.95}
-          />
-        </mesh>
-      ))}
       
       {/* Peaked tent ceiling - main canvas */}
       <mesh 

@@ -6,9 +6,8 @@ import { generateMaze, MazeLayout } from '../../game/maze/core';
 import { buildGeometry, MazeGeometry, DEFAULT_CONFIG } from '../../game/maze/geometry';
 import { Villains } from './Villains';
 import { Collectibles } from './Collectibles';
-import { TapZones } from './TapZones';
 import { HintOverlay } from './HintOverlay';
-import { GestureControls } from './GestureControls';
+import { DriveControls } from './DriveControls';
 import { AudioManager } from './AudioManager';
 import { useGameStore } from '../../game/store';
 import { PointLight } from 'three';
@@ -237,14 +236,13 @@ export function Scene({ seed }: SceneProps) {
           <Maze geometry={geometry} />
           <Villains geometry={geometry} />
           <Collectibles geometry={geometry} />
-          <TapZones geometry={geometry} />
           <HintOverlay geometry={geometry} />
         </Suspense>
 
         <RailPlayer geometry={geometry} />
       </Canvas>
       
-      <GestureControls />
+      <DriveControls />
     </>
   );
 }

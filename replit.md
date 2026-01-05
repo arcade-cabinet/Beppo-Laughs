@@ -6,7 +6,7 @@ A 3D first-person survival horror game set in a surreal 1800s circus big top ten
 
 - **Genre**: Survival Horror / Maze Navigation
 - **Theme**: Victorian circus big top nightmare, Coney Island freak show meets Monty Python absurdist horror
-- **Core Mechanic**: Tap-based rail navigation with dual sanity meters (Fear/Despair)
+- **Core Mechanic**: Clown car driving with dual sanity meters (Fear/Despair)
 - **Goal**: Start at center, escape to perimeter exits before sanity runs out
 
 ## Architecture
@@ -23,9 +23,9 @@ A 3D first-person survival horror game set in a surreal 1800s circus big top ten
 - `client/src/pages/Home.tsx` - Main game page with menu/game toggle
 - `client/src/components/game/Scene.tsx` - Three.js canvas with circus tent lighting
 - `client/src/components/game/Maze.tsx` - Circus tent canvas walls, sawdust floor, tent poles
-- `client/src/components/game/RailPlayer.tsx` - Gesture-based rail movement controller
-- `client/src/components/game/TapZones.tsx` - Invisible tap zones for navigation
-- `client/src/components/game/GestureControls.tsx` - Swipe and circle gesture detection
+- `client/src/components/game/RailPlayer.tsx` - Edge-following rail movement with continuous driving
+- `client/src/components/game/ClownCarCockpit.tsx` - 3D steering wheel, dashboard, and pedals
+- `client/src/components/game/DriveControls.tsx` - Touch/click controls for driving (gas, brake, steer)
 - `client/src/components/game/HintOverlay.tsx` - Glowing footprints and handprints
 - `client/src/components/game/Villains.tsx` - SDF ray-marched villain rendering
 - `client/src/components/game/Collectibles.tsx` - Paper mache items that clear blockades
@@ -48,13 +48,15 @@ A 3D first-person survival horror game set in a surreal 1800s circus big top ten
 - Exits are on the perimeter edges
 - Navigate outward to escape Beppo's nightmare
 
-### Gesture-Based Rail Navigation
-- No free movement - swipe or tap to move between cells
-- **Swipe controls**: Swipe in any direction to move that way
-- **Circle gesture**: Draw a circle to rotate your field of view
-- Smooth lerped transitions along rail edges
-- Speed modifiers: 1.5x toward collectibles, 0.7x toward villains
-- Mobile-friendly touch controls with invisible tap zones
+### Clown Car Driving
+- First-person driving experience in a clown car
+- **GAS pedal** (right) - Accelerate forward along rails
+- **BRAKE pedal** (left) - Slow down and stop
+- **STEER control** (center) - Drag left/right to choose direction at junctions
+- Edge-following movement: Car travels between maze nodes automatically
+- Steering selects which path to take at intersections
+- Speed indicator shows current velocity
+- 3D cockpit with animated steering wheel, dashboard, and pedals
 
 ### Hint System
 - **HINT button** (bottom right) reveals visual cues when pressed
@@ -133,8 +135,11 @@ A 3D first-person survival horror game set in a surreal 1800s circus big top ten
 
 ### Rail Navigation System
 - RailGraph built from maze with nodes at every cell
-- Connections based on open walls between cells
-- Nodes marked with hasCollectible/hasVillain for speed modifiers
+- Edge-following movement: Player travels between nodes along edges
+- edgeProgress tracks position (0-1) along current edge
+- Steering input selects which path at junctions via pickNextTarget()
+- Camera automatically rotates to face travel direction
+- visitNode() called on each node arrival for sanity tracking
 - Uses getState() in useFrame for live state updates
 
 ### SDF Shader Performance
@@ -155,9 +160,9 @@ npm run dev
 Navigate to http://localhost:5000, enter a seed or randomize, and click "ENTER MAZE".
 
 ## Controls
-- **SWIPE** in any direction to move that way
-- **TAP** anywhere in a direction to move
-- **CIRCLE GESTURE** - draw a circle to rotate your view
+- **GAS** (right pedal) - Press and hold to accelerate
+- **BRAKE** (left pedal) - Press to slow down/stop
+- **STEER** (center) - Drag left/right to choose direction at junctions
 - **HINT BUTTON** (bottom right) shows glowing clown footprints/handprints
 - Find the **EXIT** markers on the perimeter to escape
 - Collect items to clear blockades

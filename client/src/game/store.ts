@@ -42,6 +42,12 @@ interface GameState {
   // Hint System
   hintActive: boolean;        // Whether hint overlays are visible
   
+  // Clown Car Driving State
+  carSpeed: number;           // Current speed (0-5)
+  steeringAngle: number;      // -1 (left) to 1 (right)
+  accelerating: boolean;      // Is accelerator pressed
+  braking: boolean;           // Is brake pressed
+  
   // Actions
   setSeed: (seed: string) => void;
   visitNode: (nodeId: string) => void;
@@ -67,6 +73,13 @@ interface GameState {
   // Hint Actions
   toggleHint: () => void;
   setHintActive: (active: boolean) => void;
+  
+  // Clown Car Driving Actions
+  setAccelerating: (value: boolean) => void;
+  setBraking: (value: boolean) => void;
+  setSteeringAngle: (angle: number) => void;
+  setCarSpeed: (speed: number) => void;
+  updateDriving: (delta: number) => void;
   
   // Computed
   getSanityLevel: () => number;
@@ -102,6 +115,12 @@ export const useGameStore = create<GameState>((set, get) => ({
   
   // Hint system
   hintActive: false,
+  
+  // Clown car driving
+  carSpeed: 0,
+  steeringAngle: 0,
+  accelerating: false,
+  braking: false,
   
   setSeed: (seed) => set({ seed }),
   
@@ -218,6 +237,10 @@ export const useGameStore = create<GameState>((set, get) => ({
     cameraRotation: 0,
     availableMoves: [],
     hintActive: false,
+    carSpeed: 0,
+    steeringAngle: 0,
+    accelerating: false,
+    braking: false,
   }),
   
   // Rail Navigation Actions
@@ -277,6 +300,29 @@ export const useGameStore = create<GameState>((set, get) => ({
   // Hint actions
   toggleHint: () => set(state => ({ hintActive: !state.hintActive })),
   setHintActive: (active) => set({ hintActive: active }),
+  
+  // Clown car driving actions
+  setAccelerating: (value) => set({ accelerating: value }),
+  setBraking: (value) => set({ braking: value }),
+  setSteeringAngle: (angle) => set({ steeringAngle: Math.max(-1, Math.min(1, angle)) }),
+  setCarSpeed: (speed) => set({ carSpeed: Math.max(0, Math.min(5, speed)) }),
+  
+  updateDriving: (delta) => {
+    const state = get();
+    const { accelerating, braking, carSpeed } = state;
+    
+    let newSpeed = carSpeed;
+    
+    if (accelerating) {
+      newSpeed = Math.min(5, carSpeed + delta * 3);
+    } else if (braking) {
+      newSpeed = Math.max(0, carSpeed - delta * 5);
+    } else {
+      newSpeed = Math.max(0, carSpeed - delta * 1);
+    }
+    
+    set({ carSpeed: newSpeed });
+  },
   
   getSanityLevel: () => {
     const state = get();
