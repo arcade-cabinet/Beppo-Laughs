@@ -19,20 +19,33 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CI: true
+      SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+      SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
+      SONAR_HOST_URL: https://sonarcloud.io
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Read .nvmrc
+        id: node-version
+        run: echo "version=$(cat .nvmrc)" >> "$GITHUB_OUTPUT"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.1
+          run_install: false
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: ${{ steps.node-version.outputs.version }}
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: |
-          echo "::group::Installing dependencies with npm"
-          npm ci
+          echo "::group::Installing dependencies with pnpm"
+          pnpm install --frozen-lockfile
           EXIT_CODE=$?
           echo "::endgroup::"
           if [ $EXIT_CODE -ne 0 ]; then
@@ -46,7 +59,7 @@ jobs:
       - name: Run Biome linter
         run: |
           echo "::group::Running Biome linter"
-          npm run lint 2>&1 | tee lint-output.log
+          pnpm run lint 2>&1 | tee lint-output.log
           EXIT_CODE=${PIPESTATUS[0]}
           echo "::endgroup::"
           if [ $EXIT_CODE -ne 0 ]; then
@@ -63,7 +76,7 @@ jobs:
       - name: Run TypeScript type checking
         run: |
           echo "::group::Running TypeScript type checking"
-          npm run check 2>&1 | tee check-output.log
+          pnpm run check 2>&1 | tee check-output.log
           EXIT_CODE=${PIPESTATUS[0]}
           echo "::endgroup::"
           if [ $EXIT_CODE -ne 0 ]; then
@@ -80,7 +93,7 @@ jobs:
       - name: Build project
         run: |
           echo "::group::Building project with Vite"
-          npm run build:client 2>&1 | tee build-output.log
+          pnpm run build:client 2>&1 | tee build-output.log
           EXIT_CODE=${PIPESTATUS[0]}
           echo "::endgroup::"
           if [ $EXIT_CODE -ne 0 ]; then
@@ -104,7 +117,7 @@ jobs:
       - name: Unit tests with coverage
         run: |
           echo "::group::Running unit tests with coverage"
-          npm run test:coverage 2>&1 | tee test-output.log
+          pnpm run test:coverage 2>&1 | tee test-output.log
           EXIT_CODE=${PIPESTATUS[0]}
           echo "::endgroup::"
           if [ $EXIT_CODE -ne 0 ]; then
@@ -124,6 +137,33 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: coverage/lcov.info
+
+      - name: Check SonarCloud configuration
+        id: sonar-check
+        run: |
+          SONAR_ENABLED=true
+          if [ -z "$SONAR_PROJECT_KEY" ] || [ -z "$SONAR_ORGANIZATION" ]; then
+            echo "::warning::SONAR_PROJECT_KEY and/or SONAR_ORGANIZATION are not set; skipping SonarCloud analysis."
+            SONAR_ENABLED=false
+          elif [ -z "$SONAR_TOKEN" ]; then
+            echo "::warning::SONAR_TOKEN secret is missing; skipping SonarCloud analysis."
+            SONAR_ENABLED=false
+          fi
+          echo "enabled=$SONAR_ENABLED" >> "$GITHUB_OUTPUT"
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: SonarCloud analysis
+        if: steps.sonar-check.outputs.enabled == 'true'
+        uses: SonarSource/sonarcloud-github-action@v3
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >-
+            -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }}
+            -Dsonar.organization=${{ env.SONAR_ORGANIZATION }}
+            -Dsonar.host.url=${{ env.SONAR_HOST_URL }}
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
 
   security:
     name: Security Scan

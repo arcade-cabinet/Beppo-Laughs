@@ -4,3 +4,17 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+
+# npm artifacts (using pnpm instead)
+package-lock.json
+npm-debug.log*
+.npm
+
+# pnpm
+pnpm-debug.log*
+
+# Coverage
+coverage/
+
+# Build artifacts
+*.tsbuildinfo
