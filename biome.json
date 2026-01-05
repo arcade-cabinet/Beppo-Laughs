@@ -39,7 +39,6 @@
       "dist",
       "coverage",
       "*.config.js",
-      "*.config.ts",
       "attached_assets"
     ]
   }
