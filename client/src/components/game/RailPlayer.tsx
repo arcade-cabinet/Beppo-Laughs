@@ -73,8 +73,9 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
     }
     
     if (moves.length > 1) {
+      // Fork detected - pause for choice but MAINTAIN current speed
       gameState.setPendingFork({ nodeId: node.id, options: moves });
-      gameState.setCarSpeed(0);
+      // Don't zero speed - it will resume at current speed after selection
     } else if (moves.length === 1) {
       gameState.setPendingFork(null);
       targetNodeRef.current = geometry.railNodes.get(moves[0].nodeId) || null;
@@ -117,15 +118,20 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
       }
     }
     
+    // Speed increments/decrements and HOLDS - no decay
+    // Gas: increment speed while held (up to max 5)
+    // Brake: decrement speed while held (down to 0)
+    // Neither: speed stays constant (cruise control style)
     let newSpeed = carSpeed;
     if (accelerating) {
-      newSpeed = Math.min(5, carSpeed + delta * 3);
+      newSpeed = Math.min(5, carSpeed + delta * 2);
     } else if (braking) {
-      newSpeed = Math.max(0, carSpeed - delta * 5);
-    } else {
-      newSpeed = Math.max(0, carSpeed - delta * 1);
+      newSpeed = Math.max(0, carSpeed - delta * 3);
     }
-    gameState.setCarSpeed(newSpeed);
+    // No decay when neither pressed - speed holds
+    if (newSpeed !== carSpeed) {
+      gameState.setCarSpeed(newSpeed);
+    }
     
     if (newSpeed > 0.05 && targetNodeRef.current && currentNodeRef.current) {
       const fromNode = currentNodeRef.current;

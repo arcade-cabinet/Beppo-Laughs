@@ -1,183 +1,7 @@
 import { useGameStore } from '../../game/store';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BrainMeter } from './BrainMeter';
-import { useRef, useEffect, useState, useMemo } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import beppoVideoUrl from '@assets/generated_videos/beppo_clown_emerging_laughing_game_over.mp4';
-import seedrandom from 'seedrandom';
-
-function DebugInfo() {
-  const { currentNode, isMoving, targetNode } = useGameStore();
-  return (
-    <div className="mt-2 text-yellow-400/60">
-      <p>NODE: {currentNode}</p>
-      <p>MOVING: {isMoving ? `→ ${targetNode}` : 'no'}</p>
-    </div>
-  );
-}
-
-function Minimap() {
-  const { visitedCells, currentNode, despair, maxSanity, pathHistory, isGameOver, hasWon } = useGameStore();
-  
-  const despairRatio = despair / maxSanity;
-  
-  const visibleCells = useMemo(() => {
-    if (visitedCells.size === 0) return [];
-    
-    const cells = Array.from(visitedCells.entries());
-    
-    if (despairRatio < 0.3) return cells;
-    
-    const rng = seedrandom(`despair-${Math.floor(despairRatio * 10)}`);
-    const keepRatio = 1 - (despairRatio - 0.3) * 1.2;
-    
-    return cells.filter(() => rng() < Math.max(0.2, keepRatio));
-  }, [visitedCells, despairRatio]);
-  
-  const connections = useMemo(() => {
-    const conns: Array<{ from: string; to: string }> = [];
-    const seen = new Set<string>();
-    
-    for (let i = 1; i < pathHistory.length; i++) {
-      const from = `${pathHistory[i-1].x},${pathHistory[i-1].z}`;
-      const to = `${pathHistory[i].x},${pathHistory[i].z}`;
-      const key = [from, to].sort().join('-');
-      
-      if (!seen.has(key)) {
-        seen.add(key);
-        conns.push({ from, to });
-      }
-    }
-    
-    if (despairRatio < 0.2) return conns;
-    
-    const rng = seedrandom(`conn-${Math.floor(despairRatio * 10)}`);
-    const keepRatio = 1 - (despairRatio - 0.2) * 1.0;
-    
-    return conns.filter(() => rng() < Math.max(0.1, keepRatio));
-  }, [pathHistory, despairRatio]);
-  
-  const bounds = useMemo(() => {
-    if (visibleCells.length === 0) return { minX: 0, maxX: 12, minY: 0, maxY: 12 };
-    
-    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-    
-    for (const [key] of visibleCells) {
-      const [xStr, yStr] = key.split(',');
-      const x = parseInt(xStr);
-      const y = parseInt(yStr);
-      minX = Math.min(minX, x);
-      maxX = Math.max(maxX, x);
-      minY = Math.min(minY, y);
-      maxY = Math.max(maxY, y);
-    }
-    
-    return { minX: minX - 1, maxX: maxX + 1, minY: minY - 1, maxY: maxY + 1 };
-  }, [visibleCells]);
-  
-  if (isGameOver || hasWon) return null;
-  
-  const mapSize = 140;
-  const cellSize = mapSize / Math.max(bounds.maxX - bounds.minX + 1, bounds.maxY - bounds.minY + 1);
-  
-  const getPos = (key: string) => {
-    const [xStr, yStr] = key.split(',');
-    const x = parseInt(xStr);
-    const y = parseInt(yStr);
-    return {
-      x: (x - bounds.minX) * cellSize,
-      y: (y - bounds.minY) * cellSize
-    };
-  };
-  
-  const currentPos = currentNode ? getPos(currentNode) : null;
-  
-  return (
-    <div 
-      className="absolute top-4 right-4 pointer-events-none"
-      style={{
-        filter: despairRatio > 0.5 
-          ? `blur(${(despairRatio - 0.5) * 4}px) saturate(${1 - despairRatio * 0.5})` 
-          : 'none',
-        opacity: despairRatio > 0.8 ? 0.5 : 1
-      }}
-    >
-      <div 
-        className="relative rounded-lg border-2 border-amber-800/60 bg-black/40 backdrop-blur-sm overflow-hidden"
-        style={{ width: mapSize + 16, height: mapSize + 16 }}
-      >
-        <div className="absolute inset-2">
-          {/* Connections */}
-          <svg className="absolute inset-0 w-full h-full">
-            {connections.map(({ from, to }, idx) => {
-              const fromPos = getPos(from);
-              const toPos = getPos(to);
-              return (
-                <line
-                  key={idx}
-                  x1={fromPos.x + cellSize/2}
-                  y1={fromPos.y + cellSize/2}
-                  x2={toPos.x + cellSize/2}
-                  y2={toPos.y + cellSize/2}
-                  stroke="#c4a878"
-                  strokeWidth={2}
-                  strokeOpacity={0.6}
-                />
-              );
-            })}
-          </svg>
-          
-          {/* Visited cells */}
-          {visibleCells.map(([key, cell]) => {
-            const pos = getPos(key);
-            const isCurrentCell = key === currentNode;
-            
-            return (
-              <div
-                key={key}
-                className={`absolute rounded-sm ${
-                  isCurrentCell 
-                    ? 'bg-yellow-400 animate-pulse' 
-                    : 'bg-amber-700/60'
-                }`}
-                style={{
-                  left: pos.x + 2,
-                  top: pos.y + 2,
-                  width: cellSize - 4,
-                  height: cellSize - 4,
-                }}
-              />
-            );
-          })}
-          
-          {/* Current position marker */}
-          {currentPos && (
-            <div
-              className="absolute w-2 h-2 bg-white rounded-full animate-ping"
-              style={{
-                left: currentPos.x + cellSize/2 - 4,
-                top: currentPos.y + cellSize/2 - 4,
-              }}
-            />
-          )}
-        </div>
-        
-        {/* Despair corruption overlay */}
-        {despairRatio > 0.4 && (
-          <div 
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background: `radial-gradient(circle at ${50 + Math.sin(Date.now()/1000) * 20}% ${50 + Math.cos(Date.now()/1000) * 20}%, transparent, rgba(0,0,139,${despairRatio * 0.3}))`,
-            }}
-          />
-        )}
-      </div>
-      
-      <div className="text-center mt-1 text-xs text-amber-600/80 font-mono">
-        {despairRatio > 0.6 ? '???' : 'MAP'}
-      </div>
-    </div>
-  );
-}
 
 
 function HintButton() {
@@ -264,12 +88,6 @@ export function HUD() {
         }} 
       />
 
-      {/* 3D Brain Meter */}
-      <BrainMeter />
-      
-      {/* Minimap */}
-      <Minimap />
-      
       {/* Hint Button */}
       <HintButton />
       
@@ -323,11 +141,9 @@ export function HUD() {
         <p>Find the EXIT to escape</p>
       </div>
       
-      {/* Exploration Counter + Debug Info */}
+      {/* Exploration Counter */}
       <div className="absolute bottom-6 left-6 text-white/40 font-mono text-xs">
-        <p>CELLS EXPLORED: {cellsExplored}</p>
-        <p>SANITY: {Math.floor(sanityLevel)}%</p>
-        <DebugInfo />
+        <p>CELLS: {cellsExplored}</p>
       </div>
       
       {/* WIN Overlay */}

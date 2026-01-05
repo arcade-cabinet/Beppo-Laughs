@@ -1,16 +1,186 @@
-import { useRef } from 'react';
+import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { Text } from '@react-three/drei';
 import { useGameStore } from '../../game/store';
+
+function DashboardPanel({ 
+  position, 
+  color, 
+  label, 
+  valueRef 
+}: { 
+  position: [number, number, number]; 
+  color: string;
+  label: string;
+  valueRef: React.MutableRefObject<THREE.Mesh | null>;
+}) {
+  return (
+    <group position={position}>
+      {/* Panel backing */}
+      <mesh rotation={[-0.3, 0, 0]}>
+        <boxGeometry args={[0.35, 0.25, 0.02]} />
+        <meshStandardMaterial color="#1a1510" roughness={0.9} />
+      </mesh>
+      
+      {/* Panel glass/screen */}
+      <mesh position={[0, 0, 0.012]} rotation={[-0.3, 0, 0]}>
+        <boxGeometry args={[0.32, 0.22, 0.005]} />
+        <meshStandardMaterial 
+          color="#111111" 
+          roughness={0.2}
+          metalness={0.8}
+        />
+      </mesh>
+      
+      {/* Fill bar background */}
+      <mesh position={[0, -0.02, 0.018]} rotation={[-0.3, 0, 0]}>
+        <boxGeometry args={[0.28, 0.12, 0.003]} />
+        <meshStandardMaterial color="#222222" roughness={0.8} />
+      </mesh>
+      
+      {/* Fill bar (dynamic) */}
+      <mesh ref={valueRef} position={[0, -0.02, 0.022]} rotation={[-0.3, 0, 0]}>
+        <boxGeometry args={[0.28, 0.12, 0.003]} />
+        <meshStandardMaterial 
+          color={color}
+          emissive={color}
+          emissiveIntensity={0.4}
+        />
+      </mesh>
+      
+      {/* Label */}
+      <Text
+        position={[0, 0.08, 0.02]}
+        rotation={[-0.3, 0, 0]}
+        fontSize={0.035}
+        color="#ffffff"
+        anchorX="center"
+        anchorY="middle"
+        font="/fonts/Creepster-Regular.ttf"
+      >
+        {label}
+      </Text>
+    </group>
+  );
+}
+
+function SpeedometerPanel({ position }: { position: [number, number, number] }) {
+  const speedTextRef = useRef<any>(null);
+  const needleRef = useRef<THREE.Mesh>(null);
+  
+  useFrame(() => {
+    const { carSpeed } = useGameStore.getState();
+    
+    // Update speed text
+    if (speedTextRef.current) {
+      speedTextRef.current.text = Math.round(carSpeed * 20).toString();
+    }
+    
+    // Update needle rotation (0-5 speed maps to 0.8 to -0.8 radians)
+    if (needleRef.current) {
+      const targetRotation = 0.8 - (carSpeed / 5) * 1.6;
+      needleRef.current.rotation.z = THREE.MathUtils.lerp(
+        needleRef.current.rotation.z,
+        targetRotation,
+        0.15
+      );
+    }
+  });
+  
+  return (
+    <group position={position}>
+      {/* Panel backing */}
+      <mesh rotation={[-0.3, 0, 0]}>
+        <boxGeometry args={[0.4, 0.3, 0.02]} />
+        <meshStandardMaterial color="#1a1510" roughness={0.9} />
+      </mesh>
+      
+      {/* Speedometer face */}
+      <mesh position={[0, 0, 0.012]} rotation={[-0.3, 0, 0]}>
+        <circleGeometry args={[0.12, 32]} />
+        <meshStandardMaterial 
+          color="#0a0a0a" 
+          roughness={0.3}
+        />
+      </mesh>
+      
+      {/* Speed arc marks */}
+      {[0, 1, 2, 3, 4, 5].map((i) => {
+        const angle = 0.8 - (i / 5) * 1.6;
+        const x = Math.sin(angle) * 0.1;
+        const y = Math.cos(angle) * 0.1;
+        return (
+          <mesh 
+            key={`mark-${i}`} 
+            position={[x, y, 0.02]} 
+            rotation={[-0.3, 0, angle]}
+          >
+            <boxGeometry args={[0.008, 0.025, 0.002]} />
+            <meshStandardMaterial 
+              color={i < 3 ? '#00ff00' : i < 4 ? '#ffff00' : '#ff0000'}
+              emissive={i < 3 ? '#00ff00' : i < 4 ? '#ffff00' : '#ff0000'}
+              emissiveIntensity={0.3}
+            />
+          </mesh>
+        );
+      })}
+      
+      {/* Needle */}
+      <mesh ref={needleRef} position={[0, 0, 0.025]} rotation={[-0.3, 0, 0.8]}>
+        <boxGeometry args={[0.01, 0.09, 0.003]} />
+        <meshStandardMaterial 
+          color="#ff3300"
+          emissive="#ff3300"
+          emissiveIntensity={0.5}
+        />
+      </mesh>
+      
+      {/* Center cap */}
+      <mesh position={[0, 0, 0.03]} rotation={[-0.3, 0, 0]}>
+        <circleGeometry args={[0.015, 16]} />
+        <meshStandardMaterial color="#ffcc00" metalness={0.8} />
+      </mesh>
+      
+      {/* Digital speed display */}
+      <Text
+        ref={speedTextRef}
+        position={[0, -0.1, 0.02]}
+        rotation={[-0.3, 0, 0]}
+        fontSize={0.045}
+        color="#00ff00"
+        anchorX="center"
+        anchorY="middle"
+      >
+        0
+      </Text>
+      
+      {/* SPEED label */}
+      <Text
+        position={[0, 0.12, 0.02]}
+        rotation={[-0.3, 0, 0]}
+        fontSize={0.025}
+        color="#ffffff"
+        anchorX="center"
+        anchorY="middle"
+      >
+        SPEED
+      </Text>
+    </group>
+  );
+}
 
 export function ClownCarCockpit() {
   const leftPedalRef = useRef<THREE.Mesh>(null);
   const rightPedalRef = useRef<THREE.Mesh>(null);
+  const fearFillRef = useRef<THREE.Mesh>(null);
+  const despairFillRef = useRef<THREE.Mesh>(null);
   
   useFrame(() => {
     const state = useGameStore.getState();
-    const { accelerating, braking } = state;
+    const { accelerating, braking, fear, despair, maxSanity } = state;
     
+    // Animate pedals
     if (rightPedalRef.current) {
       rightPedalRef.current.rotation.x = THREE.MathUtils.lerp(
         rightPedalRef.current.rotation.x,
@@ -26,13 +196,48 @@ export function ClownCarCockpit() {
         0.2
       );
     }
+    
+    // Update fear meter fill (scale X based on percentage)
+    if (fearFillRef.current) {
+      const fearPercent = fear / maxSanity;
+      fearFillRef.current.scale.x = Math.max(0.01, fearPercent);
+      fearFillRef.current.position.x = -0.14 * (1 - fearPercent);
+    }
+    
+    // Update despair meter fill
+    if (despairFillRef.current) {
+      const despairPercent = despair / maxSanity;
+      despairFillRef.current.scale.x = Math.max(0.01, despairPercent);
+      despairFillRef.current.position.x = -0.14 * (1 - despairPercent);
+    }
   });
   
-  // Scale factor to make car much larger and more visible
   const scale = 2.5;
   
   return (
     <group position={[0, -0.6, 0.3]} scale={[scale, scale, scale]}>
+      {/* === 3D DASHBOARD PANELS === */}
+      <group position={[0, 0.45, -0.35]}>
+        {/* Left Panel - FEAR Meter */}
+        <DashboardPanel 
+          position={[-0.42, 0, 0]} 
+          color="#cc0000" 
+          label="FEAR"
+          valueRef={fearFillRef}
+        />
+        
+        {/* Center Panel - SPEEDOMETER */}
+        <SpeedometerPanel position={[0, 0.02, 0]} />
+        
+        {/* Right Panel - DESPAIR Meter */}
+        <DashboardPanel 
+          position={[0.42, 0, 0]} 
+          color="#0000cc" 
+          label="DESPAIR"
+          valueRef={despairFillRef}
+        />
+      </group>
+      
       {/* Clown Car Hood - Garish curved metal with blemishes */}
       <group position={[0, 0.15, -0.9]}>
         {/* Main hood body - curved and extended */}

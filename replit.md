@@ -173,6 +173,18 @@ Navigate to http://localhost:5000, enter a seed or randomize, and click "ENTER M
 
 ## Recent Changes
 
+### 2026-01-05: 3D Dashboard HUD on Clown Car
+- Removed 2D brain meter and minimap from screen overlay
+- Added 3D dashboard panels directly on clown car:
+  - Left panel: FEAR meter (red fill bar)
+  - Center panel: Speedometer (analog needle + digital readout)
+  - Right panel: DESPAIR meter (blue fill bar)
+- Speed system changed to increment/decrement + HOLD:
+  - Gas pedal: increases speed while held
+  - Brake pedal: decreases speed while held
+  - Neither: speed maintains (cruise control style, no decay)
+- Fork selection now maintains current speed instead of stopping
+
 ### 2026-01-05: Mobile Fullscreen & Clown Car Visibility
 - Game enters fullscreen mode on mobile when starting (captures inputs)
 - Orientation locked to landscape on supported devices

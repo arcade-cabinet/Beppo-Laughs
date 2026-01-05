@@ -353,15 +353,17 @@ export const useGameStore = create<GameState>((set, get) => ({
     
     let newSpeed = carSpeed;
     
+    // Speed increments/decrements and HOLDS - no decay
     if (accelerating) {
-      newSpeed = Math.min(5, carSpeed + delta * 3);
+      newSpeed = Math.min(5, carSpeed + delta * 2);
     } else if (braking) {
-      newSpeed = Math.max(0, carSpeed - delta * 5);
-    } else {
-      newSpeed = Math.max(0, carSpeed - delta * 1);
+      newSpeed = Math.max(0, carSpeed - delta * 3);
     }
+    // No decay - speed holds when neither pressed
     
-    set({ carSpeed: newSpeed });
+    if (newSpeed !== carSpeed) {
+      set({ carSpeed: newSpeed });
+    }
   },
   
   // Interaction Actions
