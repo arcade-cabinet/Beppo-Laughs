@@ -1,20 +1,30 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useGameStore } from '../../game/store';
 
 export function DriveControls() {
-  const { 
-    setAccelerating, 
-    setBraking, 
+  const {
+    setAccelerating,
+    setBraking,
+    accelerating,
     carSpeed,
     pendingFork,
     isGameOver,
-    hasWon 
+    hasWon
   } = useGameStore();
   const [showLeverHint, setShowLeverHint] = useState(true);
-const handleLeverPullEnd = useCallback(() => {
-  setAccelerating(false);
-  setBraking(false);
-}, [setAccelerating, setBraking]);
+
+  const leverDisabled = pendingFork;
+
+  const handleLeverPullStart = useCallback(() => {
+    if (leverDisabled) return;
+    setAccelerating(true);
+    setShowLeverHint(false);
+  }, [leverDisabled, setAccelerating]);
+
+  const handleLeverPullEnd = useCallback(() => {
+    setAccelerating(false);
+    setBraking(false);
+  }, [setAccelerating, setBraking]);
   
   if (isGameOver || hasWon) return null;
 
@@ -33,6 +43,9 @@ const handleLeverPullEnd = useCallback(() => {
           type="button"
           data-testid="lever-control"
           disabled={leverDisabled}
+          aria-label="Drive lever - hold to accelerate"
+          aria-pressed={accelerating}
+          aria-disabled={leverDisabled}
           className={`relative w-28 h-40 flex flex-col items-center justify-end select-none touch-none transition-transform ${leverDisabled ? 'opacity-50 cursor-not-allowed' : 'active:scale-95'}`}
           onMouseDown={handleLeverPullStart}
           onMouseUp={handleLeverPullEnd}
@@ -58,7 +71,7 @@ const handleLeverPullEnd = useCallback(() => {
               borderRadius: '10px',
               background: leverDisabled ? 'linear-gradient(180deg, #666, #444)' : 'linear-gradient(180deg, #e0a000, #d45b00)',
               boxShadow: leverDisabled ? '0 0 8px rgba(0,0,0,0.6)' : '0 0 12px rgba(255,132,0,0.35)',
-              transform: `translateX(-50%) rotate(${pendingFork ? 0 : '-12deg'})`
+              transform: `translateX(-50%) rotate(${accelerating ? 0 : '-12deg'})`
             }}
           >
             <div
