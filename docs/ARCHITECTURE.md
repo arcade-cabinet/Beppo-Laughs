@@ -220,8 +220,28 @@ Check win/lose conditions
 
 ## Future Considerations
 
-### Potential Improvements
-- **drei MotionPathControls**: Replace custom RailPlayer
-- **Post-processing**: Use @react-three/postprocessing for effects
-- **Web Workers**: Offload maze generation
+### Critical Refactoring: Room-Based Loading
+
+**Current Problem:** Entire 169-cell maze geometry loaded at once (wasteful)
+
+**Better Architecture:**
+```
+Maze Graph (lightweight)     Room Geometry (heavy)
+┌─────────────────────┐      ┌────────────────────────┐
+│ Generated from seed │ ───▶ │ Generated on-demand    │
+│ Keep in memory      │      │ Only current + adjacent│
+│ ~10KB               │      │ Unload when not needed │
+└─────────────────────┘      └────────────────────────┘
+```
+
+Implementation:
+1. `generateMaze()` returns graph only (nodes + connections)
+2. `buildRoomGeometry(nodeId)` generates walls/floor for ONE room
+3. As player moves, preload connected rooms, unload distant rooms
+4. Use `MotionPathControls` with `CatmullRomCurve3` for smooth room-to-room movement
+
+### Other Improvements
+- **drei MotionPathControls**: For smooth path following within/between rooms
+- **Post-processing**: ✅ Done - using @react-three/postprocessing
+- **Web Workers**: Offload maze generation and geometry building
 - **PWA**: Offline support with service worker

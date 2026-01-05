@@ -97,12 +97,45 @@ pnpm run format    # Format code
 
 ## Design Decisions
 
-### RailPlayer Implementation
-We evaluated `MotionPathControls` from drei but decided against it because:
-- MotionPathControls is designed for continuous predefined paths (bezier/catmull-rom curves)
-- Our maze uses discrete node-to-node navigation with dynamic path selection at forks
-- The current lerp-based approach is appropriate for grid-based maze navigation
-- Reference: https://drei.docs.pmnd.rs/controls/motion-path-controls
+### Maze Architecture - NEEDS REFACTORING
+
+**Current Problem:** Loading entire 169-cell maze at once (memory wasteful)
+
+**Better Architecture (TODO):**
+```
+┌─────────────────────────────────────────────────┐
+│  CURRENT ROOM    │  Fully rendered, detailed    │
+├──────────────────┼──────────────────────────────┤
+│  ADJACENT ROOMS  │  Preloaded, ready to render  │
+│  (connections)   │  when player moves           │
+├──────────────────┼──────────────────────────────┤
+│  FAR ROOMS       │  NOT loaded until needed     │
+└─────────────────────────────────────────────────┘
+```
+
+Implementation approach:
+1. **Maze data** (graph) is generated from seed (lightweight, keep in memory)
+2. **Geometry** (walls, floor) is generated on-demand per room
+3. **Current room + connections**: Render current room geometry
+4. **Preload**: When entering a room, preload geometry for connected rooms
+5. **Unload**: Remove geometry for rooms player has left
+
+### RailPlayer Implementation - NEEDS REFACTORING
+The maze IS a predefined structure (generated from seed):
+- DFS algorithm generates a 13x13 grid maze from 3-word seed
+- Each cell has a center rail node with connections to adjacent cells
+- **Only the GRAPH is known upfront** (lightweight)
+- **Geometry should be generated per-room** (memory efficient)
+
+**Current approach:** Linear lerp between nodes, entire maze loaded
+
+**Better approach (TODO):**
+1. Use `MotionPathControls` with `useMotion` for current room segment
+2. Room-based geometry loading (only current + adjacent)
+3. Convert current room edges to `CatmullRomCurve3` for smooth movement
+4. At fork selection, switch curve and preload next room
+
+Reference: https://drei.docs.pmnd.rs/controls/motion-path-controls
 
 ### Post-Processing Effects
 Horror effects use `@react-three/postprocessing` (GPU-accelerated) instead of CSS filters:
