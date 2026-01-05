@@ -13,8 +13,14 @@ afterEach(() => {
 // Mock framer-motion to avoid animation issues in tests
 vi.mock('framer-motion', () => ({
   motion: {
-    div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-    button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
+    div: ({ children, ...props }: any) => {
+      const React = require('react');
+      return React.createElement('div', props, children);
+    },
+    button: ({ children, ...props }: any) => {
+      const React = require('react');
+      return React.createElement('button', props, children);
+    },
   },
   AnimatePresence: ({ children }: any) => children,
 }));
