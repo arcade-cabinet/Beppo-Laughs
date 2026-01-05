@@ -286,16 +286,13 @@ export function Scene({ seed }: SceneProps) {
           />
         )}
 
-        {/* Maze with error boundary and loading fallback */}
-        <Scene3DErrorBoundary fallback={<FallbackMaze geometry={geometry} />}>
-          <Suspense fallback={<FallbackMaze geometry={geometry} />}>
-            <Maze geometry={geometry} />
-          </Suspense>
-        </Scene3DErrorBoundary>
-        
-        <Villains geometry={geometry} />
-        <Collectibles geometry={geometry} />
-        <HintOverlay geometry={geometry} />
+        {/* All texture-using components must be inside Suspense */}
+        <Suspense fallback={<FallbackMaze geometry={geometry} />}>
+          <Maze geometry={geometry} />
+          <Villains geometry={geometry} />
+          <Collectibles geometry={geometry} />
+          <HintOverlay geometry={geometry} />
+        </Suspense>
 
         <RailPlayer geometry={geometry} />
       </Canvas>
