@@ -2,15 +2,8 @@ import { useCallback, useState } from 'react';
 import { useGameStore } from '../../game/store';
 
 export function DriveControls() {
-  const {
-    setAccelerating,
-    setBraking,
-    accelerating,
-    carSpeed,
-    pendingFork,
-    isGameOver,
-    hasWon
-  } = useGameStore();
+  const { setAccelerating, setBraking, accelerating, carSpeed, pendingFork, isGameOver, hasWon } =
+    useGameStore();
   const [showLeverHint, setShowLeverHint] = useState(true);
 
   const leverDisabled = pendingFork;
@@ -25,7 +18,7 @@ export function DriveControls() {
     setAccelerating(false);
     setBraking(false);
   }, [setAccelerating, setBraking]);
-  
+
   if (isGameOver || hasWon) return null;
 
   const speedPercent = (Math.abs(carSpeed) / 5) * 100;
@@ -54,14 +47,18 @@ export function DriveControls() {
           onTouchEnd={handleLeverPullEnd}
           onTouchCancel={handleLeverPullEnd}
           style={{
-            background: 'radial-gradient(circle at 50% 20%, rgba(255,255,255,0.12), transparent 45%), linear-gradient(180deg, #1f130a 0%, #2e1b0e 100%)',
+            background:
+              'radial-gradient(circle at 50% 20%, rgba(255,255,255,0.12), transparent 45%), linear-gradient(180deg, #1f130a 0%, #2e1b0e 100%)',
             borderRadius: '18px',
             border: '3px solid #4b2a12',
-            boxShadow: '0 10px 25px rgba(0,0,0,0.45), inset 0 2px 8px rgba(0,0,0,0.4)'
+            boxShadow: '0 10px 25px rgba(0,0,0,0.45), inset 0 2px 8px rgba(0,0,0,0.4)',
           }}
         >
           {/* Lever base */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-20 h-5 rounded-full" style={{ background: 'linear-gradient(90deg, #3b1c0a, #6a3414, #3b1c0a)' }} />
+          <div
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 w-20 h-5 rounded-full"
+            style={{ background: 'linear-gradient(90deg, #3b1c0a, #6a3414, #3b1c0a)' }}
+          />
           {/* Lever arm */}
           <div
             className="absolute bottom-9 left-1/2 -translate-x-1/2 origin-bottom"
@@ -69,16 +66,24 @@ export function DriveControls() {
               width: '12px',
               height: '110px',
               borderRadius: '10px',
-              background: leverDisabled ? 'linear-gradient(180deg, #666, #444)' : 'linear-gradient(180deg, #e0a000, #d45b00)',
-              boxShadow: leverDisabled ? '0 0 8px rgba(0,0,0,0.6)' : '0 0 12px rgba(255,132,0,0.35)',
-              transform: `translateX(-50%) rotate(${accelerating ? 0 : '-12deg'})`
+              background: leverDisabled
+                ? 'linear-gradient(180deg, #666, #444)'
+                : 'linear-gradient(180deg, #e0a000, #d45b00)',
+              boxShadow: leverDisabled
+                ? '0 0 8px rgba(0,0,0,0.6)'
+                : '0 0 12px rgba(255,132,0,0.35)',
+              transform: `translateX(-50%) rotate(${accelerating ? 0 : '-12deg'})`,
             }}
           >
             <div
               className="absolute -top-4 left-1/2 -translate-x-1/2 w-14 h-14 rounded-full"
               style={{
-                background: leverDisabled ? 'radial-gradient(circle at 35% 35%, #ffbbbb, #bb4444)' : 'radial-gradient(circle at 35% 35%, #ffdddd, #dd0000)',
-                boxShadow: leverDisabled ? '0 0 12px rgba(0,0,0,0.5)' : '0 0 18px rgba(255,0,0,0.45), 0 6px 12px rgba(0,0,0,0.4)',
+                background: leverDisabled
+                  ? 'radial-gradient(circle at 35% 35%, #ffbbbb, #bb4444)'
+                  : 'radial-gradient(circle at 35% 35%, #ffdddd, #dd0000)',
+                boxShadow: leverDisabled
+                  ? '0 0 12px rgba(0,0,0,0.5)'
+                  : '0 0 18px rgba(255,0,0,0.45), 0 6px 12px rgba(0,0,0,0.4)',
               }}
             />
           </div>
@@ -87,7 +92,7 @@ export function DriveControls() {
           </div>
         </button>
       </div>
-      
+
       {/* Speed Indicator - Speedometer Style */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
         <div
