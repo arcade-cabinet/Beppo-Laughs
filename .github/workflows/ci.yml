@@ -1,0 +1,158 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+  checks: write
+  statuses: write
+
+jobs:
+  quality:
+    name: Quality Checks
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          echo "::group::Installing dependencies with npm"
+          npm ci
+          EXIT_CODE=$?
+          echo "::endgroup::"
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "::error::Dependency installation failed with exit code $EXIT_CODE"
+            echo "### Dependency Installation Failed" >> $GITHUB_STEP_SUMMARY
+            echo "Exit code: $EXIT_CODE" >> $GITHUB_STEP_SUMMARY
+            exit $EXIT_CODE
+          fi
+          echo "Dependencies installed successfully"
+
+      - name: Run Biome linter
+        run: |
+          echo "::group::Running Biome linter"
+          npm run lint 2>&1 | tee lint-output.log
+          EXIT_CODE=${PIPESTATUS[0]}
+          echo "::endgroup::"
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "::error::Linting failed with exit code $EXIT_CODE"
+            echo "### Linting Failed" >> $GITHUB_STEP_SUMMARY
+            echo "Exit code: $EXIT_CODE" >> $GITHUB_STEP_SUMMARY
+            echo '```text' >> $GITHUB_STEP_SUMMARY
+            tail -100 lint-output.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            exit $EXIT_CODE
+          fi
+          echo "Linting passed successfully"
+
+      - name: Run TypeScript type checking
+        run: |
+          echo "::group::Running TypeScript type checking"
+          npm run check 2>&1 | tee check-output.log
+          EXIT_CODE=${PIPESTATUS[0]}
+          echo "::endgroup::"
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "::error::Type checking failed with exit code $EXIT_CODE"
+            echo "### Type Checking Failed" >> $GITHUB_STEP_SUMMARY
+            echo "Exit code: $EXIT_CODE" >> $GITHUB_STEP_SUMMARY
+            echo '```text' >> $GITHUB_STEP_SUMMARY
+            tail -100 check-output.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            exit $EXIT_CODE
+          fi
+          echo "Type checking passed successfully"
+
+      - name: Build project
+        run: |
+          echo "::group::Building project with Vite"
+          npm run build:client 2>&1 | tee build-output.log
+          EXIT_CODE=${PIPESTATUS[0]}
+          echo "::endgroup::"
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "::error::Build failed with exit code $EXIT_CODE"
+            echo "### Build Failed" >> $GITHUB_STEP_SUMMARY
+            echo "Exit code: $EXIT_CODE" >> $GITHUB_STEP_SUMMARY
+            echo '```text' >> $GITHUB_STEP_SUMMARY
+            tail -100 build-output.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            exit $EXIT_CODE
+          fi
+          echo "Build completed successfully"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/public/
+          retention-days: 1
+
+      - name: Unit tests with coverage
+        run: |
+          echo "::group::Running unit tests with coverage"
+          npm run test:coverage 2>&1 | tee test-output.log
+          EXIT_CODE=${PIPESTATUS[0]}
+          echo "::endgroup::"
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "::error::Tests failed with exit code $EXIT_CODE"
+            echo "### Tests Failed" >> $GITHUB_STEP_SUMMARY
+            echo "Exit code: $EXIT_CODE" >> $GITHUB_STEP_SUMMARY
+            echo '```text' >> $GITHUB_STEP_SUMMARY
+            tail -100 test-output.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            exit $EXIT_CODE
+          fi
+          echo "Tests passed successfully"
+
+      - name: Upload coverage to Coveralls
+        continue-on-error: true
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: coverage/lcov.info
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+  all-checks:
+    name: All Checks Passed
+    runs-on: ubuntu-latest
+    needs: [quality]
+    if: always()
+    steps:
+      - name: Check all jobs
+        run: |
+          if [ "${{ needs.quality.result }}" != "success" ]; then
+            echo "One or more checks failed"
+            exit 1
+          fi
+          echo "All checks passed successfully!"
