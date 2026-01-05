@@ -1,20 +1,20 @@
-import { useGameStore } from '../../game/store';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect } from 'react';
+import { useGameStore } from '../../game/store';
 
 export function InteractionPrompt() {
-  const { 
-    nearbyItem, 
-    nearbyExit, 
-    collectNearbyItem, 
+  const {
+    nearbyItem,
+    nearbyExit,
+    collectNearbyItem,
     triggerExitInteraction,
     showCollectedPopup,
     clearCollectedPopup,
     itemInventory,
     isGameOver,
-    hasWon
+    hasWon,
   } = useGameStore();
-  
+
   useEffect(() => {
     if (showCollectedPopup) {
       const timer = setTimeout(() => {
@@ -23,14 +23,14 @@ export function InteractionPrompt() {
       return () => clearTimeout(timer);
     }
   }, [showCollectedPopup, clearCollectedPopup]);
-  
+
   if (isGameOver || hasWon) return null;
-  
+
   return (
     <>
       {/* Item Inventory Counter */}
       {itemInventory > 0 && (
-        <div 
+        <div
           className="absolute top-40 left-4 z-50 pointer-events-none"
           data-testid="display-inventory"
         >
@@ -41,7 +41,7 @@ export function InteractionPrompt() {
           </div>
         </div>
       )}
-      
+
       {/* Collection Popup */}
       <AnimatePresence>
         {showCollectedPopup && (
@@ -52,20 +52,16 @@ export function InteractionPrompt() {
             className="absolute top-1/3 left-1/2 -translate-x-1/2 z-50 pointer-events-none"
           >
             <div className="bg-gradient-to-b from-amber-600 to-amber-800 border-4 border-yellow-400 rounded-xl px-6 py-4 shadow-2xl">
-              <div className="text-yellow-300 font-creepy text-xl text-center mb-1">
-                COLLECTED!
-              </div>
+              <div className="text-yellow-300 font-creepy text-xl text-center mb-1">COLLECTED!</div>
               <div className="text-white font-bold text-lg text-center">
                 {showCollectedPopup.name}
               </div>
-              <div className="text-green-300 text-sm text-center mt-2">
-                -5 FEAR  -5 DESPAIR
-              </div>
+              <div className="text-green-300 text-sm text-center mt-2">-5 FEAR -5 DESPAIR</div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-      
+
       {/* Nearby Item Prompt */}
       <AnimatePresence>
         {nearbyItem && (
@@ -87,14 +83,12 @@ export function InteractionPrompt() {
               <div className="text-white font-creepy text-2xl mb-1 drop-shadow-lg">
                 TAP TO COLLECT
               </div>
-              <div className="text-yellow-200 font-bold text-lg text-center">
-                {nearbyItem.name}
-              </div>
+              <div className="text-yellow-200 font-bold text-lg text-center">{nearbyItem.name}</div>
             </button>
           </motion.div>
         )}
       </AnimatePresence>
-      
+
       {/* Nearby Exit Prompt */}
       <AnimatePresence>
         {nearbyExit && !nearbyItem && (
@@ -114,9 +108,7 @@ export function InteractionPrompt() {
                          active:scale-95 transition-all duration-200
                          animate-pulse"
             >
-              <div className="text-white font-creepy text-3xl drop-shadow-lg">
-                🚪 ESCAPE! 🚪
-              </div>
+              <div className="text-white font-creepy text-3xl drop-shadow-lg">🚪 ESCAPE! 🚪</div>
               <div className="text-green-200 font-bold text-lg text-center mt-1">
                 TAP TO EXIT THE MAZE
               </div>

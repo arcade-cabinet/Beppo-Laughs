@@ -1,0 +1,190 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+  checks: write
+  statuses: write
+
+jobs:
+  quality:
+    name: Quality Checks
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+      SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+      SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
+      SONAR_HOST_URL: https://sonarcloud.io
+    steps:
+      - name: Checkout repository
+        # actions/checkout v6.0.1
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+
+      - name: Read .nvmrc
+        id: node-version
+        run: echo "version=$(cat .nvmrc)" >> "$GITHUB_OUTPUT"
+
+      - name: Install pnpm
+        # pnpm/action-setup v4.2.0
+        uses: pnpm/action-setup@9fd676a19091d4595eefd76e4bd31c97133911f1
+        with:
+          version: 10.12.1
+          run_install: false
+
+      - name: Setup Node.js
+        # actions/setup-node v6.1.0
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f
+        with:
+          node-version: ${{ steps.node-version.outputs.version }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: |
+          echo "::group::Installing dependencies with pnpm"
+          pnpm install --frozen-lockfile
+          EXIT_CODE=$?
+          echo "::endgroup::"
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "::error::Dependency installation failed with exit code $EXIT_CODE"
+            echo "### Dependency Installation Failed" >> $GITHUB_STEP_SUMMARY
+            echo "Exit code: $EXIT_CODE" >> $GITHUB_STEP_SUMMARY
+            exit $EXIT_CODE
+          fi
+          echo "Dependencies installed successfully"
+
+      - name: Run Biome linter
+        run: |
+          echo "::group::Running Biome linter"
+          pnpm run lint 2>&1 | tee lint-output.log
+          EXIT_CODE=${PIPESTATUS[0]}
+          echo "::endgroup::"
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "::error::Linting failed with exit code $EXIT_CODE"
+            echo "### Linting Failed" >> $GITHUB_STEP_SUMMARY
+            echo "Exit code: $EXIT_CODE" >> $GITHUB_STEP_SUMMARY
+            echo '```text' >> $GITHUB_STEP_SUMMARY
+            tail -100 lint-output.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            exit $EXIT_CODE
+          fi
+          echo "Linting passed successfully"
+
+      - name: Run TypeScript type checking
+        # TODO: Remove continue-on-error once pre-existing type errors are fixed
+        continue-on-error: true
+        run: |
+          echo "::group::Running TypeScript type checking"
+          pnpm run check 2>&1 | tee check-output.log
+          EXIT_CODE=${PIPESTATUS[0]}
+          echo "::endgroup::"
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "::warning::Type checking failed with exit code $EXIT_CODE (non-blocking)"
+            echo "### Type Checking Failed (Non-blocking)" >> $GITHUB_STEP_SUMMARY
+            echo "Exit code: $EXIT_CODE" >> $GITHUB_STEP_SUMMARY
+            echo '```text' >> $GITHUB_STEP_SUMMARY
+            tail -100 check-output.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "Type checking completed"
+
+      - name: Build project
+        run: |
+          echo "::group::Building project with Vite"
+          pnpm run build:client 2>&1 | tee build-output.log
+          EXIT_CODE=${PIPESTATUS[0]}
+          echo "::endgroup::"
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "::error::Build failed with exit code $EXIT_CODE"
+            echo "### Build Failed" >> $GITHUB_STEP_SUMMARY
+            echo "Exit code: $EXIT_CODE" >> $GITHUB_STEP_SUMMARY
+            echo '```text' >> $GITHUB_STEP_SUMMARY
+            tail -100 build-output.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            exit $EXIT_CODE
+          fi
+          echo "Build completed successfully"
+
+      - name: Upload build artifacts
+        # actions/upload-artifact v6.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: dist
+          path: dist/public/
+          retention-days: 1
+
+      - name: Unit tests with coverage
+        run: |
+          echo "::group::Running unit tests with coverage"
+          pnpm run test:coverage 2>&1 | tee test-output.log
+          EXIT_CODE=${PIPESTATUS[0]}
+          echo "::endgroup::"
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "::error::Tests failed with exit code $EXIT_CODE"
+            echo "### Tests Failed" >> $GITHUB_STEP_SUMMARY
+            echo "Exit code: $EXIT_CODE" >> $GITHUB_STEP_SUMMARY
+            echo '```text' >> $GITHUB_STEP_SUMMARY
+            tail -100 test-output.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            exit $EXIT_CODE
+          fi
+          echo "Tests passed successfully"
+
+      - name: Upload coverage to Coveralls
+        continue-on-error: true
+        # coverallsapp/github-action v2.3.6
+        uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: coverage/lcov.info
+
+      - name: Check SonarCloud configuration
+        id: sonar-check
+        run: |
+          SONAR_ENABLED=true
+          if [ -z "$SONAR_PROJECT_KEY" ] || [ -z "$SONAR_ORGANIZATION" ]; then
+            echo "::warning::SONAR_PROJECT_KEY and/or SONAR_ORGANIZATION are not set; skipping SonarCloud analysis."
+            SONAR_ENABLED=false
+          elif [ -z "$SONAR_TOKEN" ]; then
+            echo "::warning::SONAR_TOKEN secret is missing; skipping SonarCloud analysis."
+            SONAR_ENABLED=false
+          fi
+          echo "enabled=$SONAR_ENABLED" >> "$GITHUB_OUTPUT"
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: SonarCloud analysis
+        if: steps.sonar-check.outputs.enabled == 'true'
+        # SonarSource/sonarcloud-github-action v5.0.0
+        uses: SonarSource/sonarcloud-github-action@ffc3010689be73b8e5ae0c57ce35968afd7909e8
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >-
+            -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }}
+            -Dsonar.organization=${{ env.SONAR_ORGANIZATION }}
+            -Dsonar.host.url=${{ env.SONAR_HOST_URL }}
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+
+  # Note: Security scanning handled by GitHub's default CodeQL setup
+  # See: https://github.com/arcade-cabinet/Beppo-Laughs/settings/security_analysis
+
+  all-checks:
+    name: All Checks Passed
+    runs-on: ubuntu-latest
+    needs: [quality]
+    if: always()
+    steps:
+      - name: Check all jobs
+        run: |
+          if [ "${{ needs.quality.result }}" != "success" ]; then
+            echo "One or more checks failed"
+            exit 1
+          fi
+          echo "All checks passed successfully!"

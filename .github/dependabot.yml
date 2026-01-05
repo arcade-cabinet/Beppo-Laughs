@@ -1,0 +1,73 @@
+version: 2
+updates:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # npm dependencies - Grouped by update type for efficient review
+  # ═══════════════════════════════════════════════════════════════════════════
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "saturday"
+      time: "06:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+
+    # Group minor and patch updates together
+    groups:
+      # Production dependencies - patch updates (auto-mergeable)
+      production-patch:
+        dependency-type: "production"
+        update-types:
+          - "patch"
+
+      # Production dependencies - minor updates
+      production-minor:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+
+      # Development dependencies - patch and minor together
+      development-minor-patch:
+        dependency-type: "development"
+        update-types:
+          - "patch"
+          - "minor"
+
+      # Major updates always separate (not grouped)
+
+    labels:
+      - "dependencies"
+
+    commit-message:
+      prefix: "chore(deps):"
+      include: "scope"
+
+    # Reviewers and assignees
+    reviewers:
+      - "jbogaty"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # GitHub Actions - Keep CI/CD up to date
+  # ═══════════════════════════════════════════════════════════════════════════
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "saturday"
+      time: "06:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 5
+
+    groups:
+      # Group all GitHub Actions updates together
+      github-actions:
+        patterns:
+          - "*"
+
+    labels:
+      - "dependencies"
+      - "ci/cd"
+
+    commit-message:
+      prefix: "chore(ci):"
+      include: "scope"

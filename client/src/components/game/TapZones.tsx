@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { MazeGeometry, RailNode } from '../../game/maze/geometry';
+import type { MazeGeometry, RailNode } from '../../game/maze/geometry';
 import { useGameStore } from '../../game/store';
 
 interface TapZonesProps {
@@ -17,26 +17,22 @@ interface TapZoneProps {
 function TapZone({ targetNode, currentNode, direction, isExit, onTap }: TapZoneProps) {
   const { isMoving, blockades } = useGameStore();
   const isBlocked = blockades.has(targetNode.id);
-  
+
   if (isMoving || isBlocked) return null;
-  
+
   const directionOffsets: Record<string, [number, number]> = {
     north: [0, -2.5],
     south: [0, 2.5],
     east: [2.5, 0],
     west: [-2.5, 0],
   };
-  
+
   const offset = directionOffsets[direction] || [0, 0];
   const markerX = currentNode.worldX + offset[0];
   const markerZ = currentNode.worldZ + offset[1];
-  
+
   return (
-    <mesh 
-      position={[markerX, 0.5, markerZ]}
-      onClick={onTap}
-      onPointerDown={onTap}
-    >
+    <mesh position={[markerX, 0.5, markerZ]} onClick={onTap} onPointerDown={onTap}>
       <boxGeometry args={[2.5, 1.5, 2.5]} />
       <meshBasicMaterial transparent opacity={0} />
     </mesh>
@@ -46,7 +42,7 @@ function TapZone({ targetNode, currentNode, direction, isExit, onTap }: TapZoneP
 function getDirection(fromNode: RailNode, toNode: RailNode): 'north' | 'south' | 'east' | 'west' {
   const dx = toNode.gridX - fromNode.gridX;
   const dy = toNode.gridY - fromNode.gridY;
-  
+
   if (dy < 0) return 'north';
   if (dy > 0) return 'south';
   if (dx > 0) return 'east';
@@ -55,48 +51,52 @@ function getDirection(fromNode: RailNode, toNode: RailNode): 'north' | 'south' |
 
 export function TapZones({ geometry }: TapZonesProps) {
   const { currentNode, isMoving, startMoveTo, blockades, setAvailableMoves } = useGameStore();
-  
+
   const availableMoves = useMemo(() => {
     if (!currentNode || isMoving) return [];
-    
+
     const current = geometry.railNodes.get(currentNode);
     if (!current) {
       console.log('TapZones: No current node found for:', currentNode);
       return [];
     }
-    
-    const moves: { targetNode: RailNode; currentNode: RailNode; direction: 'north' | 'south' | 'east' | 'west' }[] = [];
-    
+
+    const moves: {
+      targetNode: RailNode;
+      currentNode: RailNode;
+      direction: 'north' | 'south' | 'east' | 'west';
+    }[] = [];
+
     console.log('TapZones: Current node', currentNode, 'has connections:', current.connections);
-    
+
     for (const connId of current.connections) {
       const node = geometry.railNodes.get(connId);
       if (!node) continue;
       if (blockades.has(connId)) continue;
-      
+
       const direction = getDirection(current, node);
       moves.push({ targetNode: node, currentNode: current, direction });
     }
-    
+
     console.log('TapZones: Available moves:', moves.length);
-    
-    const movesForStore = moves.map(m => ({
+
+    const movesForStore = moves.map((m) => ({
       direction: m.direction,
       nodeId: m.targetNode.id,
-      isExit: m.targetNode.isExit
+      isExit: m.targetNode.isExit,
     }));
     setAvailableMoves(movesForStore);
-    
+
     return moves;
   }, [currentNode, isMoving, geometry, blockades, setAvailableMoves]);
-  
+
   const handleTap = (nodeId: string) => {
     console.log('TapZones: Tapped to move to', nodeId);
     startMoveTo(nodeId, 1.0);
   };
-  
+
   if (isMoving) return null;
-  
+
   return (
     <group>
       {availableMoves.map(({ targetNode, currentNode, direction }) => (

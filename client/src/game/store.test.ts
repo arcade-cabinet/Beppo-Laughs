@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { useGameStore } from './store';
 
 describe('GameStore', () => {
@@ -101,7 +101,7 @@ describe('GameStore', () => {
       useGameStore.getState().visitNode('5,6');
       const fearAfterFirst = useGameStore.getState().fear;
       const despairAfterFirst = useGameStore.getState().despair;
-      
+
       useGameStore.getState().visitNode('5,6');
       expect(useGameStore.getState().despair).toBeGreaterThan(despairAfterFirst);
       expect(useGameStore.getState().fear).toBe(fearAfterFirst);
@@ -111,7 +111,7 @@ describe('GameStore', () => {
       useGameStore.getState().visitNode('7,8');
       useGameStore.getState().visitNode('7,8');
       useGameStore.getState().visitNode('7,8');
-      
+
       const cell = useGameStore.getState().visitedCells.get('7,8');
       expect(cell?.visitCount).toBe(3);
     });
@@ -151,7 +151,7 @@ describe('GameStore', () => {
     it('triggers game over when fear reaches max', () => {
       useGameStore.getState().increaseFear(100);
       useGameStore.getState().checkGameOver();
-      
+
       const state = useGameStore.getState();
       expect(state.isGameOver).toBe(true);
       expect(state.hasWon).toBe(false);
@@ -161,7 +161,7 @@ describe('GameStore', () => {
     it('triggers game over when despair reaches max', () => {
       useGameStore.getState().increaseDespair(100);
       useGameStore.getState().checkGameOver();
-      
+
       const state = useGameStore.getState();
       expect(state.isGameOver).toBe(true);
       expect(state.hasWon).toBe(false);
@@ -172,7 +172,7 @@ describe('GameStore', () => {
       useGameStore.getState().increaseFear(100);
       useGameStore.getState().increaseDespair(100);
       useGameStore.getState().checkGameOver();
-      
+
       expect(useGameStore.getState().gameOverReason).toBe('both');
     });
 
@@ -180,7 +180,7 @@ describe('GameStore', () => {
       useGameStore.getState().increaseFear(99);
       useGameStore.getState().increaseDespair(99);
       useGameStore.getState().checkGameOver();
-      
+
       expect(useGameStore.getState().isGameOver).toBe(false);
     });
   });
@@ -188,7 +188,7 @@ describe('GameStore', () => {
   describe('win condition', () => {
     it('triggers win state', () => {
       useGameStore.getState().triggerWin();
-      
+
       const state = useGameStore.getState();
       expect(state.hasWon).toBe(true);
     });
@@ -203,7 +203,7 @@ describe('GameStore', () => {
     it('starts movement to target', () => {
       useGameStore.getState().setCurrentNode('0,0');
       useGameStore.getState().startMoveTo('1,0', 1.5);
-      
+
       const state = useGameStore.getState();
       expect(state.isMoving).toBe(true);
       expect(state.targetNode).toBe('1,0');
@@ -221,7 +221,7 @@ describe('GameStore', () => {
       useGameStore.getState().setCurrentNode('0,0');
       useGameStore.getState().startMoveTo('1,0');
       useGameStore.getState().completeMove();
-      
+
       const state = useGameStore.getState();
       expect(state.currentNode).toBe('1,0');
       expect(state.isMoving).toBe(false);
@@ -239,7 +239,7 @@ describe('GameStore', () => {
     it('getSanityLevel returns remaining sanity (100 minus average insanity)', () => {
       useGameStore.getState().increaseFear(50);
       useGameStore.getState().increaseDespair(30);
-      
+
       const level = useGameStore.getState().getSanityLevel();
       expect(level).toBe(60);
     });
@@ -257,7 +257,7 @@ describe('GameStore', () => {
     it('isInverted returns true at high sanity loss', () => {
       useGameStore.getState().increaseFear(80);
       useGameStore.getState().increaseDespair(80);
-      
+
       expect(useGameStore.getState().isInverted()).toBe(true);
     });
 
@@ -275,9 +275,9 @@ describe('GameStore', () => {
       useGameStore.getState().collectItem('item-1');
       useGameStore.getState().visitNode('2,2');
       useGameStore.getState().triggerWin();
-      
+
       useGameStore.getState().resetGame();
-      
+
       const state = useGameStore.getState();
       expect(state.fear).toBe(0);
       expect(state.despair).toBe(0);

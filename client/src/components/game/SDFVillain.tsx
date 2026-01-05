@@ -1,8 +1,7 @@
-import { useRef, useMemo } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
 import { shaderMaterial } from '@react-three/drei';
-import { extend } from '@react-three/fiber';
-import { ShaderMaterial, Color, Vector3, MathUtils } from 'three';
+import { extend, useFrame, useThree } from '@react-three/fiber';
+import { useRef } from 'react';
+import { Color, MathUtils, type ShaderMaterial, Vector3 } from 'three';
 import { useGameStore } from '../../game/store';
 
 // SDF Ray Marching Material
@@ -196,7 +195,7 @@ const SDFVillainMaterial = shaderMaterial(
         discard;
       }
     }
-  `
+  `,
 );
 
 extend({ SDFVillainMaterial });
@@ -218,23 +217,23 @@ export function SDFVillain({ position, isActive }: SDFVillainProps) {
   const materialRef = useRef<ShaderMaterial>(null);
   const { fear, maxSanity } = useGameStore();
   const { camera } = useThree();
-  
+
   const fearLevel = fear / maxSanity;
-  
+
   useFrame((state) => {
     if (!materialRef.current) return;
-    
+
     materialRef.current.uniforms.uTime.value = state.clock.elapsedTime;
     materialRef.current.uniforms.uFearLevel.value = MathUtils.lerp(
       materialRef.current.uniforms.uFearLevel.value,
       isActive ? fearLevel : 0,
-      0.05
+      0.05,
     );
     materialRef.current.uniforms.uCameraPos.value.copy(camera.position);
   });
-  
+
   if (!isActive) return null;
-  
+
   return (
     <mesh position={position}>
       <planeGeometry args={[3, 4]} />
@@ -244,31 +243,37 @@ export function SDFVillain({ position, isActive }: SDFVillainProps) {
 }
 
 // Marching cubes for 3D blob effects
-export function MarchingCubesBlob({ position, scale = 1 }: { position: [number, number, number], scale?: number }) {
+export function MarchingCubesBlob({
+  position,
+  scale = 1,
+}: {
+  position: [number, number, number];
+  scale?: number;
+}) {
   const meshRef = useRef<any>(null);
   const { fear, maxSanity } = useGameStore();
-  
+
   useFrame((state) => {
     if (!meshRef.current) return;
-    
+
     // Pulsing effect
     const pulse = 1 + Math.sin(state.clock.elapsedTime * 3) * 0.1;
     meshRef.current.scale.setScalar(scale * pulse);
-    
+
     // Wobble
     meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime) * 0.2;
     meshRef.current.rotation.z = Math.cos(state.clock.elapsedTime * 0.7) * 0.1;
   });
-  
+
   return (
     <mesh ref={meshRef} position={position}>
       <icosahedronGeometry args={[0.5, 3]} />
-      <meshStandardMaterial 
+      <meshStandardMaterial
         color="#8b0000"
         roughness={0.3}
         metalness={0.1}
         emissive="#ff0000"
-        emissiveIntensity={fear / maxSanity * 0.3}
+        emissiveIntensity={(fear / maxSanity) * 0.3}
       />
     </mesh>
   );

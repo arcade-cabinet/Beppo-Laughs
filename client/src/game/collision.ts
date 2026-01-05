@@ -1,5 +1,5 @@
 import { Vector3 } from 'three';
-import { MazeGenerator } from './MazeGenerator';
+import type { MazeGenerator } from './MazeGenerator';
 
 const CELL_SIZE = 2;
 const PLAYER_RADIUS = 0.3;
@@ -9,9 +9,9 @@ const WALL_THICKNESS = 0.2;
 const cellKey = (gridX: number, gridZ: number) => `${gridX},${gridZ}`;
 
 export function checkCollision(
-  position: Vector3, 
+  position: Vector3,
   maze: MazeGenerator,
-  blockades?: Set<string>
+  blockades?: Set<string>,
 ): boolean {
   // Convert world position to grid coordinates
   const gridX = Math.floor((position.x + CELL_SIZE / 2) / CELL_SIZE);
@@ -52,7 +52,7 @@ export function checkCollision(
     if (blockades.has(key)) {
       return true;
     }
-    
+
     // Check adjacent cells for blockades
     const adjacentKeys = [
       cellKey(gridX + 1, gridZ),
@@ -60,13 +60,13 @@ export function checkCollision(
       cellKey(gridX, gridZ + 1),
       cellKey(gridX, gridZ - 1),
     ];
-    
+
     for (const adjKey of adjacentKeys) {
       if (blockades.has(adjKey)) {
         const [adjX, adjZ] = adjKey.split(',').map(Number);
         const dx = adjX - gridX;
         const dz = adjZ - gridZ;
-        
+
         if (dx === 1 && localX > halfCell - PLAYER_RADIUS - 0.1) return true;
         if (dx === -1 && localX < -halfCell + PLAYER_RADIUS + 0.1) return true;
         if (dz === 1 && localZ > halfCell - PLAYER_RADIUS - 0.1) return true;
@@ -82,7 +82,7 @@ export function resolveCollision(
   currentPos: Vector3,
   targetPos: Vector3,
   maze: MazeGenerator,
-  blockades?: Set<string>
+  blockades?: Set<string>,
 ): Vector3 {
   if (!checkCollision(targetPos, maze, blockades)) {
     return targetPos;

@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Scene } from '@/components/game/Scene';
-import { MainMenu } from '@/components/game/MainMenu';
+import { useCallback, useEffect, useState } from 'react';
 import { HUD } from '@/components/game/HUD';
+import { MainMenu } from '@/components/game/MainMenu';
+import { Scene } from '@/components/game/Scene';
 import { useGameStore } from '@/game/store';
 
 export default function Home() {
@@ -9,15 +9,15 @@ export default function Home() {
   const [seed, setSeed] = useState<string>('');
   const [isMobile, setIsMobile] = useState(false);
   const [showRotatePrompt, setShowRotatePrompt] = useState(false);
-  const setSeedStore = useGameStore(state => state.setSeed);
-  const resetGame = useGameStore(state => state.resetGame);
-  const isGameOver = useGameStore(state => state.isGameOver);
+  const setSeedStore = useGameStore((state) => state.setSeed);
+  const resetGame = useGameStore((state) => state.resetGame);
+  const isGameOver = useGameStore((state) => state.isGameOver);
 
   // Request fullscreen and lock orientation
   const enterFullscreen = useCallback(async () => {
     try {
       const elem = document.documentElement;
-      
+
       // Request fullscreen
       if (elem.requestFullscreen) {
         await elem.requestFullscreen();
@@ -26,17 +26,17 @@ export default function Home() {
       } else if ((elem as any).msRequestFullscreen) {
         await (elem as any).msRequestFullscreen();
       }
-      
+
       // Lock orientation to landscape
       if (screen.orientation && (screen.orientation as any).lock) {
         try {
           await (screen.orientation as any).lock('landscape');
-        } catch (e) {
+        } catch (_e) {
           // Orientation lock may not be supported
           console.log('Orientation lock not supported');
         }
       }
-    } catch (e) {
+    } catch (_e) {
       console.log('Fullscreen not supported or denied');
     }
   }, []);
@@ -45,10 +45,10 @@ export default function Home() {
     if (document.fullscreenElement) {
       document.exitFullscreen().catch(() => {});
     }
-    if (screen.orientation && screen.orientation.unlock) {
+    if (screen.orientation?.unlock) {
       try {
         screen.orientation.unlock();
-      } catch (e) {}
+      } catch (_e) {}
     }
   }, []);
 
@@ -56,12 +56,12 @@ export default function Home() {
     resetGame();
     setSeedStore(selectedSeed);
     setSeed(selectedSeed);
-    
+
     // Enter fullscreen on mobile
     if (isMobile) {
       await enterFullscreen();
     }
-    
+
     setIsPlaying(true);
   };
 
@@ -81,16 +81,16 @@ export default function Home() {
   // Check orientation on mobile
   useEffect(() => {
     if (!isMobile) return;
-    
+
     const checkOrientation = () => {
       const isPortrait = window.innerHeight > window.innerWidth;
       setShowRotatePrompt(isPlaying && isPortrait);
     };
-    
+
     checkOrientation();
     window.addEventListener('resize', checkOrientation);
     window.addEventListener('orientationchange', checkOrientation);
-    
+
     return () => {
       window.removeEventListener('resize', checkOrientation);
       window.removeEventListener('orientationchange', checkOrientation);
@@ -100,17 +100,17 @@ export default function Home() {
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden">
       {!isPlaying && <MainMenu onStart={handleStart} />}
-      
+
       {isPlaying && (
         <>
           <div className="absolute inset-0 z-0">
-             <Scene seed={seed} />
+            <Scene seed={seed} />
           </div>
           <HUD />
-          
+
           {/* Exit Button - hidden on mobile */}
           {!isMobile && (
-            <button 
+            <button
               onClick={handleExit}
               className="absolute top-4 right-4 z-50 pointer-events-auto text-white/50 hover:text-white font-mono text-xs uppercase tracking-wider px-3 py-1 border border-white/20 hover:border-white/50 transition-all"
               data-testid="button-exit"
@@ -118,10 +118,10 @@ export default function Home() {
               ESC
             </button>
           )}
-          
+
           {/* Mobile Exit Button - touch-friendly */}
           {isMobile && (
-            <button 
+            <button
               onClick={handleExit}
               className="absolute top-4 right-4 z-50 pointer-events-auto text-white/70 font-mono text-sm uppercase px-4 py-2 bg-black/50 border border-white/30 rounded"
               data-testid="button-exit-mobile"
@@ -129,10 +129,10 @@ export default function Home() {
               EXIT
             </button>
           )}
-          
+
           {/* Restart after game over */}
           {isGameOver && (
-            <button 
+            <button
               onClick={handleExit}
               className="absolute bottom-20 left-1/2 -translate-x-1/2 z-50 pointer-events-auto text-white hover:text-red-500 font-creepy text-2xl uppercase tracking-wider px-6 py-2 border border-white/30 hover:border-red-500 transition-all"
               data-testid="button-restart"
@@ -142,19 +142,15 @@ export default function Home() {
           )}
         </>
       )}
-      
+
       {/* Rotate Device Prompt */}
       {showRotatePrompt && (
         <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center">
-          <div className="text-white font-creepy text-3xl mb-4 animate-pulse">
-            📱➡️📱
-          </div>
+          <div className="text-white font-creepy text-3xl mb-4 animate-pulse">📱➡️📱</div>
           <div className="text-white/90 font-creepy text-2xl text-center px-8">
             ROTATE YOUR DEVICE
           </div>
-          <div className="text-white/60 font-mono text-sm mt-4">
-            Landscape mode required
-          </div>
+          <div className="text-white/60 font-mono text-sm mt-4">Landscape mode required</div>
         </div>
       )}
     </div>
