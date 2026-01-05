@@ -1,34 +1,20 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Scene } from '@/components/game/Scene';
 import { MainMenu } from '@/components/game/MainMenu';
 import { HUD } from '@/components/game/HUD';
 import { useGameStore } from '@/game/store';
 
-// Minimum screen dimension (in pixels) to be considered a "large screen" (tablet/foldable)
-// Devices below this threshold in BOTH dimensions are considered phones and need landscape enforcement
-const TABLET_MIN_DIMENSION = 600;
-
 export default function Home() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [seed, setSeed] = useState<string>('');
-  const [isSmallScreen, setIsSmallScreen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [showRotatePrompt, setShowRotatePrompt] = useState(false);
-  const hasEntered = useRef(false);
   const setSeedStore = useGameStore(state => state.setSeed);
   const resetGame = useGameStore(state => state.resetGame);
   const isGameOver = useGameStore(state => state.isGameOver);
 
-  // Check if device is a small screen (phone) vs tablet/foldable
-  const checkScreenSize = useCallback(() => {
-    // Get the larger dimension (to account for orientation)
-    const largerDim = Math.max(window.innerWidth, window.innerHeight);
-    // If even the larger dimension is small, it's definitely a phone
-    return largerDim < TABLET_MIN_DIMENSION || 
-           (window.innerWidth < TABLET_MIN_DIMENSION && window.innerHeight < TABLET_MIN_DIMENSION);
-  }, []);
-
-  // Request fullscreen and optionally lock orientation (only on small screens)
-  const enterFullscreen = useCallback(async (lockOrientation: boolean) => {
+  // Request fullscreen and lock orientation
+  const enterFullscreen = useCallback(async () => {
     try {
       const elem = document.documentElement;
       
@@ -41,11 +27,12 @@ export default function Home() {
         await (elem as any).msRequestFullscreen();
       }
       
-      // Lock orientation to landscape only on small screens (phones)
-      if (lockOrientation && screen.orientation && (screen.orientation as any).lock) {
+      // Lock orientation to landscape
+      if (screen.orientation && (screen.orientation as any).lock) {
         try {
           await (screen.orientation as any).lock('landscape');
         } catch (e) {
+          // Orientation lock may not be supported
           console.log('Orientation lock not supported');
         }
       }
@@ -65,48 +52,39 @@ export default function Home() {
     }
   }, []);
 
-  // Called when user clicks ENTER MAZE in MainMenu
-  const handleStart = useCallback(async (selectedSeed: string) => {
-    // Guard against double-entry
-    if (hasEntered.current || isPlaying) return;
-    hasEntered.current = true;
-    
+  const handleStart = async (selectedSeed: string) => {
     resetGame();
     setSeedStore(selectedSeed);
     setSeed(selectedSeed);
     
-    const smallScreen = checkScreenSize();
-    setIsSmallScreen(smallScreen);
+    // Enter fullscreen on mobile
+    if (isMobile) {
+      await enterFullscreen();
+    }
     
-    // Enter fullscreen for everyone, but only lock orientation on small screens
-    await enterFullscreen(smallScreen);
-    
-    // Only set playing AFTER fullscreen is done to prevent double-render
     setIsPlaying(true);
-  }, [isPlaying, resetGame, setSeedStore, checkScreenSize, enterFullscreen]);
+  };
 
   const handleExit = () => {
     setIsPlaying(false);
     resetGame();
     exitFullscreen();
-    hasEntered.current = false;
   };
 
-  // Reset game on initial mount
+  // Detect mobile and reset on mount
   useEffect(() => {
+    const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    setIsMobile(mobile);
     resetGame();
   }, [resetGame]);
 
-  // Check orientation only on small screens (phones)
+  // Check orientation on mobile
   useEffect(() => {
-    if (!isSmallScreen || !isPlaying) {
-      setShowRotatePrompt(false);
-      return;
-    }
+    if (!isMobile) return;
     
     const checkOrientation = () => {
       const isPortrait = window.innerHeight > window.innerWidth;
-      setShowRotatePrompt(isPortrait);
+      setShowRotatePrompt(isPlaying && isPortrait);
     };
     
     checkOrientation();
@@ -117,11 +95,10 @@ export default function Home() {
       window.removeEventListener('resize', checkOrientation);
       window.removeEventListener('orientationchange', checkOrientation);
     };
-  }, [isSmallScreen, isPlaying]);
+  }, [isMobile, isPlaying]);
 
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden">
-      {/* Main Menu - shown when not playing */}
       {!isPlaying && <MainMenu onStart={handleStart} />}
       
       {isPlaying && (
@@ -131,14 +108,27 @@ export default function Home() {
           </div>
           <HUD />
           
-          {/* Exit Button - touch-friendly on all devices */}
-          <button 
-            onClick={handleExit}
-            className="absolute top-4 right-4 z-50 pointer-events-auto text-white/70 font-mono text-sm uppercase px-4 py-2 bg-black/50 border border-white/30 rounded"
-            data-testid="button-exit"
-          >
-            EXIT
-          </button>
+          {/* Exit Button - hidden on mobile */}
+          {!isMobile && (
+            <button 
+              onClick={handleExit}
+              className="absolute top-4 right-4 z-50 pointer-events-auto text-white/50 hover:text-white font-mono text-xs uppercase tracking-wider px-3 py-1 border border-white/20 hover:border-white/50 transition-all"
+              data-testid="button-exit"
+            >
+              ESC
+            </button>
+          )}
+          
+          {/* Mobile Exit Button - touch-friendly */}
+          {isMobile && (
+            <button 
+              onClick={handleExit}
+              className="absolute top-4 right-4 z-50 pointer-events-auto text-white/70 font-mono text-sm uppercase px-4 py-2 bg-black/50 border border-white/30 rounded"
+              data-testid="button-exit-mobile"
+            >
+              EXIT
+            </button>
+          )}
           
           {/* Restart after game over */}
           {isGameOver && (
