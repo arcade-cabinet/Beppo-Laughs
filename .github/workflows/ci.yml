@@ -19,9 +19,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CI: true
-      SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
-      SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
-      SONAR_HOST_URL: https://sonarcloud.io
     steps:
       - name: Checkout repository
         # actions/checkout v6.0.1
@@ -144,34 +141,8 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: coverage/lcov.info
 
-      - name: Check SonarCloud configuration
-        id: sonar-check
-        run: |
-          SONAR_ENABLED=true
-          if [ -z "$SONAR_PROJECT_KEY" ] || [ -z "$SONAR_ORGANIZATION" ]; then
-            echo "::warning::SONAR_PROJECT_KEY and/or SONAR_ORGANIZATION are not set; skipping SonarCloud analysis."
-            SONAR_ENABLED=false
-          elif [ -z "$SONAR_TOKEN" ]; then
-            echo "::warning::SONAR_TOKEN secret is missing; skipping SonarCloud analysis."
-            SONAR_ENABLED=false
-          fi
-          echo "enabled=$SONAR_ENABLED" >> "$GITHUB_OUTPUT"
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-      - name: SonarCloud analysis
-        if: steps.sonar-check.outputs.enabled == 'true'
-        # SonarSource/sonarcloud-github-action v5.0.0
-        uses: SonarSource/sonarcloud-github-action@ffc3010689be73b8e5ae0c57ce35968afd7909e8
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >-
-            -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }}
-            -Dsonar.organization=${{ env.SONAR_ORGANIZATION }}
-            -Dsonar.host.url=${{ env.SONAR_HOST_URL }}
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-
+  # Note: SonarCloud analysis handled by GitHub App (Automatic Analysis)
+  # See: https://sonarcloud.io/project/overview?id=arcade-cabinet_Beppo-Laughs
   # Note: Security scanning handled by GitHub's default CodeQL setup
   # See: https://github.com/arcade-cabinet/Beppo-Laughs/settings/security_analysis
 
