@@ -82,6 +82,11 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
       
       if (newProgress >= 1) {
         camera.position.copy(targetPos.current);
+        
+        const finalRotation = getDirectionRotation(fromNode, toNode);
+        camera.rotation.y = finalRotation;
+        gameState.setCameraRotation(finalRotation);
+        
         gameState.completeMove();
         
         if (toNode.isExit) {
@@ -109,7 +114,7 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
       camera.position.y = MathUtils.lerp(camera.position.y, 1.4, 0.1);
       
       const storeCameraRotation = gameState.cameraRotation;
-      camera.rotation.y = MathUtils.lerp(camera.rotation.y, storeCameraRotation, 0.1);
+      camera.rotation.y = storeCameraRotation;
     }
     
     const maxPitchUp = -0.17;
