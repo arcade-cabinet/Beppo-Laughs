@@ -25,8 +25,8 @@ export function MainMenu({ onStart }: MainMenuProps) {
   );
 
   const generateRandomSeed = useCallback(() => {
-    const r = () => SEED_WORDS[Math.floor(Math.random() * SEED_WORDS.length)];
-    const generated = `${r()} ${r()} ${r()}`;
+    const shuffled = [...SEED_WORDS].sort(() => 0.5 - Math.random());
+    const generated = shuffled.slice(0, 3).join(' ');
     setSeedInput(generated);
     setErrorMessage('');
   }, []);
