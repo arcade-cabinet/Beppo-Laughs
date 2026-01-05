@@ -606,7 +606,7 @@ describe('Home', () => {
     });
 
     it('handles starting with different seeds', async () => {
-      const { rerender } = render(<Home />);
+      render(<Home />);
       
       mockSetSeed.mockClear();
       
