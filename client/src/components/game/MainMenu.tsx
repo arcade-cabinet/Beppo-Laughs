@@ -97,9 +97,17 @@ export function MainMenu({ onStart }: MainMenuProps) {
               onChange={(e) => handleSeedChange(e.target.value)}
               className="bg-card/50 border-primary/30 text-center font-mono text-lg h-12"
               data-testid="input-seed"
+              aria-label="Game seed input"
+              aria-invalid={!!errorMessage}
+              aria-describedby={errorMessage ? 'seed-error' : undefined}
             />
             {errorMessage && (
-              <p className="mt-2 text-sm text-red-400" data-testid="text-seed-error">
+              <p
+                id="seed-error"
+                className="mt-2 text-sm text-red-400"
+                data-testid="text-seed-error"
+                role="alert"
+              >
                 {errorMessage}
               </p>
             )}
@@ -111,6 +119,7 @@ export function MainMenu({ onStart }: MainMenuProps) {
               onClick={generateRandomSeed}
               className="border-primary/50 hover:bg-primary/20 hover:text-primary-foreground font-ui"
               data-testid="button-random-seed"
+              aria-label="Generate random seed"
             >
               Randomize
             </Button>
@@ -120,6 +129,7 @@ export function MainMenu({ onStart }: MainMenuProps) {
               onClick={handleStart}
               className="bg-secondary hover:bg-secondary/80 text-white font-creepy tracking-wider text-xl px-8"
               data-testid="button-start-game"
+              aria-label="Start game with current seed"
             >
               ENTER MAZE
             </Button>

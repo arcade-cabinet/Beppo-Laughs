@@ -519,5 +519,57 @@ describe('MainMenu', () => {
       const input = screen.getByTestId('input-seed');
       expect(input).toHaveAttribute('type', 'text');
     });
+
+    it('input has accessible label', () => {
+      render(<MainMenu onStart={mockOnStart} />);
+
+      const input = screen.getByRole('textbox', { name: /game seed input/i });
+      expect(input).toBeInTheDocument();
+    });
+
+    it('buttons have accessible labels', () => {
+      render(<MainMenu onStart={mockOnStart} />);
+
+      expect(screen.getByRole('button', { name: /generate random seed/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /start game with current seed/i })).toBeInTheDocument();
+    });
+
+    it('error message has alert role for screen readers', () => {
+      render(<MainMenu onStart={mockOnStart} />);
+
+      const input = screen.getByRole('textbox', { name: /game seed input/i });
+      fireEvent.change(input, { target: { value: 'invalid' } });
+
+      const startButton = screen.getByRole('button', { name: /start game/i });
+      fireEvent.click(startButton);
+
+      const errorAlert = screen.getByRole('alert');
+      expect(errorAlert).toHaveTextContent('Enter a three-word seed');
+    });
+
+    it('input has aria-invalid when error is present', () => {
+      render(<MainMenu onStart={mockOnStart} />);
+
+      const input = screen.getByRole('textbox', { name: /game seed input/i });
+      fireEvent.change(input, { target: { value: 'invalid' } });
+
+      const startButton = screen.getByRole('button', { name: /start game/i });
+      fireEvent.click(startButton);
+
+      expect(input).toHaveAttribute('aria-invalid', 'true');
+    });
+
+    it('input aria-describedby references error message', () => {
+      render(<MainMenu onStart={mockOnStart} />);
+
+      const input = screen.getByRole('textbox', { name: /game seed input/i });
+      fireEvent.change(input, { target: { value: 'invalid' } });
+
+      const startButton = screen.getByRole('button', { name: /start game/i });
+      fireEvent.click(startButton);
+
+      expect(input).toHaveAttribute('aria-describedby', 'seed-error');
+      expect(screen.getByRole('alert')).toHaveAttribute('id', 'seed-error');
+    });
   });
 });
