@@ -7,6 +7,14 @@ interface MainMenuProps {
   onStart: (seed: string) => void;
 }
 
+// Seed word list for random generation
+const SEED_WORDS = ['dark', 'blood', 'shadow', 'maze', 'fear', 'run', 'hide', 'scream', 'whisper', 'death', 'green', 'hedge'];
+
+// Pattern to validate three-word seeds
+const SEED_PATTERN = /^\s*\w+\s+\w+\s+\w+\s*$/;
+
+export function MainMenu({ onStart }: MainMenuProps) {
+  const [seedInput, setSeedInput] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
   const normalizedSeed = useCallback(
