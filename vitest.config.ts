@@ -16,7 +16,7 @@ export default defineConfig({
         'dist/',
         '**/*.test.{ts,tsx}',
         '**/*.spec.{ts,tsx}',
-        '**/test-setup.ts',
+        '**/test-setup.tsx',
       ],
     },
   },

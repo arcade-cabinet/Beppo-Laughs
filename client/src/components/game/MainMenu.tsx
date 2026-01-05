@@ -8,7 +8,7 @@ interface MainMenuProps {
 }
 
 // Seed word list for random generation
-const SEED_WORDS = [
+export const SEED_WORDS = [
   'dark',
   'blood',
   'shadow',
