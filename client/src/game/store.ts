@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import seedrandom from 'seedrandom';
 
 interface VisitedCell {
   x: number;
@@ -211,12 +212,33 @@ export const useGameStore = create<GameState>((set, get) => ({
   // Rail Navigation Actions
   setCurrentNode: (nodeId) => set({ currentNode: nodeId }),
   
-  startMoveTo: (targetNodeId, speed = 1) => set({
-    targetNode: targetNodeId,
-    isMoving: true,
-    moveProgress: 0,
-    moveSpeed: speed
-  }),
+  startMoveTo: (targetNodeId, speed = 1) => {
+    const state = get();
+    const fearRatio = state.fear / state.maxSanity;
+    
+    let actualTarget = targetNodeId;
+    
+    if (fearRatio > 0.3 && state.availableMoves.length > 1) {
+      const rng = seedrandom(`fear-${Date.now()}`);
+      const confusionChance = (fearRatio - 0.3) * 0.8;
+      
+      if (rng() < confusionChance) {
+        const otherMoves = state.availableMoves.filter(m => m.nodeId !== targetNodeId);
+        if (otherMoves.length > 0) {
+          const randomMove = otherMoves[Math.floor(rng() * otherMoves.length)];
+          actualTarget = randomMove.nodeId;
+          console.log('FEAR confusion! Intended:', targetNodeId, 'Actual:', actualTarget);
+        }
+      }
+    }
+    
+    set({
+      targetNode: actualTarget,
+      isMoving: true,
+      moveProgress: 0,
+      moveSpeed: speed
+    });
+  },
   
   updateMoveProgress: (progress) => set({ moveProgress: Math.min(1, progress) }),
   
