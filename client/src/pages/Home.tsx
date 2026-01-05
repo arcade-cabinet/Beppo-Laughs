@@ -6,9 +6,9 @@ import { useGameStore } from '@/game/store';
 
 export default function Home() {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [seed, setSeed] = useState<string>('');
   const [isMobile, setIsMobile] = useState(false);
   const [showRotatePrompt, setShowRotatePrompt] = useState(false);
+  const seed = useGameStore(state => state.seed);
   const setSeedStore = useGameStore(state => state.setSeed);
   const resetGame = useGameStore(state => state.resetGame);
   const isGameOver = useGameStore(state => state.isGameOver);
@@ -55,7 +55,6 @@ export default function Home() {
   const handleStart = async (selectedSeed: string) => {
     resetGame();
     setSeedStore(selectedSeed);
-    setSeed(selectedSeed);
     
     // Enter fullscreen on mobile
     if (isMobile) {
