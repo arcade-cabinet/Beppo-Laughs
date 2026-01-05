@@ -253,7 +253,6 @@ describe('MainMenu', () => {
       render(<MainMenu onStart={mockOnStart} />);
       
       const randomizeButton = screen.getByTestId('button-random-seed');
-      const validWords = ['dark', 'blood', 'shadow', 'maze', 'fear', 'run', 'hide', 'scream', 'whisper', 'death', 'green', 'hedge'];
       
       // Generate multiple seeds and verify all words are from the list
       for (let i = 0; i < 5; i++) {
@@ -263,7 +262,7 @@ describe('MainMenu', () => {
         const words = input.value.trim().split(/\s+/);
         
         words.forEach(word => {
-          expect(validWords).toContain(word);
+          expect(SEED_WORDS).toContain(word);
         });
       }
     });
