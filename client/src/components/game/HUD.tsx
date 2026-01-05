@@ -76,6 +76,8 @@ export function HUD() {
   const [videoEnded, setVideoEnded] = useState(false);
   const fearPercent = (fear / maxSanity) * 100;
   const despairPercent = (despair / maxSanity) * 100;
+  const FEAR_METER_COLOR = '#ff2d2d';
+  const DESPAIR_METER_COLOR = '#3b82f6';
   
   const avgInsanity = (fear + despair) / 2 / maxSanity;
   const redOverlayOpacity = Math.min(fear / 300, 0.2);
