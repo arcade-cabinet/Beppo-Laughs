@@ -172,36 +172,18 @@ jobs:
             -Dsonar.host.url=${{ env.SONAR_HOST_URL }}
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
 
-  security:
-    name: Security Scan
-    runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-      contents: read
-    steps:
-      - name: Checkout repository
-        # actions/checkout v6.0.1
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
-
-      - name: Initialize CodeQL
-        # github/codeql-action v3
-        uses: github/codeql-action/init@b1722c1245f90604c2c348f9d1624af97ea8fc6e
-        with:
-          languages: javascript-typescript
-
-      - name: Perform CodeQL Analysis
-        # github/codeql-action v3
-        uses: github/codeql-action/analyze@b1722c1245f90604c2c348f9d1624af97ea8fc6e
+  # Note: Security scanning handled by GitHub's default CodeQL setup
+  # See: https://github.com/arcade-cabinet/Beppo-Laughs/settings/security_analysis
 
   all-checks:
     name: All Checks Passed
     runs-on: ubuntu-latest
-    needs: [quality, security]
+    needs: [quality]
     if: always()
     steps:
       - name: Check all jobs
         run: |
-          if [ "${{ needs.quality.result }}" != "success" ] || [ "${{ needs.security.result }}" != "success" ]; then
+          if [ "${{ needs.quality.result }}" != "success" ]; then
             echo "One or more checks failed"
             exit 1
           fi
