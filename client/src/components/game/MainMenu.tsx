@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -8,7 +8,20 @@ interface MainMenuProps {
 }
 
 // Seed word list for random generation
-const SEED_WORDS = ['dark', 'blood', 'shadow', 'maze', 'fear', 'run', 'hide', 'scream', 'whisper', 'death', 'green', 'hedge'];
+const SEED_WORDS = [
+  'dark',
+  'blood',
+  'shadow',
+  'maze',
+  'fear',
+  'run',
+  'hide',
+  'scream',
+  'whisper',
+  'death',
+  'green',
+  'hedge',
+];
 
 // Pattern to validate three-word seeds
 const SEED_PATTERN = /^\s*\w+\s+\w+\s+\w+\s*$/;
@@ -19,16 +32,21 @@ export function MainMenu({ onStart }: MainMenuProps) {
 
   const normalizedSeed = useCallback(
     (value: string) => value.trim().replace(/\s+/g, ' ').toLowerCase(),
-    []
+    [],
   );
 
   const isValidSeed = useCallback(
     (value: string) => SEED_PATTERN.test(normalizedSeed(value)),
-    [normalizedSeed]
+    [normalizedSeed],
   );
 
   const generateRandomSeed = useCallback(() => {
-    const shuffled = [...SEED_WORDS].sort(() => Math.random() - 0.5);
+    // Fisher-Yates shuffle for uniform randomization
+    const shuffled = [...SEED_WORDS];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
     const generated = `${shuffled[0]} ${shuffled[1]} ${shuffled[2]}`;
     setSeedInput(generated);
     setErrorMessage('');
@@ -72,9 +90,9 @@ export function MainMenu({ onStart }: MainMenuProps) {
 
         <div className="space-y-4 pt-8">
           <div className="relative">
-            <Input 
-              type="text" 
-              placeholder="Enter three seed words..." 
+            <Input
+              type="text"
+              placeholder="Enter three seed words..."
               value={seedInput}
               onChange={(e) => handleSeedChange(e.target.value)}
               className="bg-card/50 border-primary/30 text-center font-mono text-lg h-12"
@@ -101,7 +119,6 @@ export function MainMenu({ onStart }: MainMenuProps) {
               size="lg"
               onClick={handleStart}
               className="bg-secondary hover:bg-secondary/80 text-white font-creepy tracking-wider text-xl px-8"
-              disabled={!isValidSeed(seedInput)}
               data-testid="button-start-game"
             >
               ENTER MAZE

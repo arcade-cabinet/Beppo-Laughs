@@ -1,11 +1,11 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import Home from './Home';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useGameStore } from '@/game/store';
+import Home from './Home';
 
 // Mock the game components
 vi.mock('@/components/game/Scene', () => ({
-  Scene: ({ seed }: { seed: string }) => <div data-testid="scene">Scene: {seed}</div>
+  Scene: ({ seed }: { seed: string }) => <div data-testid="scene">Scene: {seed}</div>,
 }));
 
 vi.mock('@/components/game/MainMenu', () => ({
@@ -15,11 +15,15 @@ vi.mock('@/components/game/MainMenu', () => ({
         Start
       </button>
     </div>
-  )
+  ),
 }));
 
 vi.mock('@/components/game/HUD', () => ({
-  HUD: () => <div data-testid="hud">HUD</div>
+  HUD: () => <div data-testid="hud">HUD</div>,
+}));
+
+vi.mock('@/game/store', () => ({
+  useGameStore: vi.fn(),
 }));
 
 describe('Home', () => {
@@ -29,7 +33,7 @@ describe('Home', () => {
   beforeEach(() => {
     mockResetGame = vi.fn();
     mockSetSeed = vi.fn();
-    
+
     // Mock useGameStore
     vi.mocked(useGameStore).mockImplementation((selector: any) => {
       const state = {
@@ -56,7 +60,7 @@ describe('Home', () => {
   describe('Initial Render', () => {
     it('renders main menu by default', () => {
       render(<Home />);
-      
+
       expect(screen.getByTestId('main-menu')).toBeInTheDocument();
       expect(screen.queryByTestId('scene')).not.toBeInTheDocument();
       expect(screen.queryByTestId('hud')).not.toBeInTheDocument();
@@ -64,13 +68,13 @@ describe('Home', () => {
 
     it('resets game on mount', () => {
       render(<Home />);
-      
+
       expect(mockResetGame).toHaveBeenCalled();
     });
 
     it('does not show exit button when not playing', () => {
       render(<Home />);
-      
+
       expect(screen.queryByTestId('button-exit')).not.toBeInTheDocument();
       expect(screen.queryByTestId('button-exit-mobile')).not.toBeInTheDocument();
     });
@@ -79,10 +83,10 @@ describe('Home', () => {
   describe('Starting the Game', () => {
     it('shows scene and HUD when game starts', async () => {
       render(<Home />);
-      
+
       const startButton = screen.getByTestId('mock-start');
       fireEvent.click(startButton);
-      
+
       await waitFor(() => {
         expect(screen.getByTestId('scene')).toBeInTheDocument();
         expect(screen.getByTestId('hud')).toBeInTheDocument();
@@ -91,10 +95,10 @@ describe('Home', () => {
 
     it('hides main menu when game starts', async () => {
       render(<Home />);
-      
+
       const startButton = screen.getByTestId('mock-start');
       fireEvent.click(startButton);
-      
+
       await waitFor(() => {
         expect(screen.queryByTestId('main-menu')).not.toBeInTheDocument();
       });
@@ -102,12 +106,12 @@ describe('Home', () => {
 
     it('resets game state when starting', async () => {
       render(<Home />);
-      
+
       mockResetGame.mockClear();
-      
+
       const startButton = screen.getByTestId('mock-start');
       fireEvent.click(startButton);
-      
+
       await waitFor(() => {
         expect(mockResetGame).toHaveBeenCalled();
       });
@@ -115,10 +119,10 @@ describe('Home', () => {
 
     it('sets seed in store when starting', async () => {
       render(<Home />);
-      
+
       const startButton = screen.getByTestId('mock-start');
       fireEvent.click(startButton);
-      
+
       await waitFor(() => {
         expect(mockSetSeed).toHaveBeenCalledWith('test seed');
       });
@@ -136,10 +140,10 @@ describe('Home', () => {
       });
 
       render(<Home />);
-      
+
       const startButton = screen.getByTestId('mock-start');
       fireEvent.click(startButton);
-      
+
       await waitFor(() => {
         expect(screen.getByTestId('scene')).toHaveTextContent('Scene: test seed');
       });
@@ -149,10 +153,10 @@ describe('Home', () => {
   describe('Desktop Exit Button', () => {
     it('shows desktop exit button when playing on desktop', async () => {
       render(<Home />);
-      
+
       const startButton = screen.getByTestId('mock-start');
       fireEvent.click(startButton);
-      
+
       await waitFor(() => {
         expect(screen.getByTestId('button-exit')).toBeInTheDocument();
         expect(screen.queryByTestId('button-exit-mobile')).not.toBeInTheDocument();
@@ -161,17 +165,17 @@ describe('Home', () => {
 
     it('exits game when desktop exit button is clicked', async () => {
       render(<Home />);
-      
+
       const startButton = screen.getByTestId('mock-start');
       fireEvent.click(startButton);
-      
+
       await waitFor(() => {
         expect(screen.getByTestId('button-exit')).toBeInTheDocument();
       });
-      
+
       const exitButton = screen.getByTestId('button-exit');
       fireEvent.click(exitButton);
-      
+
       await waitFor(() => {
         expect(screen.getByTestId('main-menu')).toBeInTheDocument();
         expect(screen.queryByTestId('scene')).not.toBeInTheDocument();
@@ -180,28 +184,28 @@ describe('Home', () => {
 
     it('resets game when exiting', async () => {
       render(<Home />);
-      
+
       const startButton = screen.getByTestId('mock-start');
       fireEvent.click(startButton);
-      
+
       await waitFor(() => {
         expect(screen.getByTestId('button-exit')).toBeInTheDocument();
       });
-      
+
       mockResetGame.mockClear();
-      
+
       const exitButton = screen.getByTestId('button-exit');
       fireEvent.click(exitButton);
-      
+
       expect(mockResetGame).toHaveBeenCalled();
     });
 
     it('desktop exit button has correct label', async () => {
       render(<Home />);
-      
+
       const startButton = screen.getByTestId('mock-start');
       fireEvent.click(startButton);
-      
+
       await waitFor(() => {
         const exitButton = screen.getByTestId('button-exit');
         expect(exitButton).toHaveTextContent('ESC');
@@ -220,16 +224,16 @@ describe('Home', () => {
 
     it('detects mobile devices', () => {
       render(<Home />);
-      
+
       expect(navigator.userAgent).toContain('iPhone');
     });
 
     it('shows mobile exit button when playing on mobile', async () => {
       render(<Home />);
-      
+
       const startButton = screen.getByTestId('mock-start');
       fireEvent.click(startButton);
-      
+
       await waitFor(() => {
         expect(screen.getByTestId('button-exit-mobile')).toBeInTheDocument();
         expect(screen.queryByTestId('button-exit')).not.toBeInTheDocument();
@@ -238,10 +242,10 @@ describe('Home', () => {
 
     it('mobile exit button has correct label', async () => {
       render(<Home />);
-      
+
       const startButton = screen.getByTestId('mock-start');
       fireEvent.click(startButton);
-      
+
       await waitFor(() => {
         const exitButton = screen.getByTestId('button-exit-mobile');
         expect(exitButton).toHaveTextContent('EXIT');
@@ -264,10 +268,10 @@ describe('Home', () => {
 
     it('shows restart button when game is over', async () => {
       render(<Home />);
-      
+
       const startButton = screen.getByTestId('mock-start');
       fireEvent.click(startButton);
-      
+
       await waitFor(() => {
         expect(screen.getByTestId('button-restart')).toBeInTheDocument();
       });
@@ -275,10 +279,10 @@ describe('Home', () => {
 
     it('restart button has correct label', async () => {
       render(<Home />);
-      
+
       const startButton = screen.getByTestId('mock-start');
       fireEvent.click(startButton);
-      
+
       await waitFor(() => {
         const restartButton = screen.getByTestId('button-restart');
         expect(restartButton).toHaveTextContent('TRY AGAIN');
@@ -287,17 +291,17 @@ describe('Home', () => {
 
     it('returns to main menu when restart is clicked', async () => {
       render(<Home />);
-      
+
       const startButton = screen.getByTestId('mock-start');
       fireEvent.click(startButton);
-      
+
       await waitFor(() => {
         expect(screen.getByTestId('button-restart')).toBeInTheDocument();
       });
-      
+
       const restartButton = screen.getByTestId('button-restart');
       fireEvent.click(restartButton);
-      
+
       await waitFor(() => {
         expect(screen.getByTestId('main-menu')).toBeInTheDocument();
       });
@@ -305,19 +309,19 @@ describe('Home', () => {
 
     it('resets game when restarting', async () => {
       render(<Home />);
-      
+
       const startButton = screen.getByTestId('mock-start');
       fireEvent.click(startButton);
-      
+
       await waitFor(() => {
         expect(screen.getByTestId('button-restart')).toBeInTheDocument();
       });
-      
+
       mockResetGame.mockClear();
-      
+
       const restartButton = screen.getByTestId('button-restart');
       fireEvent.click(restartButton);
-      
+
       expect(mockResetGame).toHaveBeenCalled();
     });
   });
@@ -329,19 +333,19 @@ describe('Home', () => {
     beforeEach(() => {
       mockRequestFullscreen = vi.fn().mockResolvedValue(undefined);
       mockExitFullscreen = vi.fn().mockResolvedValue(undefined);
-      
+
       Object.defineProperty(document.documentElement, 'requestFullscreen', {
         value: mockRequestFullscreen,
         configurable: true,
         writable: true,
       });
-      
+
       Object.defineProperty(document, 'exitFullscreen', {
         value: mockExitFullscreen,
         configurable: true,
         writable: true,
       });
-      
+
       Object.defineProperty(document, 'fullscreenElement', {
         value: null,
         configurable: true,
@@ -357,10 +361,10 @@ describe('Home', () => {
 
     it('requests fullscreen on mobile when starting game', async () => {
       render(<Home />);
-      
+
       const startButton = screen.getByTestId('mock-start');
       fireEvent.click(startButton);
-      
+
       await waitFor(() => {
         expect(mockRequestFullscreen).toHaveBeenCalled();
       });
@@ -373,14 +377,14 @@ describe('Home', () => {
       });
 
       render(<Home />);
-      
+
       const startButton = screen.getByTestId('mock-start');
       fireEvent.click(startButton);
-      
+
       await waitFor(() => {
         expect(screen.getByTestId('scene')).toBeInTheDocument();
       });
-      
+
       expect(mockRequestFullscreen).not.toHaveBeenCalled();
     });
 
@@ -392,28 +396,28 @@ describe('Home', () => {
       });
 
       render(<Home />);
-      
+
       const startButton = screen.getByTestId('mock-start');
       fireEvent.click(startButton);
-      
+
       await waitFor(() => {
         expect(screen.getByTestId('button-exit-mobile')).toBeInTheDocument();
       });
-      
+
       const exitButton = screen.getByTestId('button-exit-mobile');
       fireEvent.click(exitButton);
-      
+
       expect(mockExitFullscreen).toHaveBeenCalled();
     });
 
     it('handles fullscreen errors gracefully', async () => {
       mockRequestFullscreen.mockRejectedValue(new Error('Fullscreen denied'));
-      
+
       render(<Home />);
-      
+
       const startButton = screen.getByTestId('mock-start');
       fireEvent.click(startButton);
-      
+
       // Should still show the game even if fullscreen fails
       await waitFor(() => {
         expect(screen.getByTestId('scene')).toBeInTheDocument();
@@ -444,13 +448,13 @@ describe('Home', () => {
 
     it('shows rotate prompt on mobile in portrait mode when playing', async () => {
       render(<Home />);
-      
+
       const startButton = screen.getByTestId('mock-start');
       fireEvent.click(startButton);
-      
+
       // Trigger resize event to check orientation
       fireEvent.resize(window);
-      
+
       await waitFor(() => {
         expect(screen.getByText('ROTATE YOUR DEVICE')).toBeInTheDocument();
         expect(screen.getByText('Landscape mode required')).toBeInTheDocument();
@@ -471,12 +475,12 @@ describe('Home', () => {
       });
 
       render(<Home />);
-      
+
       const startButton = screen.getByTestId('mock-start');
       fireEvent.click(startButton);
-      
+
       fireEvent.resize(window);
-      
+
       await waitFor(() => {
         expect(screen.queryByText('ROTATE YOUR DEVICE')).not.toBeInTheDocument();
       });
@@ -489,12 +493,12 @@ describe('Home', () => {
       });
 
       render(<Home />);
-      
+
       const startButton = screen.getByTestId('mock-start');
       fireEvent.click(startButton);
-      
+
       fireEvent.resize(window);
-      
+
       await waitFor(() => {
         expect(screen.queryByText('ROTATE YOUR DEVICE')).not.toBeInTheDocument();
       });
@@ -502,25 +506,25 @@ describe('Home', () => {
 
     it('does not show rotate prompt when not playing', () => {
       render(<Home />);
-      
+
       fireEvent.resize(window);
-      
+
       expect(screen.queryByText('ROTATE YOUR DEVICE')).not.toBeInTheDocument();
     });
 
     it('updates rotate prompt when orientation changes', async () => {
       render(<Home />);
-      
+
       const startButton = screen.getByTestId('mock-start');
       fireEvent.click(startButton);
-      
+
       // Start in portrait
       fireEvent.resize(window);
-      
+
       await waitFor(() => {
         expect(screen.getByText('ROTATE YOUR DEVICE')).toBeInTheDocument();
       });
-      
+
       // Change to landscape
       Object.defineProperty(window, 'innerWidth', {
         value: 800,
@@ -532,9 +536,9 @@ describe('Home', () => {
         configurable: true,
         writable: true,
       });
-      
+
       fireEvent.resize(window);
-      
+
       await waitFor(() => {
         expect(screen.queryByText('ROTATE YOUR DEVICE')).not.toBeInTheDocument();
       });
@@ -544,34 +548,34 @@ describe('Home', () => {
   describe('State Management', () => {
     it('maintains playing state across renders', async () => {
       const { rerender } = render(<Home />);
-      
+
       const startButton = screen.getByTestId('mock-start');
       fireEvent.click(startButton);
-      
+
       await waitFor(() => {
         expect(screen.getByTestId('scene')).toBeInTheDocument();
       });
-      
+
       rerender(<Home />);
-      
+
       expect(screen.getByTestId('scene')).toBeInTheDocument();
     });
 
     it('can transition from playing back to menu', async () => {
       render(<Home />);
-      
+
       // Start game
       const startButton = screen.getByTestId('mock-start');
       fireEvent.click(startButton);
-      
+
       await waitFor(() => {
         expect(screen.getByTestId('scene')).toBeInTheDocument();
       });
-      
+
       // Exit game
       const exitButton = screen.getByTestId('button-exit');
       fireEvent.click(exitButton);
-      
+
       await waitFor(() => {
         expect(screen.getByTestId('main-menu')).toBeInTheDocument();
         expect(screen.queryByTestId('scene')).not.toBeInTheDocument();
@@ -582,24 +586,24 @@ describe('Home', () => {
   describe('Edge Cases', () => {
     it('handles rapid start/exit clicks', async () => {
       render(<Home />);
-      
+
       const startButton = screen.getByTestId('mock-start');
-      
+
       // Rapidly click start multiple times
       fireEvent.click(startButton);
       fireEvent.click(startButton);
       fireEvent.click(startButton);
-      
+
       await waitFor(() => {
         expect(screen.getByTestId('scene')).toBeInTheDocument();
       });
-      
+
       const exitButton = screen.getByTestId('button-exit');
-      
+
       // Rapidly click exit
       fireEvent.click(exitButton);
       fireEvent.click(exitButton);
-      
+
       await waitFor(() => {
         expect(screen.getByTestId('main-menu')).toBeInTheDocument();
       });
@@ -607,29 +611,29 @@ describe('Home', () => {
 
     it('handles starting with different seeds', async () => {
       render(<Home />);
-      
+
       mockSetSeed.mockClear();
-      
+
       const startButton = screen.getByTestId('mock-start');
       fireEvent.click(startButton);
-      
+
       await waitFor(() => {
         expect(mockSetSeed).toHaveBeenCalledWith('test seed');
       });
-      
+
       // Exit and start again
       const exitButton = screen.getByTestId('button-exit');
       fireEvent.click(exitButton);
-      
+
       await waitFor(() => {
         expect(screen.getByTestId('main-menu')).toBeInTheDocument();
       });
-      
+
       mockSetSeed.mockClear();
-      
+
       const startButton2 = screen.getByTestId('mock-start');
       fireEvent.click(startButton2);
-      
+
       await waitFor(() => {
         expect(mockSetSeed).toHaveBeenCalled();
       });

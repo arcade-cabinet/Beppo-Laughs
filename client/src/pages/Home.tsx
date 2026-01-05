@@ -15,10 +15,10 @@ export default function Home() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showRotatePrompt, setShowRotatePrompt] = useState(false);
-  const seed = useGameStore(state => state.seed);
-  const setSeedStore = useGameStore(state => state.setSeed);
-  const resetGame = useGameStore(state => state.resetGame);
-  const isGameOver = useGameStore(state => state.isGameOver);
+  const seed = useGameStore((state) => state.seed);
+  const setSeedStore = useGameStore((state) => state.setSeed);
+  const resetGame = useGameStore((state) => state.resetGame);
+  const isGameOver = useGameStore((state) => state.isGameOver);
 
   // Request fullscreen and lock orientation
   const enterFullscreen = useCallback(async () => {
@@ -62,7 +62,7 @@ export default function Home() {
   const handleStart = async (selectedSeed: string) => {
     resetGame();
     setSeedStore(selectedSeed);
-    
+
     // Enter fullscreen on mobile
     if (isMobile) {
       await enterFullscreen();
