@@ -426,7 +426,7 @@ describe('MainMenu', () => {
   });
 
   describe('Edge Cases', () => {
-    it('handles seed with special characters in words', () => {
+    it('handles seed with alphanumeric words', () => {
       render(<MainMenu onStart={mockOnStart} />);
       
       const input = screen.getByTestId('input-seed');
