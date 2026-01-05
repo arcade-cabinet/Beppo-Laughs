@@ -173,6 +173,14 @@ Navigate to http://localhost:5000, enter a seed or randomize, and click "ENTER M
 
 ## Recent Changes
 
+### 2026-01-05: Auto-Start & Smart Screen Detection
+- Game now auto-starts immediately (no menu) with random seed
+- Fullscreen mode activated on all devices when game starts
+- Smart screen size detection:
+  - Small screens (phones < 600px): Enforce landscape orientation, show rotate prompt
+  - Large screens (tablets/foldables): No orientation enforcement, play in any mode
+- Loading screen shows "ENTERING THE NIGHTMARE..." while initializing
+
 ### 2026-01-05: 3D Dashboard HUD on Clown Car
 - Removed 2D brain meter and minimap from screen overlay
 - Added 3D dashboard panels directly on clown car:
