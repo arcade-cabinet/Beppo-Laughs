@@ -30,6 +30,7 @@ const handleLeverPullEnd = useCallback(() => {
           </div>
         )}
         <button
+          type="button"
           data-testid="lever-control"
           disabled={leverDisabled}
           className={`relative w-28 h-40 flex flex-col items-center justify-end select-none touch-none transition-transform ${leverDisabled ? 'opacity-50 cursor-not-allowed' : 'active:scale-95'}`}
