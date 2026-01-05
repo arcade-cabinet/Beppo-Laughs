@@ -23,16 +23,18 @@ A 3D first-person survival horror game set in a surreal 1800s circus big top ten
 - `client/src/pages/Home.tsx` - Main game page with menu/game toggle
 - `client/src/components/game/Scene.tsx` - Three.js canvas with circus tent lighting
 - `client/src/components/game/Maze.tsx` - Circus tent canvas walls, sawdust floor, tent poles
-- `client/src/components/game/RailPlayer.tsx` - Tap-based rail movement controller
-- `client/src/components/game/TapZones.tsx` - Clickable navigation markers at crossroads
+- `client/src/components/game/RailPlayer.tsx` - Gesture-based rail movement controller
+- `client/src/components/game/TapZones.tsx` - Invisible tap zones for navigation
+- `client/src/components/game/GestureControls.tsx` - Swipe and circle gesture detection
+- `client/src/components/game/HintOverlay.tsx` - Glowing footprints and handprints
 - `client/src/components/game/Villains.tsx` - SDF ray-marched villain rendering
 - `client/src/components/game/Collectibles.tsx` - Paper mache items that clear blockades
 - `client/src/components/game/BrainMeter.tsx` - 3D brain HUD showing Fear/Despair
-- `client/src/components/game/HUD.tsx` - Sanity meters, win/lose overlays with Beppo video
+- `client/src/components/game/HUD.tsx` - Sanity meters, minimap, hint button, win/lose overlays
 - `client/src/components/game/AudioManager.tsx` - Reactive procedural audio
 - `client/src/components/game/MainMenu.tsx` - Seed selection menu
 - `client/src/game/MazeGenerator.ts` - Reverse-minotaur maze with rail graph
-- `client/src/game/store.ts` - Zustand store for dual sanity and rail navigation
+- `client/src/game/store.ts` - Zustand store for dual sanity, rail navigation, hints
 - `client/src/game/audio.ts` - Web Audio API procedural sound engine
 
 ### Backend (server/)
@@ -46,11 +48,19 @@ A 3D first-person survival horror game set in a surreal 1800s circus big top ten
 - Exits are on the perimeter edges
 - Navigate outward to escape Beppo's nightmare
 
-### Tap-Based Rail Navigation
-- No free movement - tap arrow markers to move between cells
+### Gesture-Based Rail Navigation
+- No free movement - swipe or tap to move between cells
+- **Swipe controls**: Swipe in any direction to move that way
+- **Circle gesture**: Draw a circle to rotate your field of view
 - Smooth lerped transitions along rail edges
 - Speed modifiers: 1.5x toward collectibles, 0.7x toward villains
-- Mobile-friendly touch controls
+- Mobile-friendly touch controls with invisible tap zones
+
+### Hint System
+- **HINT button** (bottom right) reveals visual cues when pressed
+- **Glowing clown shoe footprints** on ground show available paths
+- **Grease paint handprints** on walls mark accessible directions
+- Pink/magenta glow with pulsing animation
 
 ### Dual Sanity System
 - **FEAR (Red)** - Increases when exploring unknown cells
@@ -145,6 +155,10 @@ npm run dev
 Navigate to http://localhost:5000, enter a seed or randomize, and click "ENTER MAZE".
 
 ## Controls
-- **TAP** arrow markers to move between cells
+- **SWIPE** in any direction to move that way
+- **TAP** anywhere in a direction to move
+- **CIRCLE GESTURE** - draw a circle to rotate your view
+- **HINT BUTTON** (bottom right) shows glowing clown footprints/handprints
 - Find the **EXIT** markers on the perimeter to escape
 - Collect items to clear blockades
+- Use the **MINIMAP** (top right) to track explored areas - degrades with DESPAIR
