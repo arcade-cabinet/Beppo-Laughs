@@ -23,9 +23,10 @@ A 3D first-person survival horror game set in a surreal 1800s circus big top ten
 - `client/src/pages/Home.tsx` - Main game page with menu/game toggle
 - `client/src/components/game/Scene.tsx` - Three.js canvas with circus tent lighting
 - `client/src/components/game/Maze.tsx` - Circus tent canvas walls, sawdust floor, tent poles
-- `client/src/components/game/RailPlayer.tsx` - Edge-following rail movement with continuous driving
-- `client/src/components/game/ClownCarCockpit.tsx` - 3D steering wheel, dashboard, and pedals
-- `client/src/components/game/DriveControls.tsx` - Touch/click controls for driving (gas, brake, steer)
+- `client/src/components/game/RailPlayer.tsx` - Auto-navigation rail movement with fork detection
+- `client/src/components/game/ClownCarCockpit.tsx` - First-person clown car hood view with polka dots and rivets
+- `client/src/components/game/DriveControls.tsx` - Touch/click controls for gas and brake pedals
+- `client/src/components/game/ForkPrompt.tsx` - Glowing Mickey Mouse handprints for direction choices at junctions
 - `client/src/components/game/HintOverlay.tsx` - Glowing footprints and handprints
 - `client/src/components/game/Villains.tsx` - SDF ray-marched villain rendering
 - `client/src/components/game/Collectibles.tsx` - Paper mache items that clear blockades
@@ -48,15 +49,14 @@ A 3D first-person survival horror game set in a surreal 1800s circus big top ten
 - Exits are on the perimeter edges
 - Navigate outward to escape Beppo's nightmare
 
-### Clown Car Driving
-- First-person driving experience in a clown car
+### Clown Car Driving (Simplified Auto-Navigation)
+- First-person driving experience in a garish painted clown car
 - **GAS pedal** (right) - Accelerate forward along rails
 - **BRAKE pedal** (left) - Slow down and stop
-- **STEER control** (center) - Drag left/right to choose direction at junctions
-- Edge-following movement: Car travels between maze nodes automatically
-- Steering selects which path to take at intersections
+- **Auto-navigation**: Car follows single paths automatically, no manual steering
+- **Fork prompts**: When reaching a junction with multiple paths, car pauses and displays glowing Mickey Mouse handprints for each direction - tap/click to choose
 - Speed indicator shows current velocity
-- 3D cockpit with animated steering wheel, dashboard, and pedals
+- First-person hood view with polka dots, metal rivets, and clown face hood ornament
 
 ### Hint System
 - **HINT button** (bottom right) reveals visual cues when pressed
@@ -133,11 +133,14 @@ A 3D first-person survival horror game set in a surreal 1800s circus big top ten
 
 ## Technical Notes
 
-### Rail Navigation System
+### Rail Navigation System (Auto-Navigation with Fork Prompts)
 - RailGraph built from maze with nodes at every cell
 - Edge-following movement: Player travels between nodes along edges
 - edgeProgress tracks position (0-1) along current edge
-- Steering input selects which path at junctions via pickNextTarget()
+- **Auto-navigation**: Single paths are followed automatically without player input
+- **Fork detection**: At junctions (>1 connection), car pauses and sets pendingFork state
+- **Fork prompts**: ForkPrompt component displays glowing Mickey Mouse handprints pointing to each available direction
+- **Selection resumes movement**: selectForkDirection updates targetNode, RailPlayer hydrates targetNodeRef and resumes
 - Camera automatically rotates to face travel direction
 - visitNode() called on each node arrival for sanity tracking
 - Uses getState() in useFrame for live state updates
@@ -162,8 +165,19 @@ Navigate to http://localhost:5000, enter a seed or randomize, and click "ENTER M
 ## Controls
 - **GAS** (right pedal) - Press and hold to accelerate
 - **BRAKE** (left pedal) - Press to slow down/stop
-- **STEER** (center) - Drag left/right to choose direction at junctions
+- **FORK PROMPTS** - At junctions, tap/click the glowing handprint pointing the direction you want to go
 - **HINT BUTTON** (bottom right) shows glowing clown footprints/handprints
 - Find the **EXIT** markers on the perimeter to escape
 - Collect items to clear blockades
 - Use the **MINIMAP** (top right) to track explored areas - degrades with DESPAIR
+
+## Recent Changes
+
+### 2026-01-05: Simplified Driving to Auto-Navigation with Fork Prompts
+- Removed manual steering wheel mechanism entirely
+- Car now auto-drives along single paths - just use gas/brake
+- At junctions with multiple paths, car pauses and shows glowing Mickey Mouse handprints
+- Tap/click any handprint to choose that direction - car resumes automatically
+- Added garish painted clown car hood view with polka dots, metal rivets, and clown face ornament
+- Improved pedal aesthetics with clown-shoe styling and color coding (red=brake, green=gas)
+- Fixed fork selection bug where movement wouldn't resume after choosing direction
