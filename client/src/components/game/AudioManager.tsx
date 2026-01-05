@@ -1,47 +1,47 @@
 import { useEffect, useRef } from 'react';
-import { useGameStore } from '../../game/store';
 import { audioSystem } from '../../game/audio';
+import { useGameStore } from '../../game/store';
 
 export function AudioManager() {
   const { fear, despair, isGameOver } = useGameStore();
-  const sanityLevel = useGameStore(state => state.getSanityLevel());
-  
+  const sanityLevel = useGameStore((state) => state.getSanityLevel());
+
   const lastFear = useRef(0);
   const lastSanityCheck = useRef(0);
   const droneStarted = useRef(false);
-  
+
   // Initialize audio on user interaction
   useEffect(() => {
     const handleInteraction = async () => {
       await audioSystem.init();
       await audioSystem.resume();
-      
+
       // Start ambient drone
       if (!droneStarted.current) {
         audioSystem.startAmbientDrone(fear / 100);
         droneStarted.current = true;
       }
-      
+
       document.removeEventListener('click', handleInteraction);
       document.removeEventListener('keydown', handleInteraction);
     };
-    
+
     document.addEventListener('click', handleInteraction);
     document.addEventListener('keydown', handleInteraction);
-    
+
     return () => {
       document.removeEventListener('click', handleInteraction);
       document.removeEventListener('keydown', handleInteraction);
       audioSystem.cleanup();
       droneStarted.current = false;
     };
-  }, []);
-  
+  }, [fear]);
+
   // Update drone intensity based on fear
   useEffect(() => {
     audioSystem.updateDroneIntensity(fear);
   }, [fear]);
-  
+
   // Play sounds on fear spikes (villain encounters)
   useEffect(() => {
     if (fear > lastFear.current + 10) {
@@ -53,7 +53,7 @@ export function AudioManager() {
     }
     lastFear.current = fear;
   }, [fear]);
-  
+
   // Sanity distortion sounds
   useEffect(() => {
     const now = Date.now();
@@ -62,7 +62,7 @@ export function AudioManager() {
       lastSanityCheck.current = now;
     }
   }, [sanityLevel]);
-  
+
   // Game over sequence
   useEffect(() => {
     if (isGameOver) {
@@ -72,6 +72,6 @@ export function AudioManager() {
       }, 500);
     }
   }, [isGameOver]);
-  
+
   return null;
 }

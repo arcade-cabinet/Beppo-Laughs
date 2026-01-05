@@ -1,11 +1,11 @@
-import { useMemo, useRef, useEffect } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { useTexture, Billboard, Text } from '@react-three/drei';
-import { Group } from 'three';
-import { MazeGeometry, DEFAULT_CONFIG } from '../../game/maze/geometry';
-import { useGameStore } from '../../game/store';
 import ticketUrl from '@assets/generated_images/paper_mache_circus_ticket_item.png';
 import keyUrl from '@assets/generated_images/paper_mache_key_item.png';
+import { Billboard, Text, useTexture } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
+import { useEffect, useMemo, useRef } from 'react';
+import type { Group } from 'three';
+import type { MazeGeometry } from '../../game/maze/geometry';
+import { useGameStore } from '../../game/store';
 
 interface CollectiblesProps {
   geometry: MazeGeometry;
@@ -27,21 +27,21 @@ function Collectible({ item }: { item: CollectibleItem }) {
   const texture = useTexture(ITEM_TEXTURES[item.textureIndex]);
   const groupRef = useRef<Group>(null);
   const { blockades, currentNode, collectedItems, setNearbyItem, nearbyItem } = useGameStore();
-  
+
   const hasBlockades = blockades.size > 0;
   const isCollected = collectedItems.has(item.id);
-  
+
   useEffect(() => {
     if (isCollected && nearbyItem?.id === item.id) {
       setNearbyItem(null);
     }
   }, [isCollected, nearbyItem, item.id, setNearbyItem]);
-  
+
   useFrame((state) => {
     if (!groupRef.current || isCollected) return;
-    
+
     const gameState = useGameStore.getState();
-    
+
     if (gameState.currentNode === item.nodeId && !gameState.collectedItems.has(item.id)) {
       if (!gameState.nearbyItem || gameState.nearbyItem.id !== item.id) {
         setNearbyItem({ id: item.id, name: item.name, nodeId: item.nodeId });
@@ -49,74 +49,65 @@ function Collectible({ item }: { item: CollectibleItem }) {
     } else if (gameState.nearbyItem?.id === item.id && gameState.currentNode !== item.nodeId) {
       setNearbyItem(null);
     }
-    
+
     groupRef.current.position.y = 0.8 + Math.sin(state.clock.elapsedTime * 2 + item.worldX) * 0.15;
     groupRef.current.rotation.y = state.clock.elapsedTime * 0.5;
-    
+
     const isNearby = gameState.nearbyItem?.id === item.id;
-    const pulseIntensity = isNearby ? 0.3 : (hasBlockades ? 0.2 : 0.1);
+    const pulseIntensity = isNearby ? 0.3 : hasBlockades ? 0.2 : 0.1;
     const baseScale = isNearby ? 1.0 : 0.8;
-    const pulse = baseScale + Math.sin(state.clock.elapsedTime * (isNearby ? 5 : 3)) * pulseIntensity;
+    const pulse =
+      baseScale + Math.sin(state.clock.elapsedTime * (isNearby ? 5 : 3)) * pulseIntensity;
     groupRef.current.scale.setScalar(pulse);
   });
-  
+
   if (isCollected) return null;
-  
+
   const isNearby = nearbyItem?.id === item.id;
-  
+
   return (
     <group ref={groupRef} position={[item.worldX, 0.8, item.worldZ]}>
       <Billboard>
         <group>
           <mesh>
             <planeGeometry args={[0.7, 0.9]} />
-            <meshStandardMaterial 
-              map={texture} 
-              transparent 
+            <meshStandardMaterial
+              map={texture}
+              transparent
               alphaTest={0.5}
-              emissive={isNearby ? "#ffff00" : (hasBlockades ? "#ffcc00" : "#ffaa00")}
-              emissiveIntensity={isNearby ? 0.8 : (hasBlockades ? 0.5 : 0.3)}
+              emissive={isNearby ? '#ffff00' : hasBlockades ? '#ffcc00' : '#ffaa00'}
+              emissiveIntensity={isNearby ? 0.8 : hasBlockades ? 0.5 : 0.3}
             />
           </mesh>
-          
+
           <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
             <ringGeometry args={[0.35, 0.45, 16]} />
-            <meshBasicMaterial 
-              color={isNearby ? "#ffff00" : "#ffcc00"} 
-              transparent 
-              opacity={isNearby ? 0.8 : (hasBlockades ? 0.5 : 0.3)} 
+            <meshBasicMaterial
+              color={isNearby ? '#ffff00' : '#ffcc00'}
+              transparent
+              opacity={isNearby ? 0.8 : hasBlockades ? 0.5 : 0.3}
             />
           </mesh>
         </group>
       </Billboard>
-      
+
       <Text
         position={[0, 0.9, 0]}
         fontSize={0.15}
-        color={isNearby ? "#ffff00" : "#ffcc00"}
+        color={isNearby ? '#ffff00' : '#ffcc00'}
         anchorX="center"
       >
         {item.name}
       </Text>
-      
+
       {isNearby && (
-        <Text
-          position={[0, 0.6, 0]}
-          fontSize={0.12}
-          color="#ffffff"
-          anchorX="center"
-        >
+        <Text position={[0, 0.6, 0]} fontSize={0.12} color="#ffffff" anchorX="center">
           TAP TO COLLECT
         </Text>
       )}
-      
+
       {hasBlockades && !isNearby && (
-        <Text
-          position={[0, 0.6, 0]}
-          fontSize={0.1}
-          color="#ffffff"
-          anchorX="center"
-        >
+        <Text position={[0, 0.6, 0]} fontSize={0.1} color="#ffffff" anchorX="center">
           Clears a path
         </Text>
       )}
@@ -126,27 +117,29 @@ function Collectible({ item }: { item: CollectibleItem }) {
 
 export function Collectibles({ geometry }: CollectiblesProps) {
   const { collectedItems } = useGameStore();
-  
+
   const items = useMemo(() => {
     const generated: CollectibleItem[] = [];
     const nodes = Array.from(geometry.railNodes.values());
     const itemCount = Math.floor(nodes.length / 8);
-    
-    const avoidNodes = new Set([
-      geometry.centerNodeId,
-      ...geometry.exitNodeIds
-    ]);
-    
+
+    const avoidNodes = new Set([geometry.centerNodeId, ...geometry.exitNodeIds]);
+
     for (let i = 0; i < itemCount; i++) {
-      let selectedNode: typeof nodes[0] | null = null;
+      let selectedNode: (typeof nodes)[0] | null = null;
       let attempts = 0;
-      
+
       do {
         const idx = Math.floor(Math.random() * nodes.length);
         selectedNode = nodes[idx];
         attempts++;
-      } while (selectedNode && (avoidNodes.has(selectedNode.id) || generated.some(it => it.nodeId === selectedNode!.id)) && attempts < 50);
-      
+      } while (
+        selectedNode &&
+        (avoidNodes.has(selectedNode.id) ||
+          generated.some((it) => it.nodeId === selectedNode?.id)) &&
+        attempts < 50
+      );
+
       if (attempts < 50 && selectedNode) {
         const textureIndex = Math.floor(Math.random() * ITEM_TEXTURES.length);
         generated.push({
@@ -155,22 +148,21 @@ export function Collectibles({ geometry }: CollectiblesProps) {
           worldZ: selectedNode.worldZ,
           nodeId: selectedNode.id,
           textureIndex,
-          name: ITEM_NAMES[textureIndex]
+          name: ITEM_NAMES[textureIndex],
         });
       }
     }
-    
+
     return generated;
   }, [geometry]);
-  
+
   return (
     <group>
       {items
-        .filter(item => !collectedItems.has(item.id))
-        .map(item => (
+        .filter((item) => !collectedItems.has(item.id))
+        .map((item) => (
           <Collectible key={item.id} item={item} />
-        ))
-      }
+        ))}
     </group>
   );
 }

@@ -1,4 +1,4 @@
-import { MazeLayout } from './core';
+import type { MazeLayout } from './core';
 
 export interface MazeConfig {
   cellSize: number;
@@ -47,7 +47,13 @@ export interface MazeGeometry {
   exitNodeIds: string[];
 }
 
-export function gridToWorld(gridX: number, gridY: number, config: MazeConfig, mazeWidth: number, mazeHeight: number): { x: number; z: number } {
+export function gridToWorld(
+  gridX: number,
+  gridY: number,
+  config: MazeConfig,
+  mazeWidth: number,
+  mazeHeight: number,
+): { x: number; z: number } {
   const centerX = Math.floor(mazeWidth / 2);
   const centerY = Math.floor(mazeHeight / 2);
   return {
@@ -56,7 +62,13 @@ export function gridToWorld(gridX: number, gridY: number, config: MazeConfig, ma
   };
 }
 
-export function worldToGrid(worldX: number, worldZ: number, config: MazeConfig, mazeWidth: number, mazeHeight: number): { x: number; y: number } {
+export function worldToGrid(
+  worldX: number,
+  worldZ: number,
+  config: MazeConfig,
+  mazeWidth: number,
+  mazeHeight: number,
+): { x: number; y: number } {
   const centerX = Math.floor(mazeWidth / 2);
   const centerY = Math.floor(mazeHeight / 2);
   return {
@@ -65,18 +77,21 @@ export function worldToGrid(worldX: number, worldZ: number, config: MazeConfig, 
   };
 }
 
-export function buildGeometry(layout: MazeLayout, config: MazeConfig = DEFAULT_CONFIG): MazeGeometry {
+export function buildGeometry(
+  layout: MazeLayout,
+  config: MazeConfig = DEFAULT_CONFIG,
+): MazeGeometry {
   const walls: WallSegment[] = [];
   const railNodes = new Map<string, RailNode>();
-  
+
   const { cellSize, wallHeight, wallThickness } = config;
   const halfCell = cellSize / 2;
-  
+
   for (let y = 0; y < layout.height; y++) {
     for (let x = 0; x < layout.width; x++) {
       const cell = layout.cells[y][x];
       const { x: worldX, z: worldZ } = gridToWorld(x, y, config, layout.width, layout.height);
-      
+
       if (cell.walls.north) {
         walls.push({
           x: worldX,
@@ -87,7 +102,7 @@ export function buildGeometry(layout: MazeLayout, config: MazeConfig = DEFAULT_C
           rotation: 0,
         });
       }
-      
+
       if (cell.walls.west) {
         walls.push({
           x: worldX - halfCell,
@@ -98,7 +113,7 @@ export function buildGeometry(layout: MazeLayout, config: MazeConfig = DEFAULT_C
           rotation: 0,
         });
       }
-      
+
       if (y === layout.height - 1 && cell.walls.south) {
         walls.push({
           x: worldX,
@@ -109,7 +124,7 @@ export function buildGeometry(layout: MazeLayout, config: MazeConfig = DEFAULT_C
           rotation: 0,
         });
       }
-      
+
       if (x === layout.width - 1 && cell.walls.east) {
         walls.push({
           x: worldX + halfCell,
@@ -120,15 +135,15 @@ export function buildGeometry(layout: MazeLayout, config: MazeConfig = DEFAULT_C
           rotation: 0,
         });
       }
-      
+
       const nodeId = `${x},${y}`;
       const connections: string[] = [];
-      
+
       if (!cell.walls.north && y > 0) connections.push(`${x},${y - 1}`);
       if (!cell.walls.south && y < layout.height - 1) connections.push(`${x},${y + 1}`);
       if (!cell.walls.west && x > 0) connections.push(`${x - 1},${y}`);
       if (!cell.walls.east && x < layout.width - 1) connections.push(`${x + 1},${y}`);
-      
+
       railNodes.set(nodeId, {
         id: nodeId,
         gridX: x,
@@ -141,7 +156,7 @@ export function buildGeometry(layout: MazeLayout, config: MazeConfig = DEFAULT_C
       });
     }
   }
-  
+
   const floorWidth = layout.width * cellSize;
   const floorDepth = layout.height * cellSize;
   const floor: FloorTile = {
@@ -150,10 +165,10 @@ export function buildGeometry(layout: MazeLayout, config: MazeConfig = DEFAULT_C
     width: floorWidth + cellSize,
     depth: floorDepth + cellSize,
   };
-  
+
   const centerNodeId = `${layout.center.x},${layout.center.y}`;
-  const exitNodeIds = layout.exits.map(e => `${e.x},${e.y}`);
-  
+  const exitNodeIds = layout.exits.map((e) => `${e.x},${e.y}`);
+
   return {
     walls,
     floor,
@@ -166,8 +181,8 @@ export function buildGeometry(layout: MazeLayout, config: MazeConfig = DEFAULT_C
 export function getNodeConnections(geometry: MazeGeometry, nodeId: string): RailNode[] {
   const node = geometry.railNodes.get(nodeId);
   if (!node) return [];
-  
+
   return node.connections
-    .map(id => geometry.railNodes.get(id))
+    .map((id) => geometry.railNodes.get(id))
     .filter((n): n is RailNode => n !== undefined);
 }

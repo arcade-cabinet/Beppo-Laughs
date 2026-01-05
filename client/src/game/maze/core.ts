@@ -31,13 +31,13 @@ export interface MazeLayout {
 
 export function generateMaze(width: number, height: number, seed: string): MazeLayout {
   const rng = seedrandom(seed);
-  
+
   if (width % 2 === 0) width++;
   if (height % 2 === 0) height++;
-  
+
   const centerX = Math.floor(width / 2);
   const centerY = Math.floor(height / 2);
-  
+
   const cells: MazeCell[][] = [];
   for (let y = 0; y < height; y++) {
     cells[y] = [];
@@ -52,39 +52,39 @@ export function generateMaze(width: number, height: number, seed: string): MazeL
       };
     }
   }
-  
+
   const passages: Passage[] = [];
   const stack: MazeCell[] = [];
-  
+
   const startCell = cells[centerY][centerX];
   startCell.visited = true;
   stack.push(startCell);
-  
+
   while (stack.length > 0) {
     const current = stack[stack.length - 1];
     const neighbors = getUnvisitedNeighbors(current, cells, width, height);
-    
+
     if (neighbors.length > 0) {
       const idx = Math.floor(rng() * neighbors.length);
       const { cell: next, direction } = neighbors[idx];
-      
+
       removeWall(current, next, direction);
-      
+
       passages.push({
         from: { x: current.x, y: current.y },
         to: { x: next.x, y: next.y },
         direction,
       });
-      
+
       next.visited = true;
       stack.push(next);
     } else {
       stack.pop();
     }
   }
-  
+
   const exits = createExits(cells, width, height, rng);
-  
+
   return {
     width,
     height,
@@ -99,10 +99,10 @@ function getUnvisitedNeighbors(
   cell: MazeCell,
   cells: MazeCell[][],
   width: number,
-  height: number
+  height: number,
 ): { cell: MazeCell; direction: 'north' | 'south' | 'east' | 'west' }[] {
   const neighbors: { cell: MazeCell; direction: 'north' | 'south' | 'east' | 'west' }[] = [];
-  
+
   if (cell.y > 0 && !cells[cell.y - 1][cell.x].visited) {
     neighbors.push({ cell: cells[cell.y - 1][cell.x], direction: 'north' });
   }
@@ -115,15 +115,11 @@ function getUnvisitedNeighbors(
   if (cell.x < width - 1 && !cells[cell.y][cell.x + 1].visited) {
     neighbors.push({ cell: cells[cell.y][cell.x + 1], direction: 'east' });
   }
-  
+
   return neighbors;
 }
 
-function removeWall(
-  from: MazeCell,
-  to: MazeCell,
-  direction: 'north' | 'south' | 'east' | 'west'
-) {
+function removeWall(from: MazeCell, to: MazeCell, direction: 'north' | 'south' | 'east' | 'west') {
   const opposite = { north: 'south', south: 'north', east: 'west', west: 'east' } as const;
   from.walls[direction] = false;
   to.walls[opposite[direction]] = false;
@@ -133,24 +129,24 @@ function createExits(
   cells: MazeCell[][],
   width: number,
   height: number,
-  rng: () => number
+  rng: () => number,
 ): { x: number; y: number }[] {
   const exits: { x: number; y: number }[] = [];
-  
+
   const sides = ['north', 'south', 'east', 'west'] as const;
   for (const side of sides) {
     let candidates: MazeCell[] = [];
-    
+
     if (side === 'north') {
       candidates = cells[0].slice(1, -1);
     } else if (side === 'south') {
       candidates = cells[height - 1].slice(1, -1);
     } else if (side === 'west') {
-      candidates = cells.slice(1, -1).map(row => row[0]);
+      candidates = cells.slice(1, -1).map((row) => row[0]);
     } else {
-      candidates = cells.slice(1, -1).map(row => row[width - 1]);
+      candidates = cells.slice(1, -1).map((row) => row[width - 1]);
     }
-    
+
     if (candidates.length > 0) {
       const exit = candidates[Math.floor(rng() * candidates.length)];
       exit.isExit = true;
@@ -158,20 +154,21 @@ function createExits(
       exits.push({ x: exit.x, y: exit.y });
     }
   }
-  
+
   return exits;
 }
 
 export function getConnections(
   layout: MazeLayout,
   x: number,
-  y: number
+  y: number,
 ): { x: number; y: number; direction: 'north' | 'south' | 'east' | 'west' }[] {
   const cell = layout.cells[y]?.[x];
   if (!cell) return [];
-  
-  const connections: { x: number; y: number; direction: 'north' | 'south' | 'east' | 'west' }[] = [];
-  
+
+  const connections: { x: number; y: number; direction: 'north' | 'south' | 'east' | 'west' }[] =
+    [];
+
   if (!cell.walls.north && y > 0) {
     connections.push({ x, y: y - 1, direction: 'north' });
   }
@@ -184,13 +181,13 @@ export function getConnections(
   if (!cell.walls.east && x < layout.width - 1) {
     connections.push({ x: x + 1, y, direction: 'east' });
   }
-  
+
   if (cell.isExit) {
     if (x === 0) connections.push({ x: -1, y, direction: 'west' });
     if (x === layout.width - 1) connections.push({ x: layout.width, y, direction: 'east' });
     if (y === 0) connections.push({ x, y: -1, direction: 'north' });
     if (y === layout.height - 1) connections.push({ x, y: layout.height, direction: 'south' });
   }
-  
+
   return connections;
 }

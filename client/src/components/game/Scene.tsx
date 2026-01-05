@@ -1,31 +1,36 @@
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Suspense, useState, useEffect, useRef } from 'react';
-import { Maze } from './Maze';
-import { RailPlayer } from './RailPlayer';
-import { generateMaze, MazeLayout } from '../../game/maze/core';
-import { buildGeometry, MazeGeometry, DEFAULT_CONFIG } from '../../game/maze/geometry';
-import { Villains } from './Villains';
+import { Suspense, useEffect, useRef, useState } from 'react';
+import type { PointLight } from 'three';
+import { generateMaze, type MazeLayout } from '../../game/maze/core';
+import { buildGeometry, DEFAULT_CONFIG, type MazeGeometry } from '../../game/maze/geometry';
+import { useGameStore } from '../../game/store';
+import { AudioManager } from './AudioManager';
 import { Collectibles } from './Collectibles';
-import { HintOverlay } from './HintOverlay';
 import { DriveControls } from './DriveControls';
 import { ForkPrompt } from './ForkPrompt';
+import { HintOverlay } from './HintOverlay';
 import { InteractionPrompt } from './InteractionPrompt';
-import { AudioManager } from './AudioManager';
-import { useGameStore } from '../../game/store';
-import { PointLight } from 'three';
+import { Maze } from './Maze';
+import { RailPlayer } from './RailPlayer';
+import { Villains } from './Villains';
 
 interface SceneProps {
   seed: string;
 }
 
-function FlickeringLight({ position, color, intensity, distance }: { 
-  position: [number, number, number], 
-  color: string, 
-  intensity: number,
-  distance: number 
+function FlickeringLight({
+  position,
+  color,
+  intensity,
+  distance,
+}: {
+  position: [number, number, number];
+  color: string;
+  intensity: number;
+  distance: number;
 }) {
   const lightRef = useRef<PointLight>(null);
-  
+
   useFrame((state) => {
     if (lightRef.current) {
       const flicker = Math.sin(state.clock.elapsedTime * 8 + position[0]) * 0.15;
@@ -33,13 +38,13 @@ function FlickeringLight({ position, color, intensity, distance }: {
       lightRef.current.intensity = intensity * (1 + flicker + slow);
     }
   });
-  
+
   return (
-    <pointLight 
+    <pointLight
       ref={lightRef}
-      position={position} 
-      color={color} 
-      intensity={intensity} 
+      position={position}
+      color={color}
+      intensity={intensity}
       distance={distance}
       castShadow
     />
@@ -54,34 +59,40 @@ function getDirectionFromDelta(dx: number, dy: number): 'north' | 'south' | 'eas
 }
 
 export function Scene({ seed }: SceneProps) {
-  const [mazeData, setMazeData] = useState<{ layout: MazeLayout; geometry: MazeGeometry } | null>(null);
+  const [mazeData, setMazeData] = useState<{ layout: MazeLayout; geometry: MazeGeometry } | null>(
+    null,
+  );
   const { fear, despair, maxSanity, currentNode, blockades, isMoving } = useGameStore();
-  const sanityLevel = useGameStore(state => state.getSanityLevel());
-  
+  const sanityLevel = useGameStore((state) => state.getSanityLevel());
+
   useEffect(() => {
     if (!mazeData || !currentNode || isMoving) return;
-    
+
     const { geometry } = mazeData;
     const current = geometry.railNodes.get(currentNode);
     if (!current) return;
-    
-    const moves: { direction: 'north' | 'south' | 'east' | 'west'; nodeId: string; isExit: boolean }[] = [];
+
+    const moves: {
+      direction: 'north' | 'south' | 'east' | 'west';
+      nodeId: string;
+      isExit: boolean;
+    }[] = [];
     for (const connId of current.connections) {
       const node = geometry.railNodes.get(connId);
       if (!node) continue;
       if (blockades.has(connId)) continue;
-      
+
       const dx = node.gridX - current.gridX;
       const dy = node.gridY - current.gridY;
       const direction = getDirectionFromDelta(dx, dy);
       moves.push({ direction, nodeId: node.id, isExit: node.isExit });
     }
-    
+
     useGameStore.getState().setAvailableMoves(moves);
   }, [mazeData, currentNode, blockades, isMoving]);
-  
+
   const [webglAvailable, setWebglAvailable] = useState<boolean | null>(null);
-  
+
   useEffect(() => {
     try {
       const canvas = document.createElement('canvas');
@@ -91,10 +102,10 @@ export function Scene({ seed }: SceneProps) {
       setWebglAvailable(false);
     }
   }, []);
-  
+
   useEffect(() => {
     if (!isMoving || webglAvailable !== false) return;
-    
+
     const timeout = setTimeout(() => {
       const state = useGameStore.getState();
       if (state.isMoving && state.targetNode) {
@@ -102,7 +113,7 @@ export function Scene({ seed }: SceneProps) {
         state.completeMove();
       }
     }, 300);
-    
+
     return () => clearTimeout(timeout);
   }, [isMoving, webglAvailable]);
 
@@ -113,17 +124,21 @@ export function Scene({ seed }: SceneProps) {
     console.log('Generated 2D maze:', layout.width, 'x', layout.height);
     console.log('Center:', layout.center, 'Exits:', layout.exits);
     console.log('Rail nodes:', geometry.railNodes.size);
-    
+
     const store = useGameStore.getState();
     store.setCurrentNode(geometry.centerNodeId);
-    
+
     const centerNode = geometry.railNodes.get(geometry.centerNodeId);
     if (centerNode) {
-      const moves: { direction: 'north' | 'south' | 'east' | 'west'; nodeId: string; isExit: boolean }[] = [];
+      const moves: {
+        direction: 'north' | 'south' | 'east' | 'west';
+        nodeId: string;
+        isExit: boolean;
+      }[] = [];
       for (const connId of centerNode.connections) {
         const node = geometry.railNodes.get(connId);
         if (!node) continue;
-        
+
         const dx = node.gridX - centerNode.gridX;
         const dy = node.gridY - centerNode.gridY;
         let direction: 'north' | 'south' | 'east' | 'west' = 'north';
@@ -131,7 +146,7 @@ export function Scene({ seed }: SceneProps) {
         else if (dy > 0) direction = 'south';
         else if (dx > 0) direction = 'east';
         else direction = 'west';
-        
+
         moves.push({ direction, nodeId: node.id, isExit: node.isExit });
       }
       store.setAvailableMoves(moves);
@@ -140,13 +155,13 @@ export function Scene({ seed }: SceneProps) {
   }, [seed]);
 
   const avgInsanity = (fear + despair) / 2 / maxSanity;
-  
+
   const fogNear = Math.max(2, 12 - avgInsanity * 8);
   const fogFar = Math.max(15, 35 - avgInsanity * 20);
-  
+
   const bgBrightness = Math.max(8, 25 - avgInsanity * 17);
   const bgColor = `hsl(30, 40%, ${bgBrightness}%)`;
-  
+
   const fogHue = 30 + avgInsanity * 60;
   const fogColor = `hsl(${fogHue}, ${30 - avgInsanity * 15}%, ${20 - avgInsanity * 10}%)`;
 
@@ -158,70 +173,71 @@ export function Scene({ seed }: SceneProps) {
   return (
     <>
       <AudioManager />
-      
-      <Canvas 
-        shadows 
+
+      <Canvas
+        shadows
         camera={{ fov: 70, near: 0.1, far: 100 }}
         style={{
-          filter: sanityLevel < 30 
-            ? `saturate(${0.4 + sanityLevel / 50}) contrast(${1.1 + avgInsanity * 0.2}) sepia(${avgInsanity * 0.3})` 
-            : `sepia(${avgInsanity * 0.15})`
+          filter:
+            sanityLevel < 30
+              ? `saturate(${0.4 + sanityLevel / 50}) contrast(${1.1 + avgInsanity * 0.2}) sepia(${avgInsanity * 0.3})`
+              : `sepia(${avgInsanity * 0.15})`,
         }}
       >
         <color attach="background" args={[bgColor]} />
-        <fog attach="fog" args={[fogColor, fogNear, fogFar]} /> 
-        
+        <fog attach="fog" args={[fogColor, fogNear, fogFar]} />
+
         <ambientLight intensity={0.15 + (1 - avgInsanity) * 0.15} color="#ffd4a0" />
-        
-        <FlickeringLight 
-          position={[centerWorld.x, 4, centerWorld.z]} 
-          color="#ffaa55" 
-          intensity={1.2 * (1 - avgInsanity * 0.4)} 
+
+        <FlickeringLight
+          position={[centerWorld.x, 4, centerWorld.z]}
+          color="#ffaa55"
+          intensity={1.2 * (1 - avgInsanity * 0.4)}
           distance={30}
         />
-        
-        <FlickeringLight 
-          position={[4, 3.5, 4]} 
-          color="#ff9944" 
-          intensity={0.8 * (1 - avgInsanity * 0.3)} 
+
+        <FlickeringLight
+          position={[4, 3.5, 4]}
+          color="#ff9944"
+          intensity={0.8 * (1 - avgInsanity * 0.3)}
           distance={15}
         />
-        <FlickeringLight 
-          position={[centerWorld.x * 2 - 4, 3.5, 4]} 
-          color="#ffaa66" 
-          intensity={0.7 * (1 - avgInsanity * 0.3)} 
+        <FlickeringLight
+          position={[centerWorld.x * 2 - 4, 3.5, 4]}
+          color="#ffaa66"
+          intensity={0.7 * (1 - avgInsanity * 0.3)}
           distance={15}
         />
-        <FlickeringLight 
-          position={[4, 3.5, centerWorld.z * 2 - 4]} 
-          color="#ff8833" 
-          intensity={0.7 * (1 - avgInsanity * 0.3)} 
+        <FlickeringLight
+          position={[4, 3.5, centerWorld.z * 2 - 4]}
+          color="#ff8833"
+          intensity={0.7 * (1 - avgInsanity * 0.3)}
           distance={15}
         />
-        <FlickeringLight 
-          position={[centerWorld.x * 2 - 4, 3.5, centerWorld.z * 2 - 4]} 
-          color="#ffbb77" 
-          intensity={0.8 * (1 - avgInsanity * 0.3)} 
+        <FlickeringLight
+          position={[centerWorld.x * 2 - 4, 3.5, centerWorld.z * 2 - 4]}
+          color="#ffbb77"
+          intensity={0.8 * (1 - avgInsanity * 0.3)}
           distance={15}
         />
-        
+
         {avgInsanity > 0.2 && (
           <>
-            <pointLight 
-              position={[centerWorld.x - 5, 2, centerWorld.z - 5]} 
-              intensity={avgInsanity * 0.5} 
-              color="#8b0000" 
-              distance={12} 
+            <pointLight
+              position={[centerWorld.x - 5, 2, centerWorld.z - 5]}
+              intensity={avgInsanity * 0.5}
+              color="#8b0000"
+              distance={12}
             />
-            <pointLight 
-              position={[centerWorld.x + 5, 2, centerWorld.z + 5]} 
-              intensity={avgInsanity * 0.4} 
-              color="#4a0066" 
-              distance={12} 
+            <pointLight
+              position={[centerWorld.x + 5, 2, centerWorld.z + 5]}
+              intensity={avgInsanity * 0.4}
+              color="#4a0066"
+              distance={12}
             />
           </>
         )}
-        
+
         {avgInsanity > 0.5 && (
           <spotLight
             position={[centerWorld.x, 6, centerWorld.z]}
@@ -243,7 +259,7 @@ export function Scene({ seed }: SceneProps) {
 
         <RailPlayer geometry={geometry} />
       </Canvas>
-      
+
       <DriveControls />
       <ForkPrompt />
       <InteractionPrompt />

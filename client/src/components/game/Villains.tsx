@@ -1,8 +1,8 @@
-import { useMemo, useRef, useState } from 'react';
+import { Billboard, Text } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Text, Billboard } from '@react-three/drei';
-import { Vector3, Group, MathUtils, Color, ShaderMaterial, Mesh } from 'three';
-import { MazeGeometry, DEFAULT_CONFIG } from '../../game/maze/geometry';
+import { useMemo, useRef, useState } from 'react';
+import { Color, type Group, MathUtils, type Mesh, type ShaderMaterial, type Vector3 } from 'three';
+import type { MazeGeometry } from '../../game/maze/geometry';
 import { useGameStore } from '../../game/store';
 
 interface VillainsProps {
@@ -10,33 +10,33 @@ interface VillainsProps {
 }
 
 const LAUGHS = [
-  "HA HA HA",
-  "HEE HEE",
-  "HO HO HO",
-  "YOU CANNOT LEAVE",
-  "BEPPO SEES YOU",
-  "JOIN THE CIRCUS",
-  "FOREVER LOST",
-  "HONK HONK",
-  "TURN BACK",
-  "NO ESCAPE"
+  'HA HA HA',
+  'HEE HEE',
+  'HO HO HO',
+  'YOU CANNOT LEAVE',
+  'BEPPO SEES YOU',
+  'JOIN THE CIRCUS',
+  'FOREVER LOST',
+  'HONK HONK',
+  'TURN BACK',
+  'NO ESCAPE',
 ];
 
-function SDFVillainMesh({ 
-  position, 
-  isVisible, 
+function SDFVillainMesh({
+  position,
+  isVisible,
   fearLevel,
-  isBlockade
-}: { 
-  position: [number, number, number],
-  isVisible: boolean,
-  fearLevel: number,
-  isBlockade: boolean
+  isBlockade,
+}: {
+  position: [number, number, number];
+  isVisible: boolean;
+  fearLevel: number;
+  isBlockade: boolean;
 }) {
   const meshRef = useRef<Mesh>(null);
   const materialRef = useRef<ShaderMaterial>(null);
   const currentScale = useRef(0);
-  
+
   const fragmentShader = `
     uniform float uTime;
     uniform float uFear;
@@ -168,7 +168,7 @@ function SDFVillainMesh({
       }
     }
   `;
-  
+
   const vertexShader = `
     varying vec2 vUv;
     void main() {
@@ -176,36 +176,35 @@ function SDFVillainMesh({
       gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
     }
   `;
-  
-  const uniforms = useMemo(() => ({
-    uTime: { value: 0 },
-    uFear: { value: 0 },
-    uColor1: { value: new Color('#8b0000') },
-    uColor2: { value: new Color(isBlockade ? '#ff4400' : '#ffcc00') },
-  }), [isBlockade]);
-  
+
+  const uniforms = useMemo(
+    () => ({
+      uTime: { value: 0 },
+      uFear: { value: 0 },
+      uColor1: { value: new Color('#8b0000') },
+      uColor2: { value: new Color(isBlockade ? '#ff4400' : '#ffcc00') },
+    }),
+    [isBlockade],
+  );
+
   useFrame((state) => {
     if (!materialRef.current || !meshRef.current) return;
-    
+
     materialRef.current.uniforms.uTime.value = state.clock.elapsedTime;
     materialRef.current.uniforms.uFear.value = MathUtils.lerp(
       materialRef.current.uniforms.uFear.value,
       isVisible ? fearLevel : 0,
-      0.05
+      0.05,
     );
-    
+
     const targetScale = isVisible ? 1.8 + Math.sin(state.clock.elapsedTime * 6) * 0.1 : 0;
     currentScale.current = MathUtils.lerp(currentScale.current, targetScale, 0.08);
-    
-    meshRef.current.scale.set(
-      currentScale.current, 
-      currentScale.current * 1.2, 
-      1
-    );
-    
+
+    meshRef.current.scale.set(currentScale.current, currentScale.current * 1.2, 1);
+
     meshRef.current.visible = currentScale.current > 0.05;
   });
-  
+
   return (
     <Billboard follow={true}>
       <mesh ref={meshRef} position={position}>
@@ -222,27 +221,27 @@ function SDFVillainMesh({
   );
 }
 
-function Villain({ 
+function Villain({
   worldX,
   worldZ,
   playerPos,
   isBlockade,
-  cellKey 
-}: { 
-  worldX: number,
-  worldZ: number,
-  playerPos: Vector3,
-  isBlockade: boolean,
-  cellKey: string
+  cellKey,
+}: {
+  worldX: number;
+  worldZ: number;
+  playerPos: Vector3;
+  isBlockade: boolean;
+  cellKey: string;
 }) {
   const groupRef = useRef<Group>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [hasPopped, setHasPopped] = useState(false);
   const { fear, maxSanity, increaseFear, addBlockade, blockades } = useGameStore();
-  
+
   const laughText = useMemo(() => LAUGHS[Math.floor(Math.random() * LAUGHS.length)], []);
   const fearLevel = fear / maxSanity;
-  
+
   const isBlocked = blockades.has(cellKey);
   const wasCleared = hasPopped && isBlockade && !isBlocked;
 
@@ -250,16 +249,16 @@ function Villain({
     if (!groupRef.current) return;
 
     const dist = groupRef.current.position.distanceTo(playerPos);
-    
+
     if (dist < 5 && !hasPopped) {
       setHasPopped(true);
       setIsVisible(true);
       increaseFear(15);
-      
+
       if (isBlockade) {
         addBlockade(cellKey);
       }
-      
+
       if (navigator.vibrate) {
         navigator.vibrate([100, 50, 200]);
       }
@@ -268,7 +267,7 @@ function Villain({
     if (wasCleared && isVisible) {
       setIsVisible(false);
     }
-    
+
     if (isVisible && !wasCleared) {
       groupRef.current.position.y = 1.5 + Math.sin(state.clock.elapsedTime * 20) * 0.06;
       groupRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 15) * 0.1;
@@ -279,52 +278,42 @@ function Villain({
 
   return (
     <group ref={groupRef} position={[worldX, 1.5, worldZ]}>
-      <SDFVillainMesh 
-        position={[0, 0, 0]} 
-        isVisible={isVisible} 
+      <SDFVillainMesh
+        position={[0, 0, 0]}
+        isVisible={isVisible}
         fearLevel={fearLevel}
         isBlockade={isBlockade}
       />
-      
+
       {isVisible && (
         <Billboard>
           <Text
             position={[0.8, 2.2, 0]}
             fontSize={0.45}
-            color={isBlocked ? "#ff0000" : "#8b0000"}
+            color={isBlocked ? '#ff0000' : '#8b0000'}
             anchorX="center"
           >
             {laughText}
           </Text>
         </Billboard>
       )}
-      
+
       {isBlocked && (
         <>
           <Billboard>
-            <Text
-              position={[0, -1.8, 0]}
-              fontSize={0.22}
-              color="#ffcc00"
-              anchorX="center"
-            >
+            <Text position={[0, -1.8, 0]} fontSize={0.22} color="#ffcc00" anchorX="center">
               PATH BLOCKED
             </Text>
-            <Text
-              position={[0, -2.1, 0]}
-              fontSize={0.15}
-              color="#ffffff"
-              anchorX="center"
-            >
+            <Text position={[0, -2.1, 0]} fontSize={0.15} color="#ffffff" anchorX="center">
               Find a circus item to pass
             </Text>
           </Billboard>
-          
+
           <mesh position={[0, 0.3, 0]}>
             <boxGeometry args={[1.8, 1.8, 0.1]} />
-            <meshStandardMaterial 
-              color="#8b0000" 
-              transparent 
+            <meshStandardMaterial
+              color="#8b0000"
+              transparent
               opacity={0.25}
               emissive="#ff0000"
               emissiveIntensity={0.4}
@@ -338,25 +327,26 @@ function Villain({
 
 export function Villains({ geometry }: VillainsProps) {
   const { camera } = useThree();
-  
+
   const villains = useMemo(() => {
-    const spawned: { worldX: number, worldZ: number, isBlockade: boolean, cellKey: string }[] = [];
+    const spawned: { worldX: number; worldZ: number; isBlockade: boolean; cellKey: string }[] = [];
     const nodes = Array.from(geometry.railNodes.values());
     const count = Math.floor(nodes.length / 8);
 
-    const avoidNodes = new Set([
-      geometry.centerNodeId,
-      ...geometry.exitNodeIds
-    ]);
+    const avoidNodes = new Set([geometry.centerNodeId, ...geometry.exitNodeIds]);
 
     for (let i = 0; i < count; i++) {
-      let selectedNode: typeof nodes[0] | null = null;
+      let selectedNode: (typeof nodes)[0] | null = null;
       let attempts = 0;
       do {
         const idx = Math.floor(Math.random() * nodes.length);
         selectedNode = nodes[idx];
         attempts++;
-      } while (selectedNode && (avoidNodes.has(selectedNode.id) || spawned.some(v => v.cellKey === selectedNode!.id)) && attempts < 50);
+      } while (
+        selectedNode &&
+        (avoidNodes.has(selectedNode.id) || spawned.some((v) => v.cellKey === selectedNode?.id)) &&
+        attempts < 50
+      );
 
       if (attempts < 50 && selectedNode) {
         const isBlockade = Math.random() > 0.5;
@@ -364,7 +354,7 @@ export function Villains({ geometry }: VillainsProps) {
           worldX: selectedNode.worldX,
           worldZ: selectedNode.worldZ,
           isBlockade,
-          cellKey: selectedNode.id
+          cellKey: selectedNode.id,
         });
       }
     }
@@ -374,8 +364,8 @@ export function Villains({ geometry }: VillainsProps) {
   return (
     <group>
       {villains.map((v, i) => (
-        <Villain 
-          key={i} 
+        <Villain
+          key={i}
           worldX={v.worldX}
           worldZ={v.worldZ}
           playerPos={camera.position}

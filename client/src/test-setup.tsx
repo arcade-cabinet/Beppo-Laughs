@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
@@ -32,9 +32,15 @@ type MotionProps = {
 // Mock framer-motion to avoid animation issues in tests
 vi.mock('framer-motion', () => ({
   motion: {
-    div: ({ children, initial: _, animate: _a, exit: _e, variants: _v, transition: _t, ...rest }: MotionProps) => (
-      <div {...rest}>{children}</div>
-    ),
+    div: ({
+      children,
+      initial: _,
+      animate: _a,
+      exit: _e,
+      variants: _v,
+      transition: _t,
+      ...rest
+    }: MotionProps) => <div {...rest}>{children}</div>,
     button: ({
       children,
       initial: _,
