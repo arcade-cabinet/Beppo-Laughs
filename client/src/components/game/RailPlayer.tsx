@@ -17,33 +17,6 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
   const targetNodeRef = useRef<RailNode | null>(null);
   const edgeProgress = useRef(0);
 
-  useEffect(() => {
-    if (initialized.current) return;
-
-    const centerNode = geometry.railNodes.get(geometry.centerNodeId);
-    if (centerNode) {
-      useGameStore.getState().setCurrentNode(geometry.centerNodeId);
-      camera.position.set(centerNode.worldX, 1.4, centerNode.worldZ);
-      currentNodeRef.current = centerNode;
-      targetNodeRef.current = null;
-      edgeProgress.current = 0;
-
-      const firstConn = centerNode.connections[0];
-      const firstNode = geometry.railNodes.get(firstConn);
-      if (firstNode) {
-        const lookDir = Math.atan2(
-          firstNode.worldX - centerNode.worldX,
-          -(firstNode.worldZ - centerNode.worldZ),
-        );
-        camera.rotation.y = lookDir;
-        useGameStore.getState().setCameraRotation(lookDir);
-      }
-
-      checkForFork(centerNode);
-      initialized.current = true;
-    }
-  }, [geometry, camera, checkForFork]);
-
   const checkForFork = (node: RailNode) => {
     const gameState = useGameStore.getState();
     const moves: {
@@ -88,6 +61,33 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
       targetNodeRef.current = null;
     }
   };
+
+  useEffect(() => {
+    if (initialized.current) return;
+
+    const centerNode = geometry.railNodes.get(geometry.centerNodeId);
+    if (centerNode) {
+      useGameStore.getState().setCurrentNode(geometry.centerNodeId);
+      camera.position.set(centerNode.worldX, 1.4, centerNode.worldZ);
+      currentNodeRef.current = centerNode;
+      targetNodeRef.current = null;
+      edgeProgress.current = 0;
+
+      const firstConn = centerNode.connections[0];
+      const firstNode = geometry.railNodes.get(firstConn);
+      if (firstNode) {
+        const lookDir = Math.atan2(
+          firstNode.worldX - centerNode.worldX,
+          -(firstNode.worldZ - centerNode.worldZ),
+        );
+        camera.rotation.y = lookDir;
+        useGameStore.getState().setCameraRotation(lookDir);
+      }
+
+      checkForFork(centerNode);
+      initialized.current = true;
+    }
+  }, [geometry, camera, checkForFork]);
 
   const getDirectionAngle = (from: RailNode, to: RailNode): number => {
     return Math.atan2(to.worldX - from.worldX, -(to.worldZ - from.worldZ));
