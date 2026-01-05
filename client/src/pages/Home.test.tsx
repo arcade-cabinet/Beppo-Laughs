@@ -11,7 +11,7 @@ vi.mock('@/components/game/Scene', () => ({
 vi.mock('@/components/game/MainMenu', () => ({
   MainMenu: ({ onStart }: { onStart: (seed: string) => void }) => (
     <div data-testid="main-menu">
-      <button onClick={() => onStart('test seed')} data-testid="mock-start">
+      <button type="button" onClick={() => onStart('test seed')} data-testid="mock-start">
         Start
       </button>
     </div>
