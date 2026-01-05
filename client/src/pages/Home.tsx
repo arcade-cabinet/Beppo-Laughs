@@ -5,11 +5,26 @@ import { Scene } from '@/components/game/Scene';
 import { HorrorEffects } from '@/components/game/HorrorEffects';
 import { useGameStore } from '@/game/store';
 
+/**
+ * Check if WebGL is supported by the browser.
+ * This is a synchronous check done once at startup.
+ */
+function checkWebGLSupport(): boolean {
+  try {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+    return !!gl;
+  } catch {
+    return false;
+  }
+}
+
 export default function Home() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [seed, setSeed] = useState<string>('');
   const [isMobile, setIsMobile] = useState(false);
   const [showRotatePrompt, setShowRotatePrompt] = useState(false);
+  const [webglSupported, setWebglSupported] = useState<boolean | null>(null);
   const setSeedStore = useGameStore((state) => state.setSeed);
   const resetGame = useGameStore((state) => state.resetGame);
   const isGameOver = useGameStore((state) => state.isGameOver);
@@ -72,8 +87,9 @@ export default function Home() {
     exitFullscreen();
   };
 
-  // Detect mobile and reset on mount
+  // Check WebGL support and detect mobile on mount
   useEffect(() => {
+    setWebglSupported(checkWebGLSupport());
     const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     setIsMobile(mobile);
     resetGame();
@@ -97,6 +113,30 @@ export default function Home() {
       window.removeEventListener('orientationchange', checkOrientation);
     };
   }, [isMobile, isPlaying]);
+
+  // Show loading while checking WebGL
+  if (webglSupported === null) {
+    return (
+      <div className="relative w-full h-screen bg-black flex items-center justify-center">
+        <div className="text-white font-mono">Loading...</div>
+      </div>
+    );
+  }
+
+  // Show error if WebGL not supported - no fallbacks, just a clear message
+  if (!webglSupported) {
+    return (
+      <div className="relative w-full h-screen bg-black flex flex-col items-center justify-center p-8">
+        <div className="text-red-500 font-creepy text-4xl mb-6">BROWSER NOT SUPPORTED</div>
+        <div className="text-white/80 font-mono text-center max-w-md mb-4">
+          This game requires WebGL to run. Your browser does not support WebGL or it has been disabled.
+        </div>
+        <div className="text-white/60 font-mono text-sm text-center max-w-md">
+          Please try a modern browser like Chrome, Firefox, Safari, or Edge with hardware acceleration enabled.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden">

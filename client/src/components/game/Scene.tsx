@@ -90,32 +90,6 @@ export function Scene({ seed }: SceneProps) {
     useGameStore.getState().setAvailableMoves(moves);
   }, [mazeData, currentNode, blockades, isMoving]);
 
-  const [webglAvailable, setWebglAvailable] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    try {
-      const canvas = document.createElement('canvas');
-      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-      setWebglAvailable(!!gl);
-    } catch {
-      setWebglAvailable(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!isMoving || webglAvailable !== false) return;
-
-    const timeout = setTimeout(() => {
-      const state = useGameStore.getState();
-      if (state.isMoving && state.targetNode) {
-        console.log('WebGL fallback: completing move via timeout');
-        state.completeMove();
-      }
-    }, 300);
-
-    return () => clearTimeout(timeout);
-  }, [isMoving, webglAvailable]);
-
   useEffect(() => {
     const layout = generateMaze(13, 13, seed);
     const geometry = buildGeometry(layout, DEFAULT_CONFIG);
@@ -175,7 +149,7 @@ export function Scene({ seed }: SceneProps) {
 
       <Canvas
         shadows
-        camera={{ fov: 70, near: 0.1, far: 100 }}
+        camera={{ position: [0, 1.4, 0], fov: 70, near: 0.1, far: 100 }}
         style={{
           filter:
             sanityLevel < 30
@@ -251,12 +225,10 @@ export function Scene({ seed }: SceneProps) {
 
         <Suspense fallback={null}>
           <Maze geometry={geometry} />
-          <Villains geometry={geometry} />
           <Collectibles geometry={geometry} />
-
+          <RailPlayer geometry={geometry} />
+          <Villains geometry={geometry} />
         </Suspense>
-
-        <RailPlayer geometry={geometry} />
       </Canvas>
 
       <DriveControls />

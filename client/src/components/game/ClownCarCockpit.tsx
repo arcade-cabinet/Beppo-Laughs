@@ -195,8 +195,9 @@ export function ClownCarCockpit() {
 
   const scale = 2.5;
 
+  // Position relative to camera: Y=-0.6 (below), Z=-0.5 (in front, camera looks -Z)
   return (
-    <group position={[0, -0.6, 0.3]} scale={[scale, scale, scale]}>
+    <group position={[0, -0.6, -0.5]} scale={[scale, scale, scale]}>
       {/* === 3D DASHBOARD PANELS === */}
       <group position={[0, 0.45, -0.35]}>
         {/* Left Panel - FEAR Meter */}

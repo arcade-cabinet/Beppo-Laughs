@@ -1,6 +1,6 @@
 import { useFrame, useThree } from '@react-three/fiber';
-import { useEffect, useRef } from 'react';
-import { MathUtils } from 'three';
+import { Suspense, useEffect, useRef } from 'react';
+import { Group, MathUtils } from 'three';
 import type { MazeGeometry, RailNode } from '../../game/maze/geometry';
 import { useGameStore } from '../../game/store';
 import { ClownCarCockpit } from './ClownCarCockpit';
@@ -16,6 +16,7 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
   const currentNodeRef = useRef<RailNode | null>(null);
   const targetNodeRef = useRef<RailNode | null>(null);
   const edgeProgress = useRef(0);
+  const cockpitGroupRef = useRef<Group>(null);
 
   const checkForFork = (node: RailNode) => {
     const gameState = useGameStore.getState();
@@ -87,7 +88,8 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
       checkForFork(centerNode);
       initialized.current = true;
     }
-  }, [geometry, camera, checkForFork]);
+  }, [geometry, camera]);
+
 
   const getDirectionAngle = (from: RailNode, to: RailNode): number => {
     return Math.atan2(to.worldX - from.worldX, -(to.worldZ - from.worldZ));
@@ -207,7 +209,21 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
       const tilt = Math.sin(state.clock.elapsedTime * 2) * 0.02 * (1 - sanity / 50);
       camera.rotation.z = MathUtils.lerp(camera.rotation.z, tilt, 0.1);
     }
+
+    // Update cockpit position to follow camera
+    if (cockpitGroupRef.current) {
+      cockpitGroupRef.current.position.copy(camera.position);
+      cockpitGroupRef.current.rotation.copy(camera.rotation);
+    }
   });
 
-  return <ClownCarCockpit />;
+  // Cockpit follows camera position updated in useFrame
+  // Wrapped in Suspense because ClownCarCockpit uses Text which loads fonts
+  return (
+    <group ref={cockpitGroupRef}>
+      <Suspense fallback={null}>
+        <ClownCarCockpit />
+      </Suspense>
+    </group>
+  );
 }

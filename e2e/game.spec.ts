@@ -6,7 +6,8 @@ test.describe('Beppo Laughs - Main Menu', () => {
   });
 
   test('displays the game title', async ({ page }) => {
-    await expect(page.getByText('BEPPO LAUGHS')).toBeVisible();
+    // Use role selector since title has multiple overlapping elements for glitch effect
+    await expect(page.getByRole('heading', { name: 'BEPPO LAUGHS' })).toBeVisible();
   });
 
   test('displays subtitle and warnings', async ({ page }) => {
@@ -43,7 +44,7 @@ test.describe('Beppo Laughs - Main Menu', () => {
     await page.getByTestId('button-start-game').click({ force: true });
 
     // Menu should disappear, game canvas should appear
-    await expect(page.getByText('BEPPO LAUGHS')).not.toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('heading', { name: 'BEPPO LAUGHS' })).not.toBeVisible({ timeout: 5000 });
   });
 });
 
@@ -67,8 +68,8 @@ test.describe('Beppo Laughs - Gameplay', () => {
     const exitBtn = page.getByTestId('button-exit');
     await exitBtn.click();
 
-    // Should be back at main menu
-    await expect(page.getByText('BEPPO LAUGHS')).toBeVisible({ timeout: 5000 });
+    // Should be back at main menu - use role selector for specificity
+    await expect(page.getByRole('heading', { name: 'BEPPO LAUGHS' })).toBeVisible({ timeout: 5000 });
   });
 
 
