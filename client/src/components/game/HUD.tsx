@@ -10,6 +10,11 @@ type MeterPanelProps = {
   side: 'left' | 'right';
 };
 
+const METER_GRADIENT_ENDPOINTS = {
+  left: '#ffcfb0',
+  right: '#c5ddff'
+} as const;
+
 function DashMeterPanel({ label, percent, color, side }: MeterPanelProps) {
   const clamped = Math.max(0, Math.min(100, Math.round(percent)));
   const isLeft = side === 'left';
@@ -33,7 +38,7 @@ function DashMeterPanel({ label, percent, color, side }: MeterPanelProps) {
             style={{
               width: `${clamped}%`,
               background: `linear-gradient(90deg, ${color}, ${
-                isLeft ? '#ffcfb0' : '#c5ddff'
+                METER_GRADIENT_ENDPOINTS[side]
               })`,
               boxShadow: `0 0 22px ${color}66, 0 0 8px ${color}99`
             }}
