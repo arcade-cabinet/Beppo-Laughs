@@ -15,6 +15,9 @@ const METER_GRADIENT_ENDPOINTS = {
   right: '#c5ddff'
 } as const;
 
+const FEAR_METER_COLOR = '#ff2d2d';
+const DESPAIR_METER_COLOR = '#3b82f6';
+
 function DashMeterPanel({ label, percent, color, side }: MeterPanelProps) {
   const clamped = Math.max(0, Math.min(100, Math.round(percent)));
   const isLeft = side === 'left';
@@ -60,6 +63,7 @@ function HintButton() {
 
   return (
     <button
+      type="button"
       data-testid="button-hint"
       className={`pointer-events-auto absolute bottom-6 right-6 px-4 py-3 rounded-full font-creepy text-lg transition-all duration-300 ${
         hintActive
@@ -81,10 +85,8 @@ export function HUD() {
   const [videoEnded, setVideoEnded] = useState(false);
   const fearPercent = maxSanity > 0 ? (fear / maxSanity) * 100 : 0;
   const despairPercent = maxSanity > 0 ? (despair / maxSanity) * 100 : 0;
-  const FEAR_METER_COLOR = '#ff2d2d';
-  const DESPAIR_METER_COLOR = '#3b82f6';
-  
-  const avgInsanity = (fear + despair) / 2 / maxSanity;
+
+  const avgInsanity = maxSanity > 0 ? (fear + despair) / 2 / maxSanity : 0;
   const redOverlayOpacity = Math.min(fear / 300, 0.2);
   const blueOverlayOpacity = Math.min(despair / 300, 0.2);
   const cellsExplored = visitedCells.size;
