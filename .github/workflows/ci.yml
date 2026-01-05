@@ -24,20 +24,23 @@ jobs:
       SONAR_HOST_URL: https://sonarcloud.io
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        # actions/checkout v6.0.1
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
       - name: Read .nvmrc
         id: node-version
         run: echo "version=$(cat .nvmrc)" >> "$GITHUB_OUTPUT"
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        # pnpm/action-setup v4.2.0
+        uses: pnpm/action-setup@9fd676a19091d4595eefd76e4bd31c97133911f1
         with:
           version: 10.12.1
           run_install: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        # actions/setup-node v6.1.0
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f
         with:
           node-version: ${{ steps.node-version.outputs.version }}
           cache: 'pnpm'
@@ -108,7 +111,8 @@ jobs:
           echo "Build completed successfully"
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        # actions/upload-artifact v6.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: dist
           path: dist/public/
@@ -133,7 +137,8 @@ jobs:
 
       - name: Upload coverage to Coveralls
         continue-on-error: true
-        uses: coverallsapp/github-action@v2
+        # coverallsapp/github-action v2.3.6
+        uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: coverage/lcov.info
@@ -155,7 +160,8 @@ jobs:
 
       - name: SonarCloud analysis
         if: steps.sonar-check.outputs.enabled == 'true'
-        uses: SonarSource/sonarcloud-github-action@v3
+        # SonarSource/sonarcloud-github-action v5.0.0
+        uses: SonarSource/sonarcloud-github-action@ffc3010689be73b8e5ae0c57ce35968afd7909e8
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
@@ -165,23 +171,9 @@ jobs:
             -Dsonar.host.url=${{ env.SONAR_HOST_URL }}
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
 
-  security:
-    name: Security Scan
-    runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-      contents: read
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: javascript-typescript
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+  # Note: CodeQL security scanning is handled by GitHub's default setup.
+  # See repository Settings > Code security > Code scanning for configuration.
+  # Advanced configuration is disabled to avoid conflicts with default setup.
 
   all-checks:
     name: All Checks Passed
