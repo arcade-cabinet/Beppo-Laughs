@@ -19,9 +19,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CI: true
-      SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
-      SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
-      SONAR_HOST_URL: https://sonarcloud.io
     steps:
       - name: Checkout repository
         # actions/checkout v6.0.1
@@ -144,13 +141,8 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: coverage/lcov.info
 
-      - name: SonarCloud analysis
-        # Uses sonar-project.properties for configuration (GitHub App integration)
-        # SonarSource/sonarcloud-github-action v5.0.0
-        uses: SonarSource/sonarcloud-github-action@ffc3010689be73b8e5ae0c57ce35968afd7909e8
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
+  # Note: SonarCloud analysis handled by GitHub App (Automatic Analysis)
+  # See: https://sonarcloud.io/project/overview?id=arcade-cabinet_Beppo-Laughs
   # Note: Security scanning handled by GitHub's default CodeQL setup
   # See: https://github.com/arcade-cabinet/Beppo-Laughs/settings/security_analysis
 
