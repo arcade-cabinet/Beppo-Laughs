@@ -7,9 +7,9 @@ export interface MazeConfig {
 }
 
 export const DEFAULT_CONFIG: MazeConfig = {
-  cellSize: 5,
-  wallHeight: 3.5,
-  wallThickness: 0.15,
+  cellSize: 6.5,
+  wallHeight: 5.5,
+  wallThickness: 0.2,
 };
 
 export interface WallSegment {
