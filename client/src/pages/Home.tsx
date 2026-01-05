@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Scene } from '@/components/game/Scene';
 import { MainMenu } from '@/components/game/MainMenu';
 import { HUD } from '@/components/game/HUD';
@@ -8,27 +8,94 @@ export default function Home() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [seed, setSeed] = useState<string>('');
   const [isMobile, setIsMobile] = useState(false);
+  const [showRotatePrompt, setShowRotatePrompt] = useState(false);
   const setSeedStore = useGameStore(state => state.setSeed);
   const resetGame = useGameStore(state => state.resetGame);
   const isGameOver = useGameStore(state => state.isGameOver);
 
-  const handleStart = (selectedSeed: string) => {
+  // Request fullscreen and lock orientation
+  const enterFullscreen = useCallback(async () => {
+    try {
+      const elem = document.documentElement;
+      
+      // Request fullscreen
+      if (elem.requestFullscreen) {
+        await elem.requestFullscreen();
+      } else if ((elem as any).webkitRequestFullscreen) {
+        await (elem as any).webkitRequestFullscreen();
+      } else if ((elem as any).msRequestFullscreen) {
+        await (elem as any).msRequestFullscreen();
+      }
+      
+      // Lock orientation to landscape
+      if (screen.orientation && (screen.orientation as any).lock) {
+        try {
+          await (screen.orientation as any).lock('landscape');
+        } catch (e) {
+          // Orientation lock may not be supported
+          console.log('Orientation lock not supported');
+        }
+      }
+    } catch (e) {
+      console.log('Fullscreen not supported or denied');
+    }
+  }, []);
+
+  const exitFullscreen = useCallback(() => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    }
+    if (screen.orientation && screen.orientation.unlock) {
+      try {
+        screen.orientation.unlock();
+      } catch (e) {}
+    }
+  }, []);
+
+  const handleStart = async (selectedSeed: string) => {
     resetGame();
     setSeedStore(selectedSeed);
     setSeed(selectedSeed);
+    
+    // Enter fullscreen on mobile
+    if (isMobile) {
+      await enterFullscreen();
+    }
+    
     setIsPlaying(true);
   };
 
   const handleExit = () => {
     setIsPlaying(false);
     resetGame();
+    exitFullscreen();
   };
 
   // Detect mobile and reset on mount
   useEffect(() => {
-    setIsMobile(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
+    const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    setIsMobile(mobile);
     resetGame();
   }, [resetGame]);
+
+  // Check orientation on mobile
+  useEffect(() => {
+    if (!isMobile) return;
+    
+    const checkOrientation = () => {
+      const isPortrait = window.innerHeight > window.innerWidth;
+      setShowRotatePrompt(isPlaying && isPortrait);
+    };
+    
+    checkOrientation();
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', checkOrientation);
+    
+    return () => {
+      window.removeEventListener('resize', checkOrientation);
+      window.removeEventListener('orientationchange', checkOrientation);
+    };
+  }, [isMobile, isPlaying]);
 
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden">
@@ -74,6 +141,21 @@ export default function Home() {
             </button>
           )}
         </>
+      )}
+      
+      {/* Rotate Device Prompt */}
+      {showRotatePrompt && (
+        <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center">
+          <div className="text-white font-creepy text-3xl mb-4 animate-pulse">
+            📱➡️📱
+          </div>
+          <div className="text-white/90 font-creepy text-2xl text-center px-8">
+            ROTATE YOUR DEVICE
+          </div>
+          <div className="text-white/60 font-mono text-sm mt-4">
+            Landscape mode required
+          </div>
+        </div>
       )}
     </div>
   );

@@ -173,6 +173,20 @@ Navigate to http://localhost:5000, enter a seed or randomize, and click "ENTER M
 
 ## Recent Changes
 
+### 2026-01-05: Mobile Fullscreen & Clown Car Visibility
+- Game enters fullscreen mode on mobile when starting (captures inputs)
+- Orientation locked to landscape on supported devices
+- Rotate device prompt appears if player is in portrait mode
+- Clown car cockpit scaled 2.5x larger - now dominates the viewport
+- More polka dots and rivets, larger hood ornament
+- Added mobile web app meta tags for immersive experience
+
+### 2026-01-05: Tap-to-Interact System
+- Items: "TAP TO COLLECT" button appears when near collectibles
+- Exits: "ESCAPE!" button appears when reaching exit - car pauses until tapped
+- Collection popup shows item name and sanity bonus
+- Item inventory counter in bottom-right corner
+
 ### 2026-01-05: Simplified Driving to Auto-Navigation with Fork Prompts
 - Removed manual steering wheel mechanism entirely
 - Car now auto-drives along single paths - just use gas/brake
