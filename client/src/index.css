@@ -229,7 +229,6 @@
   .hud-cockpit-row {
     flex-direction: column;
     align-items: center;
-    pointer-events: none;
   }
 
   .hud-dash-panel {
