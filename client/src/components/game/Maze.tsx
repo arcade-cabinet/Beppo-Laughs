@@ -1,18 +1,27 @@
 import { useMemo } from 'react';
-import { DoubleSide } from 'three';
+import { useTexture } from '@react-three/drei';
+import { RepeatWrapping, DoubleSide } from 'three';
 import { MazeGeometry, WallSegment, DEFAULT_CONFIG } from '../../game/maze/geometry';
+import canvasTextureUrl from '@assets/generated_images/vintage_circus_tent_canvas_texture.png';
+import sawdustTextureUrl from '@assets/generated_images/circus_sawdust_floor_texture.png';
 import React from 'react';
-
-const CANVAS_COLOR = "#c4a882";
-const SAWDUST_COLOR = "#8a7560";
-const CEILING_COLOR = "#8a7a6a";
-const POLE_COLOR = "#3a2718";
 
 interface MazeProps {
   geometry: MazeGeometry;
 }
 
 export function Maze({ geometry }: MazeProps) {
+  const canvasTexture = useTexture(canvasTextureUrl);
+  const sawdustTexture = useTexture(sawdustTextureUrl);
+
+  useMemo(() => {
+    [canvasTexture, sawdustTexture].forEach(t => {
+      t.wrapS = t.wrapT = RepeatWrapping;
+    });
+    canvasTexture.repeat.set(1, 2);
+    sawdustTexture.repeat.set(16, 16);
+  }, [canvasTexture, sawdustTexture]);
+
   const { wallHeight } = DEFAULT_CONFIG;
 
   const wallMeshes = useMemo(() => {
@@ -25,13 +34,14 @@ export function Maze({ geometry }: MazeProps) {
       >
         <boxGeometry args={[wall.width, wall.height, wall.depth]} />
         <meshStandardMaterial 
-          color={CANVAS_COLOR}
+          map={canvasTexture} 
+          color="#c4a882"
           roughness={0.9}
           side={DoubleSide}
         />
       </mesh>
     ));
-  }, [geometry]);
+  }, [geometry, canvasTexture]);
 
   const tentPoles = useMemo(() => {
     const poles: React.ReactNode[] = [];
@@ -43,7 +53,7 @@ export function Maze({ geometry }: MazeProps) {
         poles.push(
           <mesh key={`pole-${idx}`} position={[node.worldX, wallHeight / 2 + 1, node.worldZ]} castShadow>
             <cylinderGeometry args={[0.1, 0.15, wallHeight + 2, 8]} />
-            <meshStandardMaterial color={POLE_COLOR} roughness={0.8} metalness={0.05} />
+            <meshStandardMaterial color="#3a2718" roughness={0.8} metalness={0.05} />
           </mesh>
         );
       }
@@ -53,7 +63,7 @@ export function Maze({ geometry }: MazeProps) {
 
   return (
     <group>
-      {/* Sawdust floor - solid color for mobile reliability */}
+      {/* Consistent sawdust floor */}
       <mesh 
         rotation={[-Math.PI / 2, 0, 0]} 
         position={[geometry.floor.x, -0.02, geometry.floor.z]} 
@@ -61,24 +71,26 @@ export function Maze({ geometry }: MazeProps) {
       >
         <planeGeometry args={[geometry.floor.width, geometry.floor.depth]} />
         <meshStandardMaterial 
-          color={SAWDUST_COLOR}
+          map={sawdustTexture} 
+          color="#8a7560"
           roughness={0.95}
         />
       </mesh>
       
-      {/* Peaked tent ceiling */}
+      {/* Peaked tent ceiling - main canvas */}
       <mesh 
         position={[geometry.floor.x, wallHeight + 4, geometry.floor.z]}
       >
         <coneGeometry args={[geometry.floor.width * 0.9, 8, 8, 1, true]} />
         <meshStandardMaterial 
-          color={CEILING_COLOR}
+          map={canvasTexture}
+          color="#8a7a6a"
           roughness={0.95}
           side={DoubleSide}
         />
       </mesh>
       
-      {/* Inner ceiling dark layer */}
+      {/* Inner ceiling dark layer for depth */}
       <mesh 
         rotation={[Math.PI / 2, 0, 0]} 
         position={[geometry.floor.x, wallHeight + 0.5, geometry.floor.z]}

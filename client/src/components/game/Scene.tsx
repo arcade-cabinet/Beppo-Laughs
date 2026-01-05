@@ -1,5 +1,5 @@
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Suspense, useState, useEffect, useRef } from 'react';
+import { Suspense, useState, useEffect, useRef, Component, ReactNode } from 'react';
 import { Maze } from './Maze';
 import { RailPlayer } from './RailPlayer';
 import { generateMaze, MazeLayout } from '../../game/maze/core';
@@ -12,7 +12,59 @@ import { ForkPrompt } from './ForkPrompt';
 import { InteractionPrompt } from './InteractionPrompt';
 import { AudioManager } from './AudioManager';
 import { useGameStore } from '../../game/store';
-import { PointLight } from 'three';
+import { PointLight, DoubleSide } from 'three';
+
+// Error boundary for 3D content
+class Scene3DErrorBoundary extends Component<{ children: ReactNode; fallback: ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: ReactNode; fallback: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  
+  componentDidCatch(error: Error) {
+    console.error('3D Scene Error:', error);
+  }
+  
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    return this.props.children;
+  }
+}
+
+// Simple fallback maze with solid colors (no textures)
+function FallbackMaze({ geometry }: { geometry: MazeGeometry }) {
+  const { wallHeight } = DEFAULT_CONFIG;
+  
+  return (
+    <group>
+      {/* Floor */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[geometry.floor.x, -0.02, geometry.floor.z]}>
+        <planeGeometry args={[geometry.floor.width, geometry.floor.depth]} />
+        <meshStandardMaterial color="#8a7560" roughness={0.95} />
+      </mesh>
+      
+      {/* Walls */}
+      {geometry.walls.map((wall, idx) => (
+        <mesh key={idx} position={[wall.x, wall.height / 2, wall.z]}>
+          <boxGeometry args={[wall.width, wall.height, wall.depth]} />
+          <meshStandardMaterial color="#c4a882" roughness={0.9} side={DoubleSide} />
+        </mesh>
+      ))}
+      
+      {/* Ceiling */}
+      <mesh position={[geometry.floor.x, wallHeight + 4, geometry.floor.z]}>
+        <coneGeometry args={[geometry.floor.width * 0.9, 8, 8, 1, true]} />
+        <meshStandardMaterial color="#8a7a6a" roughness={0.95} side={DoubleSide} />
+      </mesh>
+    </group>
+  );
+}
 
 interface SceneProps {
   seed: string;
@@ -234,12 +286,16 @@ export function Scene({ seed }: SceneProps) {
           />
         )}
 
-        <Suspense fallback={null}>
-          <Maze geometry={geometry} />
-          <Villains geometry={geometry} />
-          <Collectibles geometry={geometry} />
-          <HintOverlay geometry={geometry} />
-        </Suspense>
+        {/* Maze with error boundary and loading fallback */}
+        <Scene3DErrorBoundary fallback={<FallbackMaze geometry={geometry} />}>
+          <Suspense fallback={<FallbackMaze geometry={geometry} />}>
+            <Maze geometry={geometry} />
+          </Suspense>
+        </Scene3DErrorBoundary>
+        
+        <Villains geometry={geometry} />
+        <Collectibles geometry={geometry} />
+        <HintOverlay geometry={geometry} />
 
         <RailPlayer geometry={geometry} />
       </Canvas>
