@@ -98,8 +98,8 @@ export function HUD() {
     <div className="pointer-events-none absolute inset-0 z-40">
       {/* Clown car console view anchored to the corners */}
       <div className="hud-cockpit-row">
-        <DashMeterPanel label="FEAR" percent={fearPercent} color="#ff2d2d" side="left" />
-        <DashMeterPanel label="DESPAIR" percent={despairPercent} color="#3b82f6" side="right" />
+        <DashMeterPanel label="FEAR" percent={fearPercent} color={FEAR_METER_COLOR} side="left" />
+        <DashMeterPanel label="DESPAIR" percent={despairPercent} color={DESPAIR_METER_COLOR} side="right" />
       </div>
 
       {/* Vignette - intensifies with combined insanity */}
