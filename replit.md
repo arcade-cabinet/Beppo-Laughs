@@ -173,13 +173,12 @@ Navigate to http://localhost:5000, enter a seed or randomize, and click "ENTER M
 
 ## Recent Changes
 
-### 2026-01-05: Auto-Start & Smart Screen Detection
-- Game now auto-starts immediately (no menu) with random seed
-- Fullscreen mode activated on all devices when game starts
-- Smart screen size detection:
+### 2026-01-05: Smart Screen Detection & Fullscreen Fix
+- MainMenu shows first, fullscreen activates only when ENTER MAZE is clicked
+- Added guard to prevent double-render/double-menu display bug
+- Smart screen size detection (600px threshold):
   - Small screens (phones < 600px): Enforce landscape orientation, show rotate prompt
   - Large screens (tablets/foldables): No orientation enforcement, play in any mode
-- Loading screen shows "ENTERING THE NIGHTMARE..." while initializing
 
 ### 2026-01-05: 3D Dashboard HUD on Clown Car
 - Removed 2D brain meter and minimap from screen overlay

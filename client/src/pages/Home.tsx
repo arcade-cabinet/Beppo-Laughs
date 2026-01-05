@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Scene } from '@/components/game/Scene';
+import { MainMenu } from '@/components/game/MainMenu';
 import { HUD } from '@/components/game/HUD';
 import { useGameStore } from '@/game/store';
 
@@ -12,7 +13,7 @@ export default function Home() {
   const [seed, setSeed] = useState<string>('');
   const [isSmallScreen, setIsSmallScreen] = useState(false);
   const [showRotatePrompt, setShowRotatePrompt] = useState(false);
-  const hasAutoStarted = useRef(false);
+  const hasEntered = useRef(false);
   const setSeedStore = useGameStore(state => state.setSeed);
   const resetGame = useGameStore(state => state.resetGame);
   const isGameOver = useGameStore(state => state.isGameOver);
@@ -22,7 +23,6 @@ export default function Home() {
     // Get the larger dimension (to account for orientation)
     const largerDim = Math.max(window.innerWidth, window.innerHeight);
     // If even the larger dimension is small, it's definitely a phone
-    // Tablets typically have at least 768px on their shorter side
     return largerDim < TABLET_MIN_DIMENSION || 
            (window.innerWidth < TABLET_MIN_DIMENSION && window.innerHeight < TABLET_MIN_DIMENSION);
   }, []);
@@ -65,13 +65,15 @@ export default function Home() {
     }
   }, []);
 
-  const startGame = useCallback(async () => {
-    if (isPlaying) return;
+  // Called when user clicks ENTER MAZE in MainMenu
+  const handleStart = useCallback(async (selectedSeed: string) => {
+    // Guard against double-entry
+    if (hasEntered.current || isPlaying) return;
+    hasEntered.current = true;
     
     resetGame();
-    const randomSeed = Math.random().toString(36).substring(2, 10);
-    setSeedStore(randomSeed);
-    setSeed(randomSeed);
+    setSeedStore(selectedSeed);
+    setSeed(selectedSeed);
     
     const smallScreen = checkScreenSize();
     setIsSmallScreen(smallScreen);
@@ -79,6 +81,7 @@ export default function Home() {
     // Enter fullscreen for everyone, but only lock orientation on small screens
     await enterFullscreen(smallScreen);
     
+    // Only set playing AFTER fullscreen is done to prevent double-render
     setIsPlaying(true);
   }, [isPlaying, resetGame, setSeedStore, checkScreenSize, enterFullscreen]);
 
@@ -86,20 +89,13 @@ export default function Home() {
     setIsPlaying(false);
     resetGame();
     exitFullscreen();
-    hasAutoStarted.current = false;
+    hasEntered.current = false;
   };
 
-  // Auto-start game immediately on mount
+  // Reset game on initial mount
   useEffect(() => {
-    if (!hasAutoStarted.current) {
-      hasAutoStarted.current = true;
-      // Small delay to ensure DOM is ready
-      const timer = setTimeout(() => {
-        startGame();
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [startGame]);
+    resetGame();
+  }, [resetGame]);
 
   // Check orientation only on small screens (phones)
   useEffect(() => {
@@ -125,14 +121,8 @@ export default function Home() {
 
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden">
-      {/* Loading state while auto-starting */}
-      {!isPlaying && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-white/60 font-creepy text-2xl animate-pulse">
-            ENTERING THE NIGHTMARE...
-          </div>
-        </div>
-      )}
+      {/* Main Menu - shown when not playing */}
+      {!isPlaying && <MainMenu onStart={handleStart} />}
       
       {isPlaying && (
         <>
