@@ -4,6 +4,13 @@ import { MainMenu } from '@/components/game/MainMenu';
 import { HUD } from '@/components/game/HUD';
 import { useGameStore } from '@/game/store';
 
+/**
+ * Root UI component that manages game lifecycle, fullscreen/orientation behavior, and renders the main menu, game scene, HUD, and controls.
+ *
+ * Handles starting and exiting games (resetting and seeding the store), requests fullscreen and attempts to lock orientation on mobile, monitors device orientation to show a rotate prompt when needed, and conditionally renders exit/restart controls and the MainMenu or active Scene/HUD.
+ *
+ * @returns The rendered JSX element containing the home screen UI (MainMenu, Scene, HUD, exit/restart buttons, and rotate prompt).
+ */
 export default function Home() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
