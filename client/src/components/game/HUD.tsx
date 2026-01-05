@@ -79,8 +79,8 @@ export function HUD() {
   const sanityLevel = useGameStore((state) => state.getSanityLevel());
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoEnded, setVideoEnded] = useState(false);
-  const fearPercent = (fear / maxSanity) * 100;
-  const despairPercent = (despair / maxSanity) * 100;
+  const fearPercent = maxSanity > 0 ? (fear / maxSanity) * 100 : 0;
+  const despairPercent = maxSanity > 0 ? (despair / maxSanity) * 100 : 0;
   const FEAR_METER_COLOR = '#ff2d2d';
   const DESPAIR_METER_COLOR = '#3b82f6';
   
