@@ -1,3 +1,4 @@
+import React from 'react';
 import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
@@ -22,17 +23,29 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
+// Simplified type for motion component props
+type MotionProps = {
+  children?: React.ReactNode;
+  [key: string]: unknown;
+};
+
 // Mock framer-motion to avoid animation issues in tests
 vi.mock('framer-motion', () => ({
   motion: {
-    div: ({ children, ...props }: { children?: React.ReactNode; [key: string]: unknown }) => {
-      const { initial, animate, exit, variants, transition, ...rest } = props;
-      return <div {...rest}>{children}</div>;
-    },
-    button: ({ children, ...props }: { children?: React.ReactNode; [key: string]: unknown }) => {
-      const { initial, animate, exit, variants, transition, whileHover, whileTap, ...rest } = props;
-      return <button {...rest}>{children}</button>;
-    },
+    div: ({ children, initial: _, animate: _a, exit: _e, variants: _v, transition: _t, ...rest }: MotionProps) => (
+      <div {...rest}>{children}</div>
+    ),
+    button: ({
+      children,
+      initial: _,
+      animate: _a,
+      exit: _e,
+      variants: _v,
+      transition: _t,
+      whileHover: _wh,
+      whileTap: _wt,
+      ...rest
+    }: MotionProps) => <button {...rest}>{children}</button>,
   },
   AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));

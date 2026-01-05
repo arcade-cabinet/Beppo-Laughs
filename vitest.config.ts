@@ -17,7 +17,7 @@ export default defineConfig({
         'dist/',
         '**/*.test.{ts,tsx}',
         '**/*.spec.{ts,tsx}',
-        '**/test-setup.ts',
+        '**/test-setup.tsx',
         'server/',
         'script/',
         '*.config.*',
@@ -26,9 +26,9 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './client/src'),
-      '@shared': path.resolve(__dirname, './shared'),
-      '@assets': path.resolve(__dirname, './attached_assets'),
+      '@': path.resolve(import.meta.dirname, './client/src'),
+      '@shared': path.resolve(import.meta.dirname, './shared'),
+      '@assets': path.resolve(import.meta.dirname, './attached_assets'),
     },
   },
 });
