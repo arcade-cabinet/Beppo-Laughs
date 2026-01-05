@@ -7,6 +7,8 @@ import { buildGeometry, MazeGeometry, DEFAULT_CONFIG } from '../../game/maze/geo
 import { Villains } from './Villains';
 import { Collectibles } from './Collectibles';
 import { TapZones } from './TapZones';
+import { HintOverlay } from './HintOverlay';
+import { GestureControls } from './GestureControls';
 import { AudioManager } from './AudioManager';
 import { useGameStore } from '../../game/store';
 import { PointLight } from 'three';
@@ -96,7 +98,7 @@ export function Scene({ seed }: SceneProps) {
       const state = useGameStore.getState();
       if (state.isMoving && state.targetNode) {
         console.log('WebGL fallback: completing move via timeout');
-        state.completeMove(state.targetNode);
+        state.completeMove();
       }
     }, 300);
     
@@ -236,10 +238,13 @@ export function Scene({ seed }: SceneProps) {
           <Villains geometry={geometry} />
           <Collectibles geometry={geometry} />
           <TapZones geometry={geometry} />
+          <HintOverlay geometry={geometry} />
         </Suspense>
 
         <RailPlayer geometry={geometry} />
       </Canvas>
+      
+      <GestureControls />
     </>
   );
 }

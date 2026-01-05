@@ -39,6 +39,9 @@ interface GameState {
   cameraRotation: number;     // Camera Y rotation in radians
   availableMoves: { direction: 'north' | 'south' | 'east' | 'west'; nodeId: string; isExit: boolean }[];
   
+  // Hint System
+  hintActive: boolean;        // Whether hint overlays are visible
+  
   // Actions
   setSeed: (seed: string) => void;
   visitNode: (nodeId: string) => void;
@@ -60,6 +63,10 @@ interface GameState {
   completeMove: () => void;
   setCameraRotation: (rotation: number) => void;
   setAvailableMoves: (moves: { direction: 'north' | 'south' | 'east' | 'west'; nodeId: string; isExit: boolean }[]) => void;
+  
+  // Hint Actions
+  toggleHint: () => void;
+  setHintActive: (active: boolean) => void;
   
   // Computed
   getSanityLevel: () => number;
@@ -92,6 +99,9 @@ export const useGameStore = create<GameState>((set, get) => ({
   moveSpeed: 1,
   cameraRotation: 0,
   availableMoves: [],
+  
+  // Hint system
+  hintActive: false,
   
   setSeed: (seed) => set({ seed }),
   
@@ -262,6 +272,10 @@ export const useGameStore = create<GameState>((set, get) => ({
   setCameraRotation: (rotation) => set({ cameraRotation: rotation }),
   
   setAvailableMoves: (moves) => set({ availableMoves: moves }),
+  
+  // Hint actions
+  toggleHint: () => set(state => ({ hintActive: !state.hintActive })),
+  setHintActive: (active) => set({ hintActive: active }),
   
   getSanityLevel: () => {
     const state = get();
