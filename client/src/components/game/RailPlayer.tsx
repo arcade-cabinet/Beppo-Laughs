@@ -107,6 +107,9 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
       camera.position.x = MathUtils.lerp(camera.position.x, fromNode.worldX, 0.1);
       camera.position.z = MathUtils.lerp(camera.position.z, fromNode.worldZ, 0.1);
       camera.position.y = MathUtils.lerp(camera.position.y, 1.4, 0.1);
+      
+      const storeCameraRotation = gameState.cameraRotation;
+      camera.rotation.y = MathUtils.lerp(camera.rotation.y, storeCameraRotation, 0.1);
     }
     
     const maxPitchUp = -0.17;

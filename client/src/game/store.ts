@@ -217,6 +217,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     moveSpeed: 1,
     cameraRotation: 0,
     availableMoves: [],
+    hintActive: false,
   }),
   
   // Rail Navigation Actions

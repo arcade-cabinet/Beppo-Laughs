@@ -8,7 +8,7 @@ interface TouchPoint {
 }
 
 export function GestureControls() {
-  const { availableMoves, isMoving, startMoveTo, cameraRotation, setCameraRotation, setHintActive } = useGameStore();
+  const { availableMoves, isMoving, startMoveTo, cameraRotation, setCameraRotation } = useGameStore();
   
   const touchStartRef = useRef<TouchPoint | null>(null);
   const touchHistoryRef = useRef<TouchPoint[]>([]);
