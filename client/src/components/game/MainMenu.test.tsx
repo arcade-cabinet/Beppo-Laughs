@@ -3,17 +3,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MainMenu, SEED_WORDS } from './MainMenu';
 
 describe('MainMenu', () => {
-<<<<<<< HEAD
-  let mockOnStart: ReturnType<typeof vi.fn<[(seed: string) => void]>>;
-
-  beforeEach(() => {
-    mockOnStart = vi.fn<[(seed: string) => void]>();
-=======
   let mockOnStart: ReturnType<typeof vi.fn<(seed: string) => void>>;
 
   beforeEach(() => {
     mockOnStart = vi.fn<(seed: string) => void>();
->>>>>>> 6ac275b (Address PR feedback: fix Vitest mock typing)
   });
 
   afterEach(() => {

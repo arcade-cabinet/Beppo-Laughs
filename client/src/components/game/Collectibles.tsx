@@ -27,9 +27,17 @@ function Collectible({ item }: { item: CollectibleItem }) {
   const texture = useTexture(ITEM_TEXTURES[item.textureIndex]);
   const groupRef = useRef<Group>(null);
   const { blockades, currentNode, collectedItems, setNearbyItem, nearbyItem } = useGameStore();
+  const mountTimeRef = useRef(performance.now());
+  const collectionTimeRef = useRef<number | null>(null);
 
   const hasBlockades = blockades.size > 0;
   const isCollected = collectedItems.has(item.id);
+
+  useEffect(() => {
+    if (isCollected && !collectionTimeRef.current) {
+      collectionTimeRef.current = performance.now();
+    }
+  }, [isCollected]);
 
   useEffect(() => {
     if (isCollected && nearbyItem?.id === item.id) {
@@ -38,7 +46,45 @@ function Collectible({ item }: { item: CollectibleItem }) {
   }, [isCollected, nearbyItem, item.id, setNearbyItem]);
 
   useFrame((state) => {
-    if (!groupRef.current || isCollected) return;
+    if (!groupRef.current) return;
+
+    const now = performance.now();
+    const elapsedSinceMount = (now - mountTimeRef.current) / 1000;
+
+    // Pop-up animation on spawn (0-0.6 seconds)
+    const popupDuration = 0.6;
+    const popupProgress = Math.min(elapsedSinceMount, popupDuration) / popupDuration;
+    const popupScale = popupProgress * popupProgress; // Easing: ease-out-quad
+
+    // Pop-down animation on collection (0-0.5 seconds)
+    let popdownScale = 1;
+    let popdownY = 0;
+    let popdownOpacity = 1;
+    if (collectionTimeRef.current) {
+      const elapsedSinceCollection = (now - collectionTimeRef.current) / 1000;
+      const popdownDuration = 0.5;
+      const popdownProgress = Math.min(elapsedSinceCollection, popdownDuration) / popdownDuration;
+      // Shrink and slide up while disappearing
+      popdownScale = Math.max(0, 1 - popdownProgress * 1.2);
+      popdownY = popdownProgress * 1.5; // Slide up
+      popdownOpacity = Math.max(0, 1 - popdownProgress);
+    }
+
+    if (isCollected) {
+      groupRef.current.position.y = 0.8 + popdownY;
+      groupRef.current.scale.setScalar(popdownScale);
+      if (groupRef.current.children[0]) {
+        const billboard = groupRef.current.children[0] as any;
+        if (billboard.children[0]) {
+          billboard.children[0].traverse((child: any) => {
+            if (child.material) {
+              child.material.opacity = popdownOpacity;
+            }
+          });
+        }
+      }
+      return;
+    }
 
     const gameState = useGameStore.getState();
 
@@ -56,12 +102,17 @@ function Collectible({ item }: { item: CollectibleItem }) {
     const isNearby = gameState.nearbyItem?.id === item.id;
     const pulseIntensity = isNearby ? 0.3 : hasBlockades ? 0.2 : 0.1;
     const baseScale = isNearby ? 1.0 : 0.8;
-    const pulse =
+    const floatingPulse =
       baseScale + Math.sin(state.clock.elapsedTime * (isNearby ? 5 : 3)) * pulseIntensity;
-    groupRef.current.scale.setScalar(pulse);
+
+    // Combine popup scale with floating pulse animation
+    const finalScale = popupProgress < 1 ? popupScale : floatingPulse;
+    groupRef.current.scale.setScalar(finalScale);
   });
 
-  if (isCollected) return null;
+  if (isCollected && collectionTimeRef.current && (performance.now() - collectionTimeRef.current) > 500) {
+    return null;
+  }
 
   const isNearby = nearbyItem?.id === item.id;
 
