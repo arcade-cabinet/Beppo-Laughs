@@ -1,26 +1,23 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useGameStore } from '../../game/store';
 
 export function DriveControls() {
-  const { setAccelerating, setBraking, carSpeed, pendingFork, isGameOver, hasWon } = useGameStore();
+  const { setAccelerating, setBraking, accelerating, carSpeed, pendingFork, isGameOver, hasWon } =
+    useGameStore();
+  const [showLeverHint, setShowLeverHint] = useState(true);
 
-  const handleAcceleratorStart = useCallback(() => {
-    if (isGameOver || hasWon || pendingFork) return;
+  const leverDisabled = pendingFork;
+
+  const handleLeverPullStart = useCallback(() => {
+    if (leverDisabled) return;
     setAccelerating(true);
-  }, [setAccelerating, isGameOver, hasWon, pendingFork]);
+    setShowLeverHint(false);
+  }, [leverDisabled, setAccelerating]);
 
-  const handleAcceleratorEnd = useCallback(() => {
+  const handleLeverPullEnd = useCallback(() => {
     setAccelerating(false);
-  }, [setAccelerating]);
-
-  const handleBrakeStart = useCallback(() => {
-    if (isGameOver || hasWon) return;
-    setBraking(true);
-  }, [setBraking, isGameOver, hasWon]);
-
-  const handleBrakeEnd = useCallback(() => {
     setBraking(false);
-  }, [setBraking]);
+  }, [setAccelerating, setBraking]);
 
   if (isGameOver || hasWon) return null;
 
@@ -28,70 +25,73 @@ export function DriveControls() {
 
   return (
     <div className="absolute inset-0 pointer-events-none z-30">
-      {/* Brake Pedal (Left) - Clown Shoe Style */}
-      <button
-        data-testid="button-brake"
-        className="pointer-events-auto absolute left-4 bottom-8 w-28 h-40 
-                   flex flex-col items-center justify-end pb-4
-                   touch-none select-none transition-transform
-                   active:scale-95"
-        onMouseDown={handleBrakeStart}
-        onMouseUp={handleBrakeEnd}
-        onMouseLeave={handleBrakeEnd}
-        onTouchStart={handleBrakeStart}
-        onTouchEnd={handleBrakeEnd}
-        style={{
-          background: 'linear-gradient(135deg, #cc2200 0%, #8b0000 50%, #660000 100%)',
-          borderRadius: '20px 20px 40px 40px',
-          border: '4px solid #4a0000',
-          boxShadow: '0 8px 20px rgba(0,0,0,0.5), inset 0 -5px 15px rgba(0,0,0,0.3)',
-        }}
-      >
-        <div className="text-white font-bold text-lg tracking-wider drop-shadow-lg">BRAKE</div>
-        <div className="text-5xl mt-2" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}>
-          🛑
-        </div>
-        {/* Shoe toe bulge */}
-        <div
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-20 h-8 rounded-b-full"
-          style={{ background: 'linear-gradient(to bottom, #8b0000, #660000)' }}
-        />
-      </button>
-
-      {/* Accelerator Pedal (Right) - Clown Shoe Style */}
-      <button
-        data-testid="button-accelerate"
-        disabled={!!pendingFork}
-        className={`pointer-events-auto absolute right-4 bottom-8 w-28 h-40 
-                   flex flex-col items-center justify-end pb-4
-                   touch-none select-none transition-transform
-                   ${pendingFork ? 'opacity-50 cursor-not-allowed' : 'active:scale-95'}`}
-        onMouseDown={handleAcceleratorStart}
-        onMouseUp={handleAcceleratorEnd}
-        onMouseLeave={handleAcceleratorEnd}
-        onTouchStart={handleAcceleratorStart}
-        onTouchEnd={handleAcceleratorEnd}
-        style={{
-          background: pendingFork
-            ? 'linear-gradient(135deg, #666 0%, #444 50%, #333 100%)'
-            : 'linear-gradient(135deg, #22cc22 0%, #008800 50%, #006600 100%)',
-          borderRadius: '20px 20px 40px 40px',
-          border: `4px solid ${pendingFork ? '#222' : '#004400'}`,
-          boxShadow: '0 8px 20px rgba(0,0,0,0.5), inset 0 -5px 15px rgba(0,0,0,0.3)',
-        }}
-      >
-        <div className="text-white font-bold text-lg tracking-wider drop-shadow-lg">GAS</div>
-        <div className="text-5xl mt-2" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}>
-          ⚡
-        </div>
-        {/* Shoe toe bulge */}
-        <div
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-20 h-8 rounded-b-full"
+      <div className="pointer-events-auto absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3">
+        {showLeverHint && (
+          <div className="flex flex-col items-center text-amber-300 text-sm font-bold drop-shadow-lg animate-bounce">
+            <span className="text-lg">⬇️</span>
+            <span>Pull the lever!</span>
+          </div>
+        )}
+        <button
+          type="button"
+          data-testid="lever-control"
+          disabled={leverDisabled}
+          aria-label="Drive lever - hold to accelerate"
+          aria-pressed={accelerating}
+          aria-disabled={leverDisabled}
+          className={`relative w-28 h-40 flex flex-col items-center justify-end select-none touch-none transition-transform ${leverDisabled ? 'opacity-50 cursor-not-allowed' : 'active:scale-95'}`}
+          onMouseDown={handleLeverPullStart}
+          onMouseUp={handleLeverPullEnd}
+          onMouseLeave={handleLeverPullEnd}
+          onTouchStart={handleLeverPullStart}
+          onTouchEnd={handleLeverPullEnd}
+          onTouchCancel={handleLeverPullEnd}
           style={{
-            background: pendingFork ? '#333' : 'linear-gradient(to bottom, #008800, #006600)',
+            background:
+              'radial-gradient(circle at 50% 20%, rgba(255,255,255,0.12), transparent 45%), linear-gradient(180deg, #1f130a 0%, #2e1b0e 100%)',
+            borderRadius: '18px',
+            border: '3px solid #4b2a12',
+            boxShadow: '0 10px 25px rgba(0,0,0,0.45), inset 0 2px 8px rgba(0,0,0,0.4)',
           }}
-        />
-      </button>
+        >
+          {/* Lever base */}
+          <div
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 w-20 h-5 rounded-full"
+            style={{ background: 'linear-gradient(90deg, #3b1c0a, #6a3414, #3b1c0a)' }}
+          />
+          {/* Lever arm */}
+          <div
+            className="absolute bottom-9 left-1/2 -translate-x-1/2 origin-bottom"
+            style={{
+              width: '12px',
+              height: '110px',
+              borderRadius: '10px',
+              background: leverDisabled
+                ? 'linear-gradient(180deg, #666, #444)'
+                : 'linear-gradient(180deg, #e0a000, #d45b00)',
+              boxShadow: leverDisabled
+                ? '0 0 8px rgba(0,0,0,0.6)'
+                : '0 0 12px rgba(255,132,0,0.35)',
+              transform: `translateX(-50%) rotate(${accelerating ? 0 : '-12deg'})`,
+            }}
+          >
+            <div
+              className="absolute -top-4 left-1/2 -translate-x-1/2 w-14 h-14 rounded-full"
+              style={{
+                background: leverDisabled
+                  ? 'radial-gradient(circle at 35% 35%, #ffbbbb, #bb4444)'
+                  : 'radial-gradient(circle at 35% 35%, #ffdddd, #dd0000)',
+                boxShadow: leverDisabled
+                  ? '0 0 12px rgba(0,0,0,0.5)'
+                  : '0 0 18px rgba(255,0,0,0.45), 0 6px 12px rgba(0,0,0,0.4)',
+              }}
+            />
+          </div>
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 text-amber-300 font-bold text-lg drop-shadow-lg">
+            DRIVE
+          </div>
+        </button>
+      </div>
 
       {/* Speed Indicator - Speedometer Style */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2">

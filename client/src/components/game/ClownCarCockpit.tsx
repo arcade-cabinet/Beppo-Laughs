@@ -152,8 +152,7 @@ function SpeedometerPanel({ position }: { position: [number, number, number] }) 
 }
 
 export function ClownCarCockpit() {
-  const leftPedalRef = useRef<THREE.Mesh>(null);
-  const rightPedalRef = useRef<THREE.Mesh>(null);
+  const leverRef = useRef<THREE.Group>(null);
   const fearFillRef = useRef<THREE.Mesh>(null);
   const despairFillRef = useRef<THREE.Mesh>(null);
 
@@ -161,20 +160,12 @@ export function ClownCarCockpit() {
     const state = useGameStore.getState();
     const { accelerating, braking, fear, despair, maxSanity } = state;
 
-    // Animate pedals
-    if (rightPedalRef.current) {
-      rightPedalRef.current.rotation.x = THREE.MathUtils.lerp(
-        rightPedalRef.current.rotation.x,
-        accelerating ? 0.4 : 0,
-        0.2,
-      );
-    }
-
-    if (leftPedalRef.current) {
-      leftPedalRef.current.rotation.x = THREE.MathUtils.lerp(
-        leftPedalRef.current.rotation.x,
-        braking ? 0.4 : 0,
-        0.2,
+    if (leverRef.current) {
+      const targetRotation = accelerating ? -0.5 : braking ? 0.2 : -0.1;
+      leverRef.current.rotation.x = THREE.MathUtils.lerp(
+        leverRef.current.rotation.x,
+        targetRotation,
+        0.15,
       );
     }
 
@@ -353,27 +344,29 @@ export function ClownCarCockpit() {
         <meshStandardMaterial color="#1a1510" roughness={0.9} />
       </mesh>
 
-      {/* Brake Pedal (Left) - 3D representation */}
-      <group position={[-0.25, -0.15, -0.2]}>
-        <mesh ref={leftPedalRef} position={[0, 0.06, 0]}>
-          <boxGeometry args={[0.15, 0.04, 0.22]} />
-          <meshStandardMaterial color="#cc0000" roughness={0.5} metalness={0.2} />
+      {/* Central drive lever */}
+      <group ref={leverRef} position={[0, -0.05, -0.25]} rotation={[-0.1, 0, 0]}>
+        {/* Base plate */}
+        <mesh position={[0, -0.12, 0]}>
+          <cylinderGeometry args={[0.2, 0.2, 0.06, 24]} />
+          <meshStandardMaterial color="#3b1c0a" roughness={0.7} metalness={0.3} />
         </mesh>
-        <mesh position={[0, 0, -0.12]}>
-          <boxGeometry args={[0.025, 0.1, 0.025]} />
-          <meshStandardMaterial color="#444" metalness={0.8} />
+        {/* Lever shaft */}
+        <mesh position={[0, 0.05, 0]}>
+          <cylinderGeometry args={[0.04, 0.03, 0.35, 12]} />
+          <meshStandardMaterial color="#d45b00" roughness={0.4} metalness={0.6} />
         </mesh>
-      </group>
-
-      {/* Accelerator Pedal (Right) - 3D representation */}
-      <group position={[0.25, -0.15, -0.2]}>
-        <mesh ref={rightPedalRef} position={[0, 0.06, 0]}>
-          <boxGeometry args={[0.15, 0.04, 0.22]} />
-          <meshStandardMaterial color="#00cc00" roughness={0.5} metalness={0.2} />
-        </mesh>
-        <mesh position={[0, 0, -0.12]}>
-          <boxGeometry args={[0.025, 0.1, 0.025]} />
-          <meshStandardMaterial color="#444" metalness={0.8} />
+        {/* Accent rings */}
+        {[0.04, 0.12, 0.2].map((y, idx) => (
+          <mesh key={`ring-${idx}`} position={[0, y, 0]}>
+            <torusGeometry args={[0.05, 0.01, 8, 24]} />
+            <meshStandardMaterial color="#f5c400" emissive="#f5c400" emissiveIntensity={0.25} />
+          </mesh>
+        ))}
+        {/* Clown nose topper */}
+        <mesh position={[0, 0.24, 0]}>
+          <sphereGeometry args={[0.1, 16, 16]} />
+          <meshStandardMaterial color="#dd0000" emissive="#dd0000" emissiveIntensity={0.45} />
         </mesh>
       </group>
     </group>
