@@ -72,14 +72,11 @@ export function Blockades({ blockades }: BlockadesProps) {
 
   const textureByNodeId = useMemo(() => {
     const map = new Map<string, Texture>();
-    if (Array.isArray(textures)) {
-      textures.forEach((texture, index) => {
-        const blockade = blockades[index];
-        if (blockade) map.set(blockade.nodeId, texture);
-      });
-    } else if (blockades[0] && textures) {
-      map.set(blockades[0].nodeId, textures);
-    }
+    const textureArray = Array.isArray(textures) ? textures : textures ? [textures] : [];
+    blockades.forEach((blockade, index) => {
+      const texture = textureArray[index];
+      if (texture) map.set(blockade.nodeId, texture);
+    });
     return map;
   }, [blockades, textures]);
 

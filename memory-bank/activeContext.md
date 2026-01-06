@@ -11,8 +11,8 @@
 - Maze wall/floor/ceiling textures now pick deterministic catalog assets per seed (`client/src/components/game/Maze.tsx`).
 - Collectibles now seeded from catalog with fallback (`client/src/components/game/Collectibles.tsx`).
 - Added deterministic blockade + collectible pairing via spawn plan (`client/src/game/spawnPlan.ts`).
-- Added blockade rendering for paper-mache cutouts (`client/src/components/game/Blockades.tsx`).
-- Blockade labels now toggle based on camera distance using `useFrame` refs.
+- Ensured blockade and collectible nodes are distinct by sampling from a shared shuffled pool.
+- Added blockade rendering for paper-mache cutouts with distance-gated labels (`client/src/components/game/Blockades.tsx`).
 - Store now tracks blockade requirements and clears only matching blockade on collect (`client/src/game/store.ts`).
 - Tests updated for blockade requirements (`client/src/game/store.test.ts`).
 

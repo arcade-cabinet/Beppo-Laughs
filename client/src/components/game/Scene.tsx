@@ -1,6 +1,6 @@
 import { useGameStore } from '@/game/store';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Suspense, useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import type { PointLight } from 'three';
 import { loadAssetCatalog } from '../../game/assetCatalog';
 import { generateMaze, type MazeLayout } from '../../game/maze/core';
@@ -154,11 +154,15 @@ export function Scene({ seed }: SceneProps) {
 
   if (!mazeData) return null;
 
-  const spawnPlan = buildSpawnPlan({
-    geometry: mazeData.geometry,
-    seed,
-    catalog,
-  });
+  const spawnPlan = useMemo(
+    () =>
+      buildSpawnPlan({
+        geometry: mazeData.geometry,
+        seed,
+        catalog,
+      }),
+    [mazeData.geometry, seed, catalog],
+  );
 
   useEffect(() => {
     const store = useGameStore.getState();

@@ -83,17 +83,16 @@ export const buildSpawnPlan = ({
   const avoidNodes = new Set([geometry.centerNodeId, ...geometry.exitNodeIds]);
   const candidateNodes = nodes.filter((node) => !avoidNodes.has(node.id));
 
-  if (!candidateNodes.length) return null;
+  if (candidateNodes.length < 2) return { blockades: [], collectibles: [] };
 
   const blockadeCount = Math.max(1, Math.floor(nodes.length / 10));
-  const blockadeNodes = seededShuffle(candidateNodes, `${seedBase}:blockade-nodes`).slice(
-    0,
-    blockadeCount,
-  );
-  const remainingNodes = seededShuffle(
-    candidateNodes.filter((node) => !blockadeNodes.some((b) => b.id === node.id)),
-    `${seedBase}:collectible-nodes`,
-  );
+  const shuffledNodes = seededShuffle(candidateNodes, `${seedBase}:spawn-nodes`);
+  const spawnPairCount = Math.min(blockadeCount, Math.floor(shuffledNodes.length / 2));
+
+  if (spawnPairCount === 0) return { blockades: [], collectibles: [] };
+
+  const blockadeNodes = shuffledNodes.slice(0, spawnPairCount);
+  const collectibleNodes = shuffledNodes.slice(spawnPairCount, spawnPairCount * 2);
 
   const blockades: BlockadePlan[] = blockadeNodes.map((node, index) => {
     const obstacleAsset = pickAssetAt(obstacleAssets, index, `${seedBase}:obstacles`);
@@ -112,7 +111,7 @@ export const buildSpawnPlan = ({
   });
 
   const collectibles: CollectiblePlan[] = blockades.map((blockade, index) => {
-    const node = remainingNodes[index % remainingNodes.length] ?? blockadeNodes[index];
+    const node = collectibleNodes[index] ?? blockadeNodes[index];
     const solutionAsset = pickAssetAt(solutionAssets, index, `${seedBase}:solutions`);
 
     return {
