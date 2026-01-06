@@ -21,6 +21,7 @@
 - Fixed cockpit polka dot color map to avoid undefined index in tests.
 - Review/triage workflows now gate on missing credentials and stop failing Dependabot PRs.
 - Dependabot auto-merge workflow now tolerates approval failures from GitHub Actions.
+- Dependabot updates merged after workflow hardening.
 
 ## Active Decisions & Considerations
 

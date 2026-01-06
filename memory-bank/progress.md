@@ -15,6 +15,7 @@
 - [x] Spawn plan now guarantees non-empty texture URLs via fallbacks.
 - [x] Dependabot review/triage workflows hardened against missing credentials.
 - [x] Dependabot auto-merge job no longer fails when approval is disallowed.
+- [x] Latest Dependabot dependency updates merged to main.
 
 ## What Works
 - Project structure according to current `CLAUDE.md`.
