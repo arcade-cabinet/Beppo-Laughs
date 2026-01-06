@@ -22,6 +22,7 @@
 - Review/triage workflows now gate on missing credentials and stop failing Dependabot PRs.
 - Dependabot auto-merge workflow now tolerates approval failures from GitHub Actions.
 - Dependabot updates merged after workflow hardening.
+- Foundational PRs (#2, #3, #4) are now integrated into main; no remaining diffs on their branches.
 
 ## Active Decisions & Considerations
 
