@@ -10,13 +10,32 @@ type MeterPanelProps = {
   side: 'left' | 'right';
 };
 
-const METER_GRADIENT_ENDPOINTS = {
-  left: '#ffcfb0',
-  right: '#c5ddff'
+const METER_CONFIG = {
+  gradients: {
+    left: '#ffcfb0',
+    right: '#c5ddff',
+  },
+  meters: {
+    fear: {
+      color: '#ff2d2d',
+      label: 'FEAR',
+    },
+    despair: {
+      color: '#3b82f6',
+      label: 'DESPAIR',
+    },
+  },
 } as const;
 
-const FEAR_METER_COLOR = '#ff2d2d';
-const DESPAIR_METER_COLOR = '#3b82f6';
+/**
+ * Robustly appends alpha to a hex color or returns a safe fallback.
+ */
+function getAlphaColor(color: string, alphaHex: string): string {
+  if (color.startsWith('#') && (color.length === 7 || color.length === 4)) {
+    return `${color}${alphaHex}`;
+  }
+  return color;
+}
 
 function DashMeterPanel({ label, percent, color, side }: MeterPanelProps) {
   const clamped = Math.max(0, Math.min(100, Math.round(percent)));
@@ -40,10 +59,8 @@ function DashMeterPanel({ label, percent, color, side }: MeterPanelProps) {
             className="hud-dash-meter-fill"
             style={{
               width: `${clamped}%`,
-              background: `linear-gradient(90deg, ${color}, ${
-                METER_GRADIENT_ENDPOINTS[side]
-              })`,
-              boxShadow: `0 0 22px ${color}66, 0 0 8px ${color}99`
+              background: `linear-gradient(90deg, ${color}, ${METER_CONFIG.gradients[side]})`,
+              boxShadow: `0 0 22px ${getAlphaColor(color, '66')}, 0 0 8px ${getAlphaColor(color, '99')}`,
             }}
           />
           <div className="hud-dash-meter-grid" />
@@ -105,8 +122,18 @@ export function HUD() {
     <div className="pointer-events-none absolute inset-0 z-40">
       {/* Clown car console view anchored to the corners */}
       <div className="hud-cockpit-row">
-        <DashMeterPanel label="FEAR" percent={fearPercent} color={FEAR_METER_COLOR} side="left" />
-        <DashMeterPanel label="DESPAIR" percent={despairPercent} color={DESPAIR_METER_COLOR} side="right" />
+        <DashMeterPanel
+          label={METER_CONFIG.meters.fear.label}
+          percent={fearPercent}
+          color={METER_CONFIG.meters.fear.color}
+          side="left"
+        />
+        <DashMeterPanel
+          label={METER_CONFIG.meters.despair.label}
+          percent={despairPercent}
+          color={METER_CONFIG.meters.despair.color}
+          side="right"
+        />
       </div>
 
       {/* Vignette - intensifies with combined insanity */}
