@@ -19,18 +19,20 @@ test.describe('Beppo Laughs - Main Menu', () => {
   test('shows seed input field', async ({ page }) => {
     const seedInput = page.getByTestId('input-seed');
     await expect(seedInput).toBeVisible();
-    await expect(seedInput).toHaveAttribute('placeholder', 'Enter Seed Words...');
+    await expect(seedInput).toHaveAttribute('placeholder', 'Enter three seed words...');
   });
 
   test('randomize button generates a seed', async ({ page }) => {
     const seedInput = page.getByTestId('input-seed');
     const randomizeBtn = page.getByTestId('button-random-seed');
 
-    await expect(seedInput).toHaveValue('');
-    await randomizeBtn.click();
+    // Should already have a 3-word seed from initialization
+    let value = await seedInput.inputValue();
+    expect(value.split(' ').length).toBe(3);
 
-    // Should have a 3-word seed
-    const value = await seedInput.inputValue();
+    // Click randomize and verify it's different
+    await randomizeBtn.click();
+    value = await seedInput.inputValue();
     expect(value.split(' ').length).toBe(3);
   });
 
