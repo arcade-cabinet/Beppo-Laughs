@@ -1,6 +1,3 @@
-import { useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
-import * as THREE from 'three';
 import { Text } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
@@ -162,13 +159,13 @@ export function ClownCarCockpit() {
   useFrame(() => {
     const state = useGameStore.getState();
     const { accelerating, braking, fear, despair, maxSanity } = state;
-    
+
     if (leverRef.current) {
       const targetRotation = accelerating ? -0.5 : braking ? 0.2 : -0.1;
       leverRef.current.rotation.x = THREE.MathUtils.lerp(
         leverRef.current.rotation.x,
         targetRotation,
-        0.15
+        0.15,
       );
     }
 
@@ -345,7 +342,7 @@ export function ClownCarCockpit() {
         <boxGeometry args={[1.1, 0.06, 0.7]} />
         <meshStandardMaterial color="#1a1510" roughness={0.9} />
       </mesh>
-      
+
       {/* Central drive lever */}
       <group ref={leverRef} position={[0, -0.05, -0.25]} rotation={[-0.1, 0, 0]}>
         {/* Base plate */}
