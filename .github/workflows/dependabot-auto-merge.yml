@@ -22,6 +22,7 @@ jobs:
 
       - name: Auto-approve patch updates
         if: steps.metadata.outputs.update-type == 'version-update:semver-patch'
+        continue-on-error: true
         run: gh pr review --approve "$PR_URL"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
@@ -38,6 +39,7 @@ jobs:
         if: |
           steps.metadata.outputs.update-type == 'version-update:semver-minor' &&
           steps.metadata.outputs.dependency-type == 'direct:production'
+        continue-on-error: true
         run: gh pr review --approve "$PR_URL"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
@@ -56,6 +58,7 @@ jobs:
         if: |
           steps.metadata.outputs.update-type == 'version-update:semver-minor' &&
           steps.metadata.outputs.dependency-type == 'direct:development'
+        continue-on-error: true
         run: gh pr review --approve "$PR_URL"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
@@ -72,6 +75,7 @@ jobs:
 
       - name: Auto-approve GitHub Actions updates
         if: steps.metadata.outputs.package-ecosystem == 'github-actions'
+        continue-on-error: true
         run: gh pr review --approve "$PR_URL"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
