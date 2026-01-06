@@ -17,8 +17,10 @@
 - Store now tracks blockade requirements and clears only matching blockade on collect (`client/src/game/store.ts`).
 - Tests updated for blockade requirements (`client/src/game/store.test.ts`).
 - Biome config now ignores generated assets/reports; lint fixes across UI/test files for a11y and typing.
+- Spawn plan now uses safe fallback textures when catalog entries are missing.
 
 ## Active Decisions & Considerations
+
 - **AI Provider**: Gemini API only (no Vertex AI, no OpenAI fallback).
 - **Runtime Asset Catalog**: `client/public/assets/asset-catalog.json` is the source of truth.
 - **Determinism**: All placement and asset picks are seeded by the maze seed.
@@ -26,12 +28,14 @@
 - **Video Assets**: Documented in manifest but generation deferred until model availability.
 
 ## Pending Tasks
+
 - [ ] Run `pnpm test:e2e` to validate new blockade/item flow.
 - [ ] Confirm asset workflow behavior after recent catalog additions.
 - [ ] Expand UI/UX to surface required-item names more clearly (if needed).
 - [ ] Plan video pipeline once Gemini/Veo model access is confirmed.
 
 ## Important Patterns
+
 - Use `useGameStore.getState()` inside `useFrame` to avoid rerenders.
 - All R3F asset loads go through `<Suspense>`.
 - Seeded PRNG is required for placement and asset choice.

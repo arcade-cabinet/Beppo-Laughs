@@ -1,6 +1,7 @@
 import seedrandom from 'seedrandom';
 import { ASSET_IMAGE_BASE, type AssetCatalog, type CatalogImageAsset } from './assetCatalog';
 import type { MazeGeometry } from './maze/geometry';
+import { COLLECTIBLE_TEXTURE_URLS, MAZE_TEXTURES } from './textures';
 
 export type BlockadePlan = {
   nodeId: string;
@@ -25,6 +26,10 @@ export type SpawnPlan = {
   blockades: BlockadePlan[];
   collectibles: CollectiblePlan[];
 };
+
+const FALLBACK_BLOCKADE_TEXTURE_URL = MAZE_TEXTURES.WALL_HEDGE.url;
+const FALLBACK_COLLECTIBLE_TEXTURE_URL =
+  COLLECTIBLE_TEXTURE_URLS[0] ?? MAZE_TEXTURES.FLOOR_SAWDUST.url;
 
 const toTitleCase = (value: string) =>
   value
@@ -101,14 +106,16 @@ export const buildSpawnPlan = ({
       nodeId: node.id,
       worldX: node.worldX,
       worldZ: node.worldZ,
-      textureUrl: obstacleAsset ? `${ASSET_IMAGE_BASE}${obstacleAsset.fileName}` : '',
+      textureUrl: obstacleAsset
+        ? `${ASSET_IMAGE_BASE}${obstacleAsset.fileName}`
+        : FALLBACK_BLOCKADE_TEXTURE_URL,
       requiredItemId,
       requiredItemName,
     };
   });
 
   const collectibles: CollectiblePlan[] = blockades.map((blockade, index) => {
-    const node = collectibleNodes[index] ?? blockadeNodes[index];
+    const node = collectibleNodes[index];
     const solutionAsset = pickAssetAt(solutionAssets, index, `${seedBase}:solutions`);
 
     return {
@@ -117,7 +124,9 @@ export const buildSpawnPlan = ({
       nodeId: node.id,
       worldX: node.worldX,
       worldZ: node.worldZ,
-      textureUrl: solutionAsset ? `${ASSET_IMAGE_BASE}${solutionAsset.fileName}` : '',
+      textureUrl: solutionAsset
+        ? `${ASSET_IMAGE_BASE}${solutionAsset.fileName}`
+        : FALLBACK_COLLECTIBLE_TEXTURE_URL,
       unlocksBlockadeId: blockade.nodeId,
     };
   });
