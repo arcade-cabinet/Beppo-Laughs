@@ -4,7 +4,7 @@
 - **React 19**: Latest React features for modern UI.
 - **TypeScript**: Strict typing for reliability.
 - **R3F (@react-three/fiber)**: 3D renderer.
-- **Drei**: Essential R3F helpers (useTexture, useGLTF, CatmullRomCurve3).
+- **Drei**: Essential R3F helpers (useTexture, Billboards, Text).
 - **Zustand**: Lightweight state management.
 - **Tailwind CSS v4**: Utility-first styling with latest v4 features.
 - **Vite**: Ultra-fast build tool.
@@ -13,13 +13,12 @@
 - **@react-three/rapier**: Physics engine for collision and world logic.
 - **@react-three/postprocessing**: GPU-accelerated horror effects.
 - **unique-names-generator**: For generating the 3-word horror seed phrases.
-- **random**: Seeded PRNG for deterministic maze generation.
+- **seedrandom**: Seeded PRNG for deterministic generation.
 - **GSAP**: For complex paper-mache animations (popups, drops).
 
 ## Backend/Dev Layer
 - **Node.js**: Server environment.
-- **Vercel AI SDK**: For build-time asset manifest generation.
-- **OpenAI/Replicate APIs**: For LLM (GPT-5) and Image Gen (Flux.1).
+- **@google/genai**: Gemini API for build-time image generation.
 
 ## Development Setup
 - **Package Manager**: pnpm (Required).

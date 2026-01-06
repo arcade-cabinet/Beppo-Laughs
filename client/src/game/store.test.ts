@@ -25,6 +25,10 @@ describe('GameStore', () => {
       expect(useGameStore.getState().blockades.size).toBe(0);
     });
 
+    it('starts with no blockade requirements', () => {
+      expect(useGameStore.getState().blockadeRequirements.size).toBe(0);
+    });
+
     it('starts not game over', () => {
       const state = useGameStore.getState();
       expect(state.isGameOver).toBe(false);
@@ -132,6 +136,18 @@ describe('GameStore', () => {
     it('removing non-existent blockade is safe', () => {
       expect(() => useGameStore.getState().removeBlockade('nonexistent')).not.toThrow();
     });
+
+    it('sets blockades in bulk', () => {
+      useGameStore.getState().setBlockades(new Set(['1,1', '2,2']));
+      expect(useGameStore.getState().blockades.size).toBe(2);
+    });
+
+    it('sets blockade requirements in bulk', () => {
+      useGameStore
+        .getState()
+        .setBlockadeRequirements(new Map([['3,3', { itemId: 'unlock-3,3', itemName: 'Key' }]]));
+      expect(useGameStore.getState().blockadeRequirements.size).toBe(1);
+    });
   });
 
   describe('collectibles', () => {
@@ -144,6 +160,36 @@ describe('GameStore', () => {
       useGameStore.getState().collectItem('item-2');
       useGameStore.getState().collectItem('item-2');
       expect(useGameStore.getState().collectedItems.size).toBe(1);
+    });
+
+    it('removes the matching blockade when a required item is collected', () => {
+      useGameStore.getState().setBlockades(new Set(['5,5']));
+      useGameStore
+        .getState()
+        .setBlockadeRequirements(new Map([['5,5', { itemId: 'unlock-5,5', itemName: 'Net' }]]));
+
+      useGameStore
+        .getState()
+        .setNearbyItem({ id: 'unlock-5,5', name: 'Net', nodeId: '6,6' });
+      useGameStore.getState().collectNearbyItem();
+
+      const state = useGameStore.getState();
+      expect(state.blockades.has('5,5')).toBe(false);
+      expect(state.blockadeRequirements.size).toBe(0);
+    });
+
+    it('does not remove a blockade when collecting an unrelated item', () => {
+      useGameStore.getState().setBlockades(new Set(['7,7']));
+      useGameStore
+        .getState()
+        .setBlockadeRequirements(new Map([['7,7', { itemId: 'unlock-7,7', itemName: 'Key' }]]));
+
+      useGameStore
+        .getState()
+        .setNearbyItem({ id: 'item-else', name: 'Lamp', nodeId: '8,8' });
+      useGameStore.getState().collectNearbyItem();
+
+      expect(useGameStore.getState().blockades.has('7,7')).toBe(true);
     });
   });
 
@@ -282,6 +328,7 @@ describe('GameStore', () => {
       expect(state.fear).toBe(0);
       expect(state.despair).toBe(0);
       expect(state.blockades.size).toBe(0);
+      expect(state.blockadeRequirements.size).toBe(0);
       expect(state.collectedItems.size).toBe(0);
       expect(state.visitedCells.size).toBe(0);
       expect(state.isGameOver).toBe(false);

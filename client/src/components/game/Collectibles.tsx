@@ -10,6 +10,7 @@ import { useGameStore } from '../../game/store';
 
 interface CollectiblesProps {
   geometry: MazeGeometry;
+  items?: CollectibleItem[];
 }
 
 interface CollectibleItem {
@@ -164,7 +165,7 @@ function Collectible({ item }: { item: CollectibleItem }) {
   );
 }
 
-export function Collectibles({ geometry }: CollectiblesProps) {
+export function Collectibles({ geometry, items: providedItems }: CollectiblesProps) {
   const { collectedItems, seed } = useGameStore();
   const [catalog, setCatalog] = useState<Awaited<ReturnType<typeof loadAssetCatalog>>>(null);
 
@@ -190,7 +191,7 @@ export function Collectibles({ geometry }: CollectiblesProps) {
     }));
   }, []);
 
-  const items = useMemo(() => {
+  const generatedItems = useMemo(() => {
     const generated: CollectibleItem[] = [];
     const nodes = Array.from(geometry.railNodes.values());
     const itemCount = Math.floor(nodes.length / 8);
@@ -240,6 +241,8 @@ export function Collectibles({ geometry }: CollectiblesProps) {
 
     return generated;
   }, [geometry, seed, assetCandidates, fallbackAssets]);
+
+  const items = providedItems ?? generatedItems;
 
   return (
     <group>

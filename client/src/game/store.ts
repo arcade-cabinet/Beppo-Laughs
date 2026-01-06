@@ -26,6 +26,7 @@ interface GameState {
 
   // Blockades (villain-created obstacles)
   blockades: Set<string>;
+  blockadeRequirements: Map<string, { itemId: string; itemName: string }>;
 
   // Collected Items
   collectedItems: Set<string>;
@@ -71,6 +72,10 @@ interface GameState {
   decreaseDespair: (amount: number) => void;
   addBlockade: (cellKey: string) => void;
   removeBlockade: (cellKey: string) => void;
+  setBlockades: (blockades: Set<string>) => void;
+  setBlockadeRequirements: (
+    requirements: Map<string, { itemId: string; itemName: string }>,
+  ) => void;
   collectItem: (itemId: string) => void;
   checkGameOver: () => void;
   triggerWin: () => void;
@@ -136,6 +141,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   gameOverReason: null,
 
   blockades: new Set(),
+  blockadeRequirements: new Map(),
   collectedItems: new Set(),
 
   // Rail navigation - initialized empty, set by maze
@@ -243,6 +249,10 @@ export const useGameStore = create<GameState>((set, get) => ({
       return { blockades: newBlockades };
     }),
 
+  setBlockades: (blockades) => set({ blockades }),
+
+  setBlockadeRequirements: (requirements) => set({ blockadeRequirements: requirements }),
+
   collectItem: (itemId) =>
     set((state) => {
       const newItems = new Set(state.collectedItems);
@@ -277,6 +287,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       hasWon: false,
       gameOverReason: null,
       blockades: new Set(),
+      blockadeRequirements: new Map(),
       collectedItems: new Set(),
       currentNode: '',
       targetNode: null,
@@ -400,17 +411,25 @@ export const useGameStore = create<GameState>((set, get) => ({
     newItems.add(itemId);
 
     // Remove a blockade if any exist
-    const blockadeArray = Array.from(state.blockades);
     let newBlockades = state.blockades;
-    if (blockadeArray.length > 0) {
-      newBlockades = new Set(state.blockades);
-      const randomBlockade = blockadeArray[Math.floor(Math.random() * blockadeArray.length)];
-      newBlockades.delete(randomBlockade);
+    let newRequirements = state.blockadeRequirements;
+
+    if (state.blockadeRequirements.size > 0) {
+      for (const [blockadeId, requirement] of state.blockadeRequirements.entries()) {
+        if (requirement.itemId === itemId) {
+          newBlockades = new Set(state.blockades);
+          newBlockades.delete(blockadeId);
+          newRequirements = new Map(state.blockadeRequirements);
+          newRequirements.delete(blockadeId);
+          break;
+        }
+      }
     }
 
     set({
       collectedItems: newItems,
       blockades: newBlockades,
+      blockadeRequirements: newRequirements,
       nearbyItem: null,
       showCollectedPopup: { name: itemName, timestamp: Date.now() },
       itemInventory: state.itemInventory + 1,

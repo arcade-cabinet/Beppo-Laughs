@@ -5,6 +5,7 @@ export type AssetCatalog = {
   images: {
     coreFloorTextures: CatalogImageAsset[];
     coreWallTextures: CatalogImageAsset[];
+    coreCollectibles: CatalogImageAsset[];
     wallTextures: CatalogImageAsset[];
     floorTextures: CatalogImageAsset[];
     obstacles: CatalogImageAsset[];
