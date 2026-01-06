@@ -50,6 +50,15 @@ describe('Home', () => {
       value: 'Desktop Browser',
       configurable: true,
     });
+
+    // Mock WebGL support
+    const mockCanvas = {
+      getContext: vi.fn(() => ({})),
+    };
+    document.createElement = vi.fn((tag: string) => {
+      if (tag === 'canvas') return mockCanvas as any;
+      return document.createElementNS('http://www.w3.org/1999/xhtml', tag);
+    });
   });
 
   afterEach(() => {
