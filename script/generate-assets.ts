@@ -470,7 +470,10 @@ type ImageAsset = TaggedImageAsset;
 type VideoAsset = BaseVideoAsset;
 
 function getClient(): GoogleGenAI | null {
-  const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GOOGLE_API_KEY;
+  const apiKey =
+    process.env.GEMINI_API_KEY ||
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY ||
+    process.env.GOOGLE_API_KEY;
   if (!apiKey) return null;
   return new GoogleGenAI({ apiKey });
 }
