@@ -1,20 +1,19 @@
 /**
  * Global Texture Library
- * 
+ *
  * Centralized management of all game textures and asset URLs.
  * All textures are imported from the attached_assets directory and bundled
  * by Vite during the build process.
  */
 
+// Maze environment textures
+import sawdustFloorUrl from '@assets/generated_images/circus_sawdust_floor_texture.png';
+import grassGroundUrl from '@assets/generated_images/dark_muddy_grass_ground_texture.png';
 // Paper mâché collectible items
 import ticketItemUrl from '@assets/generated_images/paper_mache_circus_ticket_item.png';
 import keyItemUrl from '@assets/generated_images/paper_mache_key_item.png';
-
-// Maze environment textures
-import sawdustFloorUrl from '@assets/generated_images/circus_sawdust_floor_texture.png';
-import canvasCeilingUrl from '@assets/generated_images/vintage_circus_tent_canvas_texture.png';
-import grassGroundUrl from '@assets/generated_images/dark_muddy_grass_ground_texture.png';
 import hedgeWallUrl from '@assets/generated_images/seamless_dark_hedge_texture.png';
+import canvasCeilingUrl from '@assets/generated_images/vintage_circus_tent_canvas_texture.png';
 
 // Video assets
 import beppoGameOverUrl from '@assets/generated_videos/beppo_clown_emerging_laughing_game_over.mp4';
@@ -38,16 +37,12 @@ export const COLLECTIBLE_TEXTURES = {
 /**
  * Array of collectible texture URLs for random selection
  */
-export const COLLECTIBLE_TEXTURE_URLS = Object.values(COLLECTIBLE_TEXTURES).map(
-  (item) => item.url,
-);
+export const COLLECTIBLE_TEXTURE_URLS = Object.values(COLLECTIBLE_TEXTURES).map((item) => item.url);
 
 /**
  * Array of collectible names for random selection
  */
-export const COLLECTIBLE_NAMES = Object.values(COLLECTIBLE_TEXTURES).map(
-  (item) => item.name,
-);
+export const COLLECTIBLE_NAMES = Object.values(COLLECTIBLE_TEXTURES).map((item) => item.name);
 
 /**
  * Maze environment textures

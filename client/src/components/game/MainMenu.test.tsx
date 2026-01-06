@@ -531,7 +531,9 @@ describe('MainMenu', () => {
       render(<MainMenu onStart={mockOnStart} />);
 
       expect(screen.getByRole('button', { name: /generate random seed/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /start game with current seed/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /start game with current seed/i }),
+      ).toBeInTheDocument();
     });
 
     it('error message has alert role for screen readers', () => {

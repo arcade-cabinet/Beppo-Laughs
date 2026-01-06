@@ -1,5 +1,5 @@
-import react from '@vitejs/plugin-react';
 import path from 'node:path';
+import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 
 const stubMp4 = {
@@ -18,11 +18,7 @@ export default defineConfig({
     globals: true,
     environment: 'happy-dom',
     setupFiles: ['./client/src/test-setup.tsx'],
-    exclude: [
-      'node_modules/',
-      'dist/',
-      'e2e/**/*.spec.ts',
-    ],
+    exclude: ['node_modules/', 'dist/', 'e2e/**/*.spec.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

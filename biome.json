@@ -56,6 +56,9 @@
       "!**/coverage",
       "!**/*.config.js",
       "!**/attached_assets",
+      "!**/client/public/assets",
+      "!**/playwright-report",
+      "!**/test-results",
       "!**/*.css"
     ],
     "ignoreUnknown": true

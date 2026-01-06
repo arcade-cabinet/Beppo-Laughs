@@ -26,12 +26,10 @@ function SDFVillainMesh({
   position,
   isVisible,
   fearLevel,
-  isBlockade,
 }: {
   position: [number, number, number];
   isVisible: boolean;
   fearLevel: number;
-  isBlockade: boolean;
 }) {
   const meshRef = useRef<Mesh>(null);
   const materialRef = useRef<ShaderMaterial>(null);
@@ -182,9 +180,9 @@ function SDFVillainMesh({
       uTime: { value: 0 },
       uFear: { value: 0 },
       uColor1: { value: new Color('#8b0000') },
-      uColor2: { value: new Color(isBlockade ? '#ff4400' : '#ffcc00') },
+      uColor2: { value: new Color('#ffcc00') },
     }),
-    [isBlockade],
+    [],
   );
 
   useFrame((state) => {
@@ -225,25 +223,18 @@ function Villain({
   worldX,
   worldZ,
   playerPos,
-  isBlockade,
-  cellKey,
 }: {
   worldX: number;
   worldZ: number;
   playerPos: Vector3;
-  isBlockade: boolean;
-  cellKey: string;
 }) {
   const groupRef = useRef<Group>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [hasPopped, setHasPopped] = useState(false);
-  const { fear, maxSanity, increaseFear, addBlockade, blockades } = useGameStore();
+  const { fear, maxSanity, increaseFear } = useGameStore();
 
   const laughText = useMemo(() => LAUGHS[Math.floor(Math.random() * LAUGHS.length)], []);
   const fearLevel = fear / maxSanity;
-
-  const isBlocked = blockades.has(cellKey);
-  const wasCleared = hasPopped && isBlockade && !isBlocked;
 
   useFrame((state) => {
     if (!groupRef.current) return;
@@ -255,35 +246,20 @@ function Villain({
       setIsVisible(true);
       increaseFear(15);
 
-      if (isBlockade) {
-        addBlockade(cellKey);
-      }
-
       if (navigator.vibrate) {
         navigator.vibrate([100, 50, 200]);
       }
     }
 
-    if (wasCleared && isVisible) {
-      setIsVisible(false);
-    }
-
-    if (isVisible && !wasCleared) {
+    if (isVisible) {
       groupRef.current.position.y = 1.5 + Math.sin(state.clock.elapsedTime * 20) * 0.06;
       groupRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 15) * 0.1;
     }
   });
 
-  if (wasCleared) return null;
-
   return (
     <group ref={groupRef} position={[worldX, 1.5, worldZ]}>
-      <SDFVillainMesh
-        position={[0, 0, 0]}
-        isVisible={isVisible}
-        fearLevel={fearLevel}
-        isBlockade={isBlockade}
-      />
+      <SDFVillainMesh position={[0, 0, 0]} isVisible={isVisible} fearLevel={fearLevel} />
 
       {isVisible && (
         <Billboard>
@@ -297,30 +273,6 @@ function Villain({
           </Text>
         </Billboard>
       )}
-
-      {isBlocked && (
-        <>
-          <Billboard>
-            <Text position={[0, -1.8, 0]} fontSize={0.22} color="#ffcc00" anchorX="center">
-              PATH BLOCKED
-            </Text>
-            <Text position={[0, -2.1, 0]} fontSize={0.15} color="#ffffff" anchorX="center">
-              Find a circus item to pass
-            </Text>
-          </Billboard>
-
-          <mesh position={[0, 0.3, 0]}>
-            <boxGeometry args={[1.8, 1.8, 0.1]} />
-            <meshStandardMaterial
-              color="#8b0000"
-              transparent
-              opacity={0.25}
-              emissive="#ff0000"
-              emissiveIntensity={0.4}
-            />
-          </mesh>
-        </>
-      )}
     </group>
   );
 }
@@ -329,7 +281,7 @@ export function Villains({ geometry }: VillainsProps) {
   const { camera } = useThree();
 
   const villains = useMemo(() => {
-    const spawned: { worldX: number; worldZ: number; isBlockade: boolean; cellKey: string }[] = [];
+    const spawned: { worldX: number; worldZ: number; cellKey: string }[] = [];
     const nodes = Array.from(geometry.railNodes.values());
     const count = Math.floor(nodes.length / 8);
 
@@ -349,11 +301,9 @@ export function Villains({ geometry }: VillainsProps) {
       );
 
       if (attempts < 50 && selectedNode) {
-        const isBlockade = Math.random() > 0.5;
         spawned.push({
           worldX: selectedNode.worldX,
           worldZ: selectedNode.worldZ,
-          isBlockade,
           cellKey: selectedNode.id,
         });
       }
@@ -363,15 +313,8 @@ export function Villains({ geometry }: VillainsProps) {
 
   return (
     <group>
-      {villains.map((v, i) => (
-        <Villain
-          key={i}
-          worldX={v.worldX}
-          worldZ={v.worldZ}
-          playerPos={camera.position}
-          isBlockade={v.isBlockade}
-          cellKey={v.cellKey}
-        />
+      {villains.map((v) => (
+        <Villain key={v.cellKey} worldX={v.worldX} worldZ={v.worldZ} playerPos={camera.position} />
       ))}
     </group>
   );

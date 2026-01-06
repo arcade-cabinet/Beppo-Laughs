@@ -1,3 +1,4 @@
+import type { KeyboardEvent } from 'react';
 import { useMemo } from 'react';
 import type { MazeGeometry, RailNode } from '../../game/maze/geometry';
 import { useGameStore } from '../../game/store';
@@ -10,11 +11,10 @@ interface TapZoneProps {
   targetNode: RailNode;
   currentNode: RailNode;
   direction: 'north' | 'south' | 'east' | 'west';
-  isExit: boolean;
   onTap: () => void;
 }
 
-function TapZone({ targetNode, currentNode, direction, isExit, onTap }: TapZoneProps) {
+function TapZone({ targetNode, currentNode, direction, onTap }: TapZoneProps) {
   const { isMoving, blockades } = useGameStore();
   const isBlocked = blockades.has(targetNode.id);
 
@@ -31,8 +31,23 @@ function TapZone({ targetNode, currentNode, direction, isExit, onTap }: TapZoneP
   const markerX = currentNode.worldX + offset[0];
   const markerZ = currentNode.worldZ + offset[1];
 
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onTap();
+    }
+  };
+
   return (
-    <mesh position={[markerX, 0.5, markerZ]} onClick={onTap} onPointerDown={onTap}>
+    // biome-ignore lint/a11y/useSemanticElements: R3F mesh is not a DOM button.
+    <mesh
+      position={[markerX, 0.5, markerZ]}
+      role="button"
+      tabIndex={0}
+      onClick={onTap}
+      onPointerDown={onTap}
+      onKeyDown={handleKeyDown}
+    >
       <boxGeometry args={[2.5, 1.5, 2.5]} />
       <meshBasicMaterial transparent opacity={0} />
     </mesh>
@@ -105,7 +120,6 @@ export function TapZones({ geometry }: TapZonesProps) {
           targetNode={targetNode}
           currentNode={currentNode}
           direction={direction}
-          isExit={targetNode.isExit}
           onTap={() => handleTap(targetNode.id)}
         />
       ))}

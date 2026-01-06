@@ -4,6 +4,18 @@ import { useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '../../game/store';
 
+const DOT_COLORS = [
+  '#00ffff',
+  '#ff00ff',
+  '#ffff00',
+  '#00ff00',
+  '#0000ff',
+  '#ff0066',
+  '#66ff00',
+  '#00ffaa',
+  '#aa00ff',
+];
+
 function DashboardPanel({
   position,
   color,
@@ -58,7 +70,8 @@ function DashboardPanel({
 }
 
 function SpeedometerPanel({ position }: { position: [number, number, number] }) {
-  const speedTextRef = useRef<any>(null);
+  type SpeedText = THREE.Mesh & { text: string };
+  const speedTextRef = useRef<SpeedText>(null);
   const needleRef = useRef<THREE.Mesh>(null);
 
   useFrame(() => {
@@ -268,41 +281,20 @@ export function ClownCarCockpit() {
           [0.5, 0.09, -0.2],
           [-0.25, 0.09, -0.35],
           [0.25, 0.09, -0.35],
-        ].map((pos, i) => (
-          <mesh key={`dot-${i}`} position={pos as [number, number, number]}>
-            <sphereGeometry args={[0.06, 8, 8]} />
-            <meshStandardMaterial
-              color={
-                [
-                  '#00ffff',
-                  '#ff00ff',
-                  '#ffff00',
-                  '#00ff00',
-                  '#0000ff',
-                  '#ff0066',
-                  '#66ff00',
-                  '#00ffaa',
-                  '#aa00ff',
-                ][i]
-              }
-              roughness={0.3}
-              emissive={
-                [
-                  '#00ffff',
-                  '#ff00ff',
-                  '#ffff00',
-                  '#00ff00',
-                  '#0000ff',
-                  '#ff0066',
-                  '#66ff00',
-                  '#00ffaa',
-                  '#aa00ff',
-                ][i]
-              }
-              emissiveIntensity={0.1}
-            />
-          </mesh>
-        ))}
+        ].map((pos, index) => {
+          const dotColor = DOT_COLORS[index % DOT_COLORS.length];
+          return (
+            <mesh key={`dot-${pos.join('-')}`} position={pos as [number, number, number]}>
+              <sphereGeometry args={[0.06, 8, 8]} />
+              <meshStandardMaterial
+                color={dotColor}
+                roughness={0.3}
+                emissive={dotColor}
+                emissiveIntensity={0.1}
+              />
+            </mesh>
+          );
+        })}
 
         {/* Metal blemishes/rivets - larger */}
         {[
@@ -314,8 +306,8 @@ export function ClownCarCockpit() {
           [0.3, 0.08, -0.4],
           [-0.7, 0.08, 0],
           [0.7, 0.08, 0],
-        ].map((pos, i) => (
-          <mesh key={`rivet-${i}`} position={pos as [number, number, number]}>
+        ].map((pos) => (
+          <mesh key={`rivet-${pos.join('-')}`} position={pos as [number, number, number]}>
             <cylinderGeometry args={[0.025, 0.025, 0.03, 8]} />
             <meshStandardMaterial color="#888866" roughness={0.8} metalness={0.6} />
           </mesh>
@@ -357,8 +349,8 @@ export function ClownCarCockpit() {
           <meshStandardMaterial color="#d45b00" roughness={0.4} metalness={0.6} />
         </mesh>
         {/* Accent rings */}
-        {[0.04, 0.12, 0.2].map((y, idx) => (
-          <mesh key={`ring-${idx}`} position={[0, y, 0]}>
+        {[0.04, 0.12, 0.2].map((y) => (
+          <mesh key={`ring-${y}`} position={[0, y, 0]}>
             <torusGeometry args={[0.05, 0.01, 8, 24]} />
             <meshStandardMaterial color="#f5c400" emissive="#f5c400" emissiveIntensity={0.25} />
           </mesh>

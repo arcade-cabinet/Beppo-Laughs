@@ -5,14 +5,13 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 
-function InputGroup({ className, ...props }: React.ComponentProps<'div'>) {
+function InputGroup({ className, ...props }: React.ComponentProps<'fieldset'>) {
   return (
-    <div
+    <fieldset
       data-slot="input-group"
-      role="group"
       className={cn(
         'group/input-group border-input dark:bg-input/30 shadow-xs relative flex w-full items-center rounded-md border outline-none transition-[color,box-shadow]',
-        'h-9 has-[>textarea]:h-auto',
+        'h-9 has-[>textarea]:h-auto border-0 p-0',
 
         // Variants based on alignment.
         'has-[>[data-align=inline-start]]:[&>input]:pl-2',
@@ -55,20 +54,26 @@ const inputGroupAddonVariants = cva(
 function InputGroupAddon({
   className,
   align = 'inline-start',
+  type = 'button',
   ...props
-}: React.ComponentProps<'div'> & VariantProps<typeof inputGroupAddonVariants>) {
+}: React.ComponentProps<'button'> & VariantProps<typeof inputGroupAddonVariants>) {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      event.currentTarget.parentElement?.querySelector('input')?.focus();
+    }
+  };
+
   return (
-    <div
-      role="group"
+    <button
+      type={type}
       data-slot="input-group-addon"
       data-align={align}
       className={cn(inputGroupAddonVariants({ align }), className)}
       onClick={(e) => {
-        if ((e.target as HTMLElement).closest('button')) {
-          return;
-        }
         e.currentTarget.parentElement?.querySelector('input')?.focus();
       }}
+      onKeyDown={handleKeyDown}
       {...props}
     />
   );

@@ -116,7 +116,9 @@ describe('generateMaze', () => {
     let foundExit = false;
 
     while (queue.length > 0 && !foundExit) {
-      const [x, y] = queue.shift()!;
+      const next = queue.shift();
+      if (!next) continue;
+      const [x, y] = next;
       const key = `${x},${y}`;
 
       if (visited.has(key)) continue;

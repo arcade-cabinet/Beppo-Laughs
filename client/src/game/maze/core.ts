@@ -62,9 +62,12 @@ export function generateMaze(width: number, height: number, seed: string): MazeL
   activeCells.push(startCell);
 
   while (activeCells.length > 0) {
-    // Growing Tree: Pick a cell from active list. 
+    // Growing Tree: Pick a cell from active list.
     // 0.7 probability of picking newest (Backtracking style), 0.3 for random (Prim's style)
-    const pickIdx = random.float() < 0.7 ? activeCells.length - 1 : Math.floor(random.float() * activeCells.length);
+    const pickIdx =
+      random.float() < 0.7
+        ? activeCells.length - 1
+        : Math.floor(random.float() * activeCells.length);
     const current = activeCells[pickIdx];
 
     const neighbors = getUnvisitedNeighbors(current, cells, width, height, 1);
@@ -105,7 +108,7 @@ function getUnvisitedNeighbors(
   cells: MazeCell[][],
   width: number,
   height: number,
-  step: number = 1
+  step: number = 1,
 ): { cell: MazeCell; direction: 'north' | 'south' | 'east' | 'west' }[] {
   const neighbors: { cell: MazeCell; direction: 'north' | 'south' | 'east' | 'west' }[] = [];
 
@@ -123,7 +126,7 @@ function getUnvisitedNeighbors(
     if (nx >= 0 && nx < width && ny >= 0 && ny < height && !cells[ny][nx].visited) {
       neighbors.push({
         cell: cells[ny][nx],
-        direction
+        direction,
       });
     }
   }

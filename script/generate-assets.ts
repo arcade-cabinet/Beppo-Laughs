@@ -517,10 +517,9 @@ async function generateImage(client: GoogleGenAI, asset: ImageAsset) {
   });
 
   const imageBytes =
-    (response as { generatedImages?: { image?: { imageBytes?: string } }[] })
-      .generatedImages?.[0]?.image?.imageBytes ??
-    (response as { images?: { image?: { imageBytes?: string } }[] }).images?.[0]
-      ?.image?.imageBytes;
+    (response as { generatedImages?: { image?: { imageBytes?: string } }[] }).generatedImages?.[0]
+      ?.image?.imageBytes ??
+    (response as { images?: { image?: { imageBytes?: string } }[] }).images?.[0]?.image?.imageBytes;
   if (!imageBytes) {
     throw new Error(`No image bytes returned for ${asset.id}`);
   }
@@ -548,10 +547,9 @@ async function generateVideo(client: GoogleGenAI, asset: VideoAsset) {
   });
 
   const videoBytes =
-    (response as { generatedVideos?: { video?: { videoBytes?: string } }[] })
-      .generatedVideos?.[0]?.video?.videoBytes ??
-    (response as { videos?: { video?: { videoBytes?: string } }[] }).videos?.[0]
-      ?.video?.videoBytes;
+    (response as { generatedVideos?: { video?: { videoBytes?: string } }[] }).generatedVideos?.[0]
+      ?.video?.videoBytes ??
+    (response as { videos?: { video?: { videoBytes?: string } }[] }).videos?.[0]?.video?.videoBytes;
   if (!videoBytes) {
     throw new Error(`No video bytes returned for ${asset.id}`);
   }
@@ -611,7 +609,10 @@ async function main() {
       try {
         await generateImage(client, asset);
       } catch (error) {
-        console.error(`  ✗ Failed ${asset.fileName}:`, error instanceof Error ? error.message : error);
+        console.error(
+          `  ✗ Failed ${asset.fileName}:`,
+          error instanceof Error ? error.message : error,
+        );
       }
     }
   } else {
@@ -625,7 +626,10 @@ async function main() {
       try {
         await generateVideo(client, asset);
       } catch (error) {
-        console.error(`  ✗ Failed ${asset.fileName}:`, error instanceof Error ? error.message : error);
+        console.error(
+          `  ✗ Failed ${asset.fileName}:`,
+          error instanceof Error ? error.message : error,
+        );
       }
     }
   } else {

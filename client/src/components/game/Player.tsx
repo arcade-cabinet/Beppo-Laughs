@@ -7,12 +7,11 @@ import type { MazeGenerator } from '../../game/MazeGenerator';
 import { useGameStore } from '../../game/store';
 
 interface PlayerProps {
-  position?: [number, number, number];
   onMove?: (pos: Vector3) => void;
   maze: MazeGenerator;
 }
 
-export function Player({ position = [1, 1, 1], onMove, maze }: PlayerProps) {
+export function Player({ onMove, maze }: PlayerProps) {
   const { camera } = useThree();
   const [_locked, setLocked] = useState(false);
   const { fear, despair, visitNode, decreaseFear, decreaseDespair, isGameOver, blockades } =

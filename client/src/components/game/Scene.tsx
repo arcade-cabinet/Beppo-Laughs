@@ -1,10 +1,13 @@
-import { useGameStore } from '@/game/store';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Suspense, useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import type { PointLight } from 'three';
+import { useGameStore } from '@/game/store';
+import { loadAssetCatalog } from '../../game/assetCatalog';
 import { generateMaze, type MazeLayout } from '../../game/maze/core';
 import { buildGeometry, DEFAULT_CONFIG, type MazeGeometry } from '../../game/maze/geometry';
+import { buildSpawnPlan } from '../../game/spawnPlan';
 import { AudioManager } from './AudioManager';
+import { Blockades } from './Blockades';
 import { Collectibles } from './Collectibles';
 import { DriveControls } from './DriveControls';
 import { ForkPrompt } from './ForkPrompt';
@@ -62,6 +65,7 @@ export function Scene({ seed }: SceneProps) {
   const [mazeData, setMazeData] = useState<{ layout: MazeLayout; geometry: MazeGeometry } | null>(
     null,
   );
+  const [catalog, setCatalog] = useState<Awaited<ReturnType<typeof loadAssetCatalog>>>(null);
   const { fear, despair, maxSanity, currentNode, blockades, isMoving } = useGameStore();
 
   useEffect(() => {
@@ -127,6 +131,16 @@ export function Scene({ seed }: SceneProps) {
     }
   }, [seed]);
 
+  useEffect(() => {
+    let mounted = true;
+    loadAssetCatalog().then((data) => {
+      if (mounted) setCatalog(data);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const avgInsanity = maxSanity > 0 ? (fear + despair) / 2 / maxSanity : 0;
 
   const fogNear = Math.max(2, 12 - avgInsanity * 8);
@@ -138,19 +152,45 @@ export function Scene({ seed }: SceneProps) {
   const fogHue = 30 + avgInsanity * 60;
   const fogColor = `hsl(${fogHue}, ${30 - avgInsanity * 15}%, ${20 - avgInsanity * 10}%)`;
 
+  const spawnPlan = useMemo(() => {
+    if (!mazeData) return null;
+    return buildSpawnPlan({
+      geometry: mazeData.geometry,
+      seed,
+      catalog,
+    });
+  }, [mazeData, seed, catalog]);
+
+  useEffect(() => {
+    const store = useGameStore.getState();
+    if (!spawnPlan) {
+      store.setBlockades(new Set());
+      store.setBlockadeRequirements(new Map());
+      return;
+    }
+
+    const blockadeIds = new Set(spawnPlan.blockades.map((blockade) => blockade.nodeId));
+    const requirements = new Map(
+      spawnPlan.blockades.map((blockade) => [
+        blockade.nodeId,
+        { itemId: blockade.requiredItemId, itemName: blockade.requiredItemName },
+      ]),
+    );
+
+    store.setBlockades(blockadeIds);
+    store.setBlockadeRequirements(requirements);
+  }, [spawnPlan]);
+
   if (!mazeData) return null;
 
-  const { layout, geometry } = mazeData;
+  const { geometry } = mazeData;
   const centerWorld = { x: geometry.floor.x, z: geometry.floor.z };
 
   return (
     <>
       <AudioManager />
 
-      <Canvas
-        shadows
-        camera={{ position: [0, 1.4, 0], fov: 70, near: 0.1, far: 100 }}
-      >
+      <Canvas shadows camera={{ position: [0, 1.4, 0], fov: 70, near: 0.1, far: 100 }}>
         <color attach="background" args={[bgColor]} />
         <fog attach="fog" args={[fogColor, fogNear, fogFar]} />
 
@@ -219,7 +259,8 @@ export function Scene({ seed }: SceneProps) {
 
         <Suspense fallback={null}>
           <Maze geometry={geometry} />
-          <Collectibles geometry={geometry} />
+          {spawnPlan?.blockades.length ? <Blockades blockades={spawnPlan.blockades} /> : null}
+          <Collectibles geometry={geometry} items={spawnPlan?.collectibles} />
           <RailPlayer geometry={geometry} />
           <Villains geometry={geometry} />
         </Suspense>

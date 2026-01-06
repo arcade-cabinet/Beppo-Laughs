@@ -110,9 +110,7 @@ export function MainMenu({ onStart }: MainMenuProps) {
         </p>
 
         <div className="space-y-4 pt-8">
-          <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground/70">
-            Barker Call
-          </p>
+          <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground/70">Barker Call</p>
           <div className="relative">
             <Input
               type="text"

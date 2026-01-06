@@ -50,6 +50,7 @@ export function ForkPrompt() {
       {pendingFork.options.map((option, _idx) => (
         <button
           key={option.nodeId}
+          type="button"
           data-testid={`button-fork-${option.direction}`}
           onClick={() => selectForkDirection(option.nodeId)}
           className={`pointer-events-auto absolute ${getHandPosition(option.direction)}

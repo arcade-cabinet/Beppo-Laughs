@@ -1,7 +1,7 @@
 import { shaderMaterial } from '@react-three/drei';
-import { extend, useFrame, useThree } from '@react-three/fiber';
+import { extend, type ReactThreeFiber, useFrame, useThree } from '@react-three/fiber';
 import { useRef } from 'react';
-import { Color, MathUtils, type ShaderMaterial, Vector3 } from 'three';
+import { Color, MathUtils, type Mesh, type ShaderMaterial, Vector3 } from 'three';
 import { useGameStore } from '../../game/store';
 
 // SDF Ray Marching Material
@@ -203,7 +203,7 @@ extend({ SDFVillainMaterial });
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      sDFVillainMaterial: any;
+      sDFVillainMaterial: ReactThreeFiber.Object3DNode<ShaderMaterial, typeof SDFVillainMaterial>;
     }
   }
 }
@@ -250,7 +250,7 @@ export function MarchingCubesBlob({
   position: [number, number, number];
   scale?: number;
 }) {
-  const meshRef = useRef<any>(null);
+  const meshRef = useRef<Mesh>(null);
   const { fear, maxSanity } = useGameStore();
 
   useFrame((state) => {
