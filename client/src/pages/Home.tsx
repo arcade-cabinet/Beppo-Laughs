@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { HUD } from '@/components/game/HUD';
 import { MainMenu } from '@/components/game/MainMenu';
 import { Scene } from '@/components/game/Scene';
-import { HorrorEffects } from '@/components/game/HorrorEffects';
 import { useGameStore } from '@/game/store';
 
 /**
@@ -148,7 +147,6 @@ export default function Home() {
             <Scene seed={seed} />
           </div>
           <HUD />
-          <HorrorEffects />
 
           {/* Exit Button - hidden on mobile */}
           {!isMobile && (
