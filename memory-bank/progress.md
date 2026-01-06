@@ -13,6 +13,7 @@
 - [x] CI lint cleanup (Biome ignores for generated assets + a11y/type fixes).
 - [x] Unit tests updated and passing.
 - [x] Spawn plan now guarantees non-empty texture URLs via fallbacks.
+- [x] Dependabot review/triage workflows hardened against missing credentials.
 
 ## What Works
 - Project structure according to current `CLAUDE.md`.

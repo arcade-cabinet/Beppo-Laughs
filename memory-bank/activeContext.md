@@ -19,6 +19,7 @@
 - Biome config now ignores generated assets/reports; lint fixes across UI/test files for a11y and typing.
 - Spawn plan now uses safe fallback textures when catalog entries are missing.
 - Fixed cockpit polka dot color map to avoid undefined index in tests.
+- Review/triage workflows now gate on missing credentials and stop failing Dependabot PRs.
 
 ## Active Decisions & Considerations
 
