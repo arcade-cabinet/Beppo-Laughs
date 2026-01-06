@@ -1,4 +1,4 @@
-import beppoVideoUrl from '@assets/generated_videos/beppo_clown_emerging_laughing_game_over.mp4';
+import { VIDEO_ASSETS } from '../../game/textures';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { useGameStore } from '../../game/store';
@@ -250,7 +250,7 @@ export function HUD() {
             {!videoEnded && (
               <video
                 ref={videoRef}
-                src={beppoVideoUrl}
+                src={VIDEO_ASSETS.BEPPO_GAME_OVER.url}
                 className="absolute inset-0 w-full h-full object-cover"
                 onEnded={handleVideoEnd}
                 playsInline

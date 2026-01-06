@@ -1,18 +1,14 @@
-import ticketUrl from '@assets/generated_images/paper_mache_circus_ticket_item.png';
-import keyUrl from '@assets/generated_images/paper_mache_key_item.png';
 import { Billboard, Text, useTexture } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import type { Group } from 'three';
+import { COLLECTIBLE_NAMES, COLLECTIBLE_TEXTURE_URLS } from '../../game/textures';
 import type { MazeGeometry } from '../../game/maze/geometry';
 import { useGameStore } from '../../game/store';
 
 interface CollectiblesProps {
   geometry: MazeGeometry;
 }
-
-const ITEM_TEXTURES = [ticketUrl, keyUrl];
-const ITEM_NAMES = ['CIRCUS TICKET', 'MYSTERY KEY'];
 
 interface CollectibleItem {
   id: string;
@@ -24,7 +20,7 @@ interface CollectibleItem {
 }
 
 function Collectible({ item }: { item: CollectibleItem }) {
-  const texture = useTexture(ITEM_TEXTURES[item.textureIndex]);
+  const texture = useTexture(COLLECTIBLE_TEXTURE_URLS[item.textureIndex]);
   const groupRef = useRef<Group>(null);
   const { blockades, currentNode, collectedItems, setNearbyItem, nearbyItem } = useGameStore();
   const mountTimeRef = useRef(performance.now());
@@ -192,14 +188,14 @@ export function Collectibles({ geometry }: CollectiblesProps) {
       );
 
       if (attempts < 50 && selectedNode) {
-        const textureIndex = Math.floor(Math.random() * ITEM_TEXTURES.length);
+        const textureIndex = Math.floor(Math.random() * COLLECTIBLE_TEXTURE_URLS.length);
         generated.push({
           id: `item-${selectedNode.id}`,
           worldX: selectedNode.worldX,
           worldZ: selectedNode.worldZ,
           nodeId: selectedNode.id,
           textureIndex,
-          name: ITEM_NAMES[textureIndex],
+          name: COLLECTIBLE_NAMES[textureIndex],
         });
       }
     }

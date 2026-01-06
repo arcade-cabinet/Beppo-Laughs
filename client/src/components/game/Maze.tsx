@@ -1,9 +1,8 @@
-import sawdustTextureUrl from '@assets/generated_images/circus_sawdust_floor_texture.png';
-import canvasTextureUrl from '@assets/generated_images/vintage_circus_tent_canvas_texture.png';
 import { useTexture } from '@react-three/drei';
 import type React from 'react';
 import { useMemo } from 'react';
 import { DoubleSide, RepeatWrapping } from 'three';
+import { MAZE_TEXTURES } from '../../game/textures';
 import { DEFAULT_CONFIG, type MazeGeometry, type WallSegment } from '../../game/maze/geometry';
 
 interface MazeProps {
@@ -11,8 +10,8 @@ interface MazeProps {
 }
 
 export function Maze({ geometry }: MazeProps) {
-  const canvasTexture = useTexture(canvasTextureUrl);
-  const sawdustTexture = useTexture(sawdustTextureUrl);
+  const canvasTexture = useTexture(MAZE_TEXTURES.CEILING_CANVAS.url);
+  const sawdustTexture = useTexture(MAZE_TEXTURES.FLOOR_SAWDUST.url);
 
   useMemo(() => {
     [canvasTexture, sawdustTexture].forEach((t) => {
