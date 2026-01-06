@@ -1,0 +1,1193 @@
+{
+  "generatedAt": "2026-01-06T03:02:16.714Z",
+  "images": {
+    "coreFloorTextures": [
+      {
+        "id": "circus_sawdust_floor_texture",
+        "fileName": "circus_sawdust_floor_texture.png",
+        "prompt": "Circus sawdust floor with scattered straw and grime, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "core",
+        "tags": [
+          "texture",
+          "floor",
+          "core"
+        ]
+      },
+      {
+        "id": "dark_muddy_grass_ground_texture",
+        "fileName": "dark_muddy_grass_ground_texture.png",
+        "prompt": "Dark muddy grass with puddles and trampled footprints, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "core",
+        "tags": [
+          "texture",
+          "floor",
+          "core"
+        ]
+      }
+    ],
+    "coreWallTextures": [
+      {
+        "id": "vintage_circus_tent_canvas_texture",
+        "fileName": "vintage_circus_tent_canvas_texture.png",
+        "prompt": "Aged circus tent canvas with stains, seams, and faint rope shadows, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "core",
+        "tags": [
+          "texture",
+          "wall",
+          "core"
+        ]
+      },
+      {
+        "id": "seamless_dark_hedge_texture",
+        "fileName": "seamless_dark_hedge_texture.png",
+        "prompt": "Dense twisted hedge wall texture with thorny branches, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "core",
+        "tags": [
+          "texture",
+          "wall",
+          "core"
+        ]
+      }
+    ],
+    "coreCollectibles": [
+      {
+        "id": "paper_mache_circus_ticket_item",
+        "fileName": "paper_mache_circus_ticket_item.png",
+        "prompt": "A tattered circus ticket made of paper mache, ornate edges, eerie ink stamps, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "core",
+        "tags": [
+          "item",
+          "collectible",
+          "core"
+        ]
+      },
+      {
+        "id": "paper_mache_key_item",
+        "fileName": "paper_mache_key_item.png",
+        "prompt": "An ornate paper mache key with carnival filigree and chipped paint, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "core",
+        "tags": [
+          "item",
+          "collectible",
+          "core"
+        ]
+      }
+    ],
+    "wallTextures": [
+      {
+        "id": "wall_tattered_fabric_texture",
+        "fileName": "wall_tattered_fabric_texture.png",
+        "prompt": "Tattered carnival fabric wall with frayed threads and patchwork seams, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "texture",
+          "wall",
+          "extended"
+        ]
+      },
+      {
+        "id": "wall_rusted_metal_grid_texture",
+        "fileName": "wall_rusted_metal_grid_texture.png",
+        "prompt": "Rusted metal grid wall like a lion tamer cage, corroded bars, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "texture",
+          "wall",
+          "extended"
+        ]
+      },
+      {
+        "id": "wall_weathered_wood_planks_texture",
+        "fileName": "wall_weathered_wood_planks_texture.png",
+        "prompt": "Weathered carnival booth wood planks with nails and peeling paint, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "texture",
+          "wall",
+          "extended"
+        ]
+      },
+      {
+        "id": "wall_backstage_canvas_texture",
+        "fileName": "wall_backstage_canvas_texture.png",
+        "prompt": "Backstage canvas wall with rope lashings, pulley marks, and grime, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "texture",
+          "wall",
+          "extended"
+        ]
+      },
+      {
+        "id": "wall_velvet_drape_texture",
+        "fileName": "wall_velvet_drape_texture.png",
+        "prompt": "Worn velvet drapes with heavy folds, dust, and stitched trim, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "texture",
+          "wall",
+          "extended"
+        ]
+      },
+      {
+        "id": "wall_ringmaster_banners_texture",
+        "fileName": "wall_ringmaster_banners_texture.png",
+        "prompt": "Torn ringmaster banners layered on canvas wall, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "texture",
+          "wall",
+          "extended"
+        ]
+      }
+    ],
+    "floorTextures": [
+      {
+        "id": "floor_worn_carnival_tile_texture",
+        "fileName": "floor_worn_carnival_tile_texture.png",
+        "prompt": "Worn carnival tile floor, faded checkerboard, grime in the grout, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "texture",
+          "floor",
+          "extended"
+        ]
+      },
+      {
+        "id": "floor_blood_stained_concrete_texture",
+        "fileName": "floor_blood_stained_concrete_texture.png",
+        "prompt": "Blood-stained concrete with cracks and dark smears, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "texture",
+          "floor",
+          "extended"
+        ]
+      },
+      {
+        "id": "floor_creaky_boardwalk_texture",
+        "fileName": "floor_creaky_boardwalk_texture.png",
+        "prompt": "Creaky wooden boardwalk with salt stains and warped planks, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "texture",
+          "floor",
+          "extended"
+        ]
+      },
+      {
+        "id": "floor_muddy_straw_texture",
+        "fileName": "floor_muddy_straw_texture.png",
+        "prompt": "Muddy straw mixed with dirt and hoof prints, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "texture",
+          "floor",
+          "extended"
+        ]
+      },
+      {
+        "id": "floor_ticket_litter_texture",
+        "fileName": "floor_ticket_litter_texture.png",
+        "prompt": "Littered tickets, handbill fragments, and confetti ground texture, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "texture",
+          "floor",
+          "extended"
+        ]
+      },
+      {
+        "id": "floor_greasepaint_smear_texture",
+        "fileName": "floor_greasepaint_smear_texture.png",
+        "prompt": "Smudged greasepaint and chalky footprints, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "texture",
+          "floor",
+          "extended"
+        ]
+      }
+    ],
+    "obstacles": [
+      {
+        "id": "popup_tubeman_cutout",
+        "fileName": "popup_tubeman.png",
+        "prompt": "Wacky arm-flailing inflatable tubeman clown with manic grin, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "obstacle",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "popup_punching_clown_cutout",
+        "fileName": "popup_clown.png",
+        "prompt": "Giant inflatable punching clown with boxing gloves and cracked paint, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "obstacle",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "popup_spring_jester_cutout",
+        "fileName": "popup_jester.png",
+        "prompt": "Spring-loaded jester with angular limbs and bells, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "obstacle",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "slide_guillotine_cutout",
+        "fileName": "slide_guillotine.png",
+        "prompt": "Rusty carnival guillotine blade with ornate frame, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "obstacle",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "slide_spiked_door_cutout",
+        "fileName": "slide_spiked_door.png",
+        "prompt": "Spiked iron door with circus motifs and grime, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "obstacle",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "slide_carousel_spike_cutout",
+        "fileName": "slide_carousel.png",
+        "prompt": "Carousel spike ring with skeletal horse motifs and chipped paint, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "obstacle",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "drop_hanging_chain_cutout",
+        "fileName": "drop_chain.png",
+        "prompt": "Hanging chain with heavy rusted links, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "obstacle",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "drop_cage_door_cutout",
+        "fileName": "drop_cage.png",
+        "prompt": "Falling cage door with bars and torn banners, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "obstacle",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "drop_net_curtain_cutout",
+        "fileName": "drop_net.png",
+        "prompt": "Net curtain with frayed edges and knots, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "obstacle",
+          "cutout",
+          "extended"
+        ]
+      }
+    ],
+    "solutionItems": [
+      {
+        "id": "item_scissors_cutout",
+        "fileName": "item_scissors.png",
+        "prompt": "Large ceremonial scissors with carnival filigree, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "item",
+          "solution",
+          "extended"
+        ]
+      },
+      {
+        "id": "item_boxing_glove_cutout",
+        "fileName": "item_boxing_glove.png",
+        "prompt": "Worn leather boxing glove with stitched seams, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "item",
+          "solution",
+          "extended"
+        ]
+      },
+      {
+        "id": "item_mallet_cutout",
+        "fileName": "item_mallet.png",
+        "prompt": "Carnival mallet with chipped paint and wood grain, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "item",
+          "solution",
+          "extended"
+        ]
+      },
+      {
+        "id": "item_pin_cutout",
+        "fileName": "item_pin.png",
+        "prompt": "Ornate safety pin with tiny circus charms, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "item",
+          "solution",
+          "extended"
+        ]
+      },
+      {
+        "id": "item_net_cutout",
+        "fileName": "item_net.png",
+        "prompt": "Carnival capture net coiled and frayed, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "item",
+          "solution",
+          "extended"
+        ]
+      },
+      {
+        "id": "item_hook_cutout",
+        "fileName": "item_hook.png",
+        "prompt": "Old iron hook with rope binding, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "item",
+          "solution",
+          "extended"
+        ]
+      },
+      {
+        "id": "item_lamp_cutout",
+        "fileName": "item_lamp.png",
+        "prompt": "Lantern lamp with cracked glass and glow, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "item",
+          "solution",
+          "extended"
+        ]
+      },
+      {
+        "id": "item_key_cutout",
+        "fileName": "item_key.png",
+        "prompt": "Huge iron key with carnival crest, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "item",
+          "solution",
+          "extended"
+        ]
+      },
+      {
+        "id": "item_pitcher_cutout",
+        "fileName": "item_pitcher.png",
+        "prompt": "Glass water pitcher with condensation and grime, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "item",
+          "solution",
+          "extended"
+        ]
+      }
+    ],
+    "characters": [
+      {
+        "id": "char_beppo_cutout",
+        "fileName": "char_beppo.png",
+        "prompt": "Beppo the clown master, looming grin and hollow eyes, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "character",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "char_audience_cutout",
+        "fileName": "char_audience.png",
+        "prompt": "Shadowy audience silhouettes with hollow smiles, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "16:9",
+        "group": "extended",
+        "tags": [
+          "character",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "char_barker_cutout",
+        "fileName": "char_barker.png",
+        "prompt": "Carnival barker in ragged coat, megaphone mouth, showman’s sash, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "character",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "char_makeup_artist_cutout",
+        "fileName": "char_makeup_artist.png",
+        "prompt": "Creepy clown makeup artist with brush hands, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "character",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "char_ringmaster_cutout",
+        "fileName": "char_ringmaster.png",
+        "prompt": "Menacing ringmaster with top hat and whip, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "character",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "char_carousel_horse_cutout",
+        "fileName": "char_carousel_horse.png",
+        "prompt": "Creepy carousel horse with hollow eyes and cracked paint, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "character",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "char_tent_clowns_cutout",
+        "fileName": "char_tent_clowns.png",
+        "prompt": "Tent pole clowns perched on poles, elongated limbs, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "character",
+          "cutout",
+          "extended"
+        ]
+      }
+    ],
+    "backdrops": [
+      {
+        "id": "backdrop_tattered_tent",
+        "fileName": "backdrop_tattered_tent.png",
+        "prompt": "Tattered circus tent interior with endless canvas walls and striped rigging, layered circus backdrop, parade spectacle tableau, menagerie silhouettes, paper collage, moody lighting, endless canvas walls, high contrast, vintage carnival grime, no text, no logos",
+        "aspectRatio": "16:9",
+        "group": "extended",
+        "tags": [
+          "backdrop",
+          "extended"
+        ]
+      },
+      {
+        "id": "backdrop_shadowy_crowd",
+        "fileName": "backdrop_shadowy_crowd.png",
+        "prompt": "Shadowy carnival crowd behind torn banners and parade wagons, layered circus backdrop, parade spectacle tableau, menagerie silhouettes, paper collage, moody lighting, endless canvas walls, high contrast, vintage carnival grime, no text, no logos",
+        "aspectRatio": "16:9",
+        "group": "extended",
+        "tags": [
+          "backdrop",
+          "extended"
+        ]
+      },
+      {
+        "id": "backdrop_twisted_rides",
+        "fileName": "backdrop_twisted_rides.png",
+        "prompt": "Twisted carnival rides silhouetted in fog with menagerie cages, layered circus backdrop, parade spectacle tableau, menagerie silhouettes, paper collage, moody lighting, endless canvas walls, high contrast, vintage carnival grime, no text, no logos",
+        "aspectRatio": "16:9",
+        "group": "extended",
+        "tags": [
+          "backdrop",
+          "extended"
+        ]
+      },
+      {
+        "id": "backdrop_backstage_corridor",
+        "fileName": "backdrop_backstage_corridor.png",
+        "prompt": "Backstage corridor of the big top with rigging and shadows, layered circus backdrop, parade spectacle tableau, menagerie silhouettes, paper collage, moody lighting, endless canvas walls, high contrast, vintage carnival grime, no text, no logos",
+        "aspectRatio": "16:9",
+        "group": "extended",
+        "tags": [
+          "backdrop",
+          "extended"
+        ]
+      },
+      {
+        "id": "backdrop_lion_cage",
+        "fileName": "backdrop_lion_cage.png",
+        "prompt": "Lion tamer cage interior with bars and dangling banners, layered circus backdrop, parade spectacle tableau, menagerie silhouettes, paper collage, moody lighting, endless canvas walls, high contrast, vintage carnival grime, no text, no logos",
+        "aspectRatio": "16:9",
+        "group": "extended",
+        "tags": [
+          "backdrop",
+          "extended"
+        ]
+      }
+    ],
+    "all": [
+      {
+        "id": "circus_sawdust_floor_texture",
+        "fileName": "circus_sawdust_floor_texture.png",
+        "prompt": "Circus sawdust floor with scattered straw and grime, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "core",
+        "tags": [
+          "texture",
+          "floor",
+          "core"
+        ]
+      },
+      {
+        "id": "dark_muddy_grass_ground_texture",
+        "fileName": "dark_muddy_grass_ground_texture.png",
+        "prompt": "Dark muddy grass with puddles and trampled footprints, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "core",
+        "tags": [
+          "texture",
+          "floor",
+          "core"
+        ]
+      },
+      {
+        "id": "vintage_circus_tent_canvas_texture",
+        "fileName": "vintage_circus_tent_canvas_texture.png",
+        "prompt": "Aged circus tent canvas with stains, seams, and faint rope shadows, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "core",
+        "tags": [
+          "texture",
+          "wall",
+          "core"
+        ]
+      },
+      {
+        "id": "seamless_dark_hedge_texture",
+        "fileName": "seamless_dark_hedge_texture.png",
+        "prompt": "Dense twisted hedge wall texture with thorny branches, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "core",
+        "tags": [
+          "texture",
+          "wall",
+          "core"
+        ]
+      },
+      {
+        "id": "paper_mache_circus_ticket_item",
+        "fileName": "paper_mache_circus_ticket_item.png",
+        "prompt": "A tattered circus ticket made of paper mache, ornate edges, eerie ink stamps, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "core",
+        "tags": [
+          "item",
+          "collectible",
+          "core"
+        ]
+      },
+      {
+        "id": "paper_mache_key_item",
+        "fileName": "paper_mache_key_item.png",
+        "prompt": "An ornate paper mache key with carnival filigree and chipped paint, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "core",
+        "tags": [
+          "item",
+          "collectible",
+          "core"
+        ]
+      },
+      {
+        "id": "wall_tattered_fabric_texture",
+        "fileName": "wall_tattered_fabric_texture.png",
+        "prompt": "Tattered carnival fabric wall with frayed threads and patchwork seams, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "texture",
+          "wall",
+          "extended"
+        ]
+      },
+      {
+        "id": "wall_rusted_metal_grid_texture",
+        "fileName": "wall_rusted_metal_grid_texture.png",
+        "prompt": "Rusted metal grid wall like a lion tamer cage, corroded bars, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "texture",
+          "wall",
+          "extended"
+        ]
+      },
+      {
+        "id": "wall_weathered_wood_planks_texture",
+        "fileName": "wall_weathered_wood_planks_texture.png",
+        "prompt": "Weathered carnival booth wood planks with nails and peeling paint, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "texture",
+          "wall",
+          "extended"
+        ]
+      },
+      {
+        "id": "wall_backstage_canvas_texture",
+        "fileName": "wall_backstage_canvas_texture.png",
+        "prompt": "Backstage canvas wall with rope lashings, pulley marks, and grime, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "texture",
+          "wall",
+          "extended"
+        ]
+      },
+      {
+        "id": "wall_velvet_drape_texture",
+        "fileName": "wall_velvet_drape_texture.png",
+        "prompt": "Worn velvet drapes with heavy folds, dust, and stitched trim, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "texture",
+          "wall",
+          "extended"
+        ]
+      },
+      {
+        "id": "wall_ringmaster_banners_texture",
+        "fileName": "wall_ringmaster_banners_texture.png",
+        "prompt": "Torn ringmaster banners layered on canvas wall, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "texture",
+          "wall",
+          "extended"
+        ]
+      },
+      {
+        "id": "floor_worn_carnival_tile_texture",
+        "fileName": "floor_worn_carnival_tile_texture.png",
+        "prompt": "Worn carnival tile floor, faded checkerboard, grime in the grout, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "texture",
+          "floor",
+          "extended"
+        ]
+      },
+      {
+        "id": "floor_blood_stained_concrete_texture",
+        "fileName": "floor_blood_stained_concrete_texture.png",
+        "prompt": "Blood-stained concrete with cracks and dark smears, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "texture",
+          "floor",
+          "extended"
+        ]
+      },
+      {
+        "id": "floor_creaky_boardwalk_texture",
+        "fileName": "floor_creaky_boardwalk_texture.png",
+        "prompt": "Creaky wooden boardwalk with salt stains and warped planks, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "texture",
+          "floor",
+          "extended"
+        ]
+      },
+      {
+        "id": "floor_muddy_straw_texture",
+        "fileName": "floor_muddy_straw_texture.png",
+        "prompt": "Muddy straw mixed with dirt and hoof prints, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "texture",
+          "floor",
+          "extended"
+        ]
+      },
+      {
+        "id": "floor_ticket_litter_texture",
+        "fileName": "floor_ticket_litter_texture.png",
+        "prompt": "Littered tickets, handbill fragments, and confetti ground texture, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "texture",
+          "floor",
+          "extended"
+        ]
+      },
+      {
+        "id": "floor_greasepaint_smear_texture",
+        "fileName": "floor_greasepaint_smear_texture.png",
+        "prompt": "Smudged greasepaint and chalky footprints, seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "texture",
+          "floor",
+          "extended"
+        ]
+      },
+      {
+        "id": "popup_tubeman_cutout",
+        "fileName": "popup_tubeman.png",
+        "prompt": "Wacky arm-flailing inflatable tubeman clown with manic grin, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "obstacle",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "popup_punching_clown_cutout",
+        "fileName": "popup_clown.png",
+        "prompt": "Giant inflatable punching clown with boxing gloves and cracked paint, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "obstacle",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "popup_spring_jester_cutout",
+        "fileName": "popup_jester.png",
+        "prompt": "Spring-loaded jester with angular limbs and bells, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "obstacle",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "slide_guillotine_cutout",
+        "fileName": "slide_guillotine.png",
+        "prompt": "Rusty carnival guillotine blade with ornate frame, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "obstacle",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "slide_spiked_door_cutout",
+        "fileName": "slide_spiked_door.png",
+        "prompt": "Spiked iron door with circus motifs and grime, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "obstacle",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "slide_carousel_spike_cutout",
+        "fileName": "slide_carousel.png",
+        "prompt": "Carousel spike ring with skeletal horse motifs and chipped paint, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "obstacle",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "drop_hanging_chain_cutout",
+        "fileName": "drop_chain.png",
+        "prompt": "Hanging chain with heavy rusted links, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "obstacle",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "drop_cage_door_cutout",
+        "fileName": "drop_cage.png",
+        "prompt": "Falling cage door with bars and torn banners, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "obstacle",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "drop_net_curtain_cutout",
+        "fileName": "drop_net.png",
+        "prompt": "Net curtain with frayed edges and knots, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "obstacle",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "item_scissors_cutout",
+        "fileName": "item_scissors.png",
+        "prompt": "Large ceremonial scissors with carnival filigree, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "item",
+          "solution",
+          "extended"
+        ]
+      },
+      {
+        "id": "item_boxing_glove_cutout",
+        "fileName": "item_boxing_glove.png",
+        "prompt": "Worn leather boxing glove with stitched seams, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "item",
+          "solution",
+          "extended"
+        ]
+      },
+      {
+        "id": "item_mallet_cutout",
+        "fileName": "item_mallet.png",
+        "prompt": "Carnival mallet with chipped paint and wood grain, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "item",
+          "solution",
+          "extended"
+        ]
+      },
+      {
+        "id": "item_pin_cutout",
+        "fileName": "item_pin.png",
+        "prompt": "Ornate safety pin with tiny circus charms, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "item",
+          "solution",
+          "extended"
+        ]
+      },
+      {
+        "id": "item_net_cutout",
+        "fileName": "item_net.png",
+        "prompt": "Carnival capture net coiled and frayed, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "item",
+          "solution",
+          "extended"
+        ]
+      },
+      {
+        "id": "item_hook_cutout",
+        "fileName": "item_hook.png",
+        "prompt": "Old iron hook with rope binding, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "item",
+          "solution",
+          "extended"
+        ]
+      },
+      {
+        "id": "item_lamp_cutout",
+        "fileName": "item_lamp.png",
+        "prompt": "Lantern lamp with cracked glass and glow, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "item",
+          "solution",
+          "extended"
+        ]
+      },
+      {
+        "id": "item_key_cutout",
+        "fileName": "item_key.png",
+        "prompt": "Huge iron key with carnival crest, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "item",
+          "solution",
+          "extended"
+        ]
+      },
+      {
+        "id": "item_pitcher_cutout",
+        "fileName": "item_pitcher.png",
+        "prompt": "Glass water pitcher with condensation and grime, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "item",
+          "solution",
+          "extended"
+        ]
+      },
+      {
+        "id": "char_beppo_cutout",
+        "fileName": "char_beppo.png",
+        "prompt": "Beppo the clown master, looming grin and hollow eyes, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "character",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "char_audience_cutout",
+        "fileName": "char_audience.png",
+        "prompt": "Shadowy audience silhouettes with hollow smiles, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "16:9",
+        "group": "extended",
+        "tags": [
+          "character",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "char_barker_cutout",
+        "fileName": "char_barker.png",
+        "prompt": "Carnival barker in ragged coat, megaphone mouth, showman’s sash, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "character",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "char_makeup_artist_cutout",
+        "fileName": "char_makeup_artist.png",
+        "prompt": "Creepy clown makeup artist with brush hands, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "character",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "char_ringmaster_cutout",
+        "fileName": "char_ringmaster.png",
+        "prompt": "Menacing ringmaster with top hat and whip, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "character",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "char_carousel_horse_cutout",
+        "fileName": "char_carousel_horse.png",
+        "prompt": "Creepy carousel horse with hollow eyes and cracked paint, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "character",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "char_tent_clowns_cutout",
+        "fileName": "char_tent_clowns.png",
+        "prompt": "Tent pole clowns perched on poles, elongated limbs, paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark",
+        "aspectRatio": "1:1",
+        "group": "extended",
+        "tags": [
+          "character",
+          "cutout",
+          "extended"
+        ]
+      },
+      {
+        "id": "backdrop_tattered_tent",
+        "fileName": "backdrop_tattered_tent.png",
+        "prompt": "Tattered circus tent interior with endless canvas walls and striped rigging, layered circus backdrop, parade spectacle tableau, menagerie silhouettes, paper collage, moody lighting, endless canvas walls, high contrast, vintage carnival grime, no text, no logos",
+        "aspectRatio": "16:9",
+        "group": "extended",
+        "tags": [
+          "backdrop",
+          "extended"
+        ]
+      },
+      {
+        "id": "backdrop_shadowy_crowd",
+        "fileName": "backdrop_shadowy_crowd.png",
+        "prompt": "Shadowy carnival crowd behind torn banners and parade wagons, layered circus backdrop, parade spectacle tableau, menagerie silhouettes, paper collage, moody lighting, endless canvas walls, high contrast, vintage carnival grime, no text, no logos",
+        "aspectRatio": "16:9",
+        "group": "extended",
+        "tags": [
+          "backdrop",
+          "extended"
+        ]
+      },
+      {
+        "id": "backdrop_twisted_rides",
+        "fileName": "backdrop_twisted_rides.png",
+        "prompt": "Twisted carnival rides silhouetted in fog with menagerie cages, layered circus backdrop, parade spectacle tableau, menagerie silhouettes, paper collage, moody lighting, endless canvas walls, high contrast, vintage carnival grime, no text, no logos",
+        "aspectRatio": "16:9",
+        "group": "extended",
+        "tags": [
+          "backdrop",
+          "extended"
+        ]
+      },
+      {
+        "id": "backdrop_backstage_corridor",
+        "fileName": "backdrop_backstage_corridor.png",
+        "prompt": "Backstage corridor of the big top with rigging and shadows, layered circus backdrop, parade spectacle tableau, menagerie silhouettes, paper collage, moody lighting, endless canvas walls, high contrast, vintage carnival grime, no text, no logos",
+        "aspectRatio": "16:9",
+        "group": "extended",
+        "tags": [
+          "backdrop",
+          "extended"
+        ]
+      },
+      {
+        "id": "backdrop_lion_cage",
+        "fileName": "backdrop_lion_cage.png",
+        "prompt": "Lion tamer cage interior with bars and dangling banners, layered circus backdrop, parade spectacle tableau, menagerie silhouettes, paper collage, moody lighting, endless canvas walls, high contrast, vintage carnival grime, no text, no logos",
+        "aspectRatio": "16:9",
+        "group": "extended",
+        "tags": [
+          "backdrop",
+          "extended"
+        ]
+      }
+    ]
+  },
+  "videos": [
+    {
+      "id": "intro_beppo_emerging",
+      "fileName": "intro_beppo_emerging.mp4",
+      "prompt": "Cinematic approach to a decaying big-top tent; parade wagons and a distant circus train arrival dissolve into paper collage animation, swirling fog, Beppo emerging in the distance, unsettling carnival lights, Terry Gilliam style.",
+      "aspectRatio": "16:9",
+      "durationSeconds": 20,
+      "group": "core"
+    },
+    {
+      "id": "outro_beppo_laughing",
+      "fileName": "outro_beppo_laughing.mp4",
+      "prompt": "Close-up of Beppo’s giant papier-mâché face laughing as the camera is swallowed; chromolithograph poster texture, jittery collage animation, heavy shadows, surreal carnival glare.",
+      "aspectRatio": "16:9",
+      "durationSeconds": 10,
+      "group": "core"
+    },
+    {
+      "id": "win_escape",
+      "fileName": "win_escape.mp4",
+      "prompt": "The maze collapses into paper confetti as the player escapes into night air; collage animation, carnival banners tearing, cathartic glow.",
+      "aspectRatio": "16:9",
+      "durationSeconds": 12,
+      "group": "extended"
+    }
+  ]
+}
