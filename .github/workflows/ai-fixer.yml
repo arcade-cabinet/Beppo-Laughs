@@ -82,7 +82,7 @@ jobs:
       needs_escalation: ${{ steps.fix.outputs.needs_escalation }}
     steps:
       - name: Download binary
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: control-center-binary
           path: /tmp
@@ -150,7 +150,7 @@ jobs:
       - name: Detect flaky test failures
         id: detect
         if: steps.check-key.outputs.available == 'true'
-        uses: anthropics/claude-code-action@7145c3e0510bcdbdd29f67cc4a8c1958f1acfa2f # v1
+        uses: anthropics/claude-code-action@c9ec2b02b40ac0444c6716e51d5e19ef2e0b8d00 # v1
         env:
           WORKFLOW_URL: ${{ github.event.workflow_run.html_url }}
           WORKFLOW_ID: ${{ github.event.workflow_run.id }}
@@ -272,7 +272,7 @@ jobs:
 
       - name: Fix with Claude
         if: steps.check-key.outputs.available == 'true'
-        uses: anthropics/claude-code-action@7145c3e0510bcdbdd29f67cc4a8c1958f1acfa2f # v1
+        uses: anthropics/claude-code-action@c9ec2b02b40ac0444c6716e51d5e19ef2e0b8d00 # v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.CI_GITHUB_TOKEN }}
