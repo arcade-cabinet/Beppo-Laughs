@@ -14,14 +14,14 @@ test.describe('Beppo Laughs - Maze Solving Flow', () => {
         // 3. Wait for the game to initialize and the HUD to appear
         await expect(page.getByText(/CELLS:/)).toBeVisible({ timeout: 15000 });
 
-        // 4. Test movement
-        const gasBtn = page.getByTestId('button-accelerate');
-        await expect(gasBtn).toBeVisible();
+        // 4. Test movement with lever control
+        const leverControl = page.getByTestId('lever-control');
+        await expect(leverControl).toBeVisible();
 
-        // Hold GAS down to move to the next cell
-        await gasBtn.dispatchEvent('mousedown');
+        // Hold lever down to accelerate and move to the next cell
+        await leverControl.dispatchEvent('mousedown');
         await page.waitForTimeout(3000);
-        await gasBtn.dispatchEvent('mouseup');
+        await leverControl.dispatchEvent('mouseup');
 
         // Check if we reached a new cell or a fork
         const forkBtn = page.locator('[data-testid^="button-fork-"]').first();
@@ -48,6 +48,6 @@ test.describe('Beppo Laughs - Maze Solving Flow', () => {
 
         // Verify HUD elements appear
         await expect(page.getByText(/CELLS:/)).toBeVisible({ timeout: 15000 });
-        await expect(page.getByTestId('button-accelerate')).toBeVisible();
+        await expect(page.getByTestId('lever-control')).toBeVisible();
     });
 });
