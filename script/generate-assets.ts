@@ -1,443 +1,638 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import random from 'random';
-import { uniqueNamesGenerator } from 'unique-names-generator';
-import { z } from 'zod';
+import { GoogleGenAI } from '@google/genai';
 
-// Horror-themed dictionaries for seed generation (from Grok research)
-const horrorAdjectives = [
-  'eerie',
-  'ghastly',
-  'sinister',
-  'haunted',
-  'bloodied',
-  'whispering',
-  'forgotten',
-  'cursed',
-  'macabre',
-  'dreadful',
-  'unnerving',
-  'phantom',
-  'spectral',
-  'baleful',
-  'corpse-like',
-  'eldritch',
-  'menacing',
-  'rotting',
-  'forsaken',
-  'lurking',
-  'twisted',
-  'ominous',
-  'chilling',
+const IMAGE_MODEL = process.env.GOOGLE_IMAGEN_MODEL || 'imagen-4.0-generate-001';
+const VIDEO_MODEL = process.env.GOOGLE_VEO_MODEL || 'veo-3.1-generate-001';
+
+const OUTPUT_IMAGES_DIRS = [
+  path.join(process.cwd(), 'attached_assets', 'generated_images'),
+  path.join(process.cwd(), 'client', 'public', 'assets', 'generated_images'),
 ];
-
-const horrorNouns = [
-  'crypt',
-  'mansion',
-  'graveyard',
-  'asylum',
-  'forest',
-  'mirror',
-  'doll',
-  'attic',
-  'basement',
-  'ritual',
-  'entity',
-  'curse',
-  'whisper',
-  'shadow',
-  'blood',
-  'moon',
-  'fog',
-  'chain',
-  'door',
-  'eye',
-  'hand',
-  'void',
+const OUTPUT_VIDEOS_DIRS = [
+  path.join(process.cwd(), 'attached_assets', 'generated_videos'),
+  path.join(process.cwd(), 'client', 'public', 'assets', 'generated_videos'),
 ];
+const CATALOG_OUTPUT = path.join(process.cwd(), 'client', 'public', 'assets', 'asset-catalog.json');
 
-const config = {
-  dictionaries: [horrorAdjectives, horrorAdjectives, horrorNouns],
-  length: 3,
-  separator: ' ',
-  style: 'lowerCase' as const,
+const GENERATE_IMAGES = process.env.GENERATE_IMAGES !== 'false';
+const GENERATE_VIDEOS = process.env.GENERATE_VIDEOS === 'true';
+const FORCE_REGENERATE = process.env.FORCE_REGENERATE === 'true';
+const ASSET_GROUP = process.env.ASSET_GROUP || 'extended';
+
+const CUTOUT_STYLE =
+  'paper-mache cutout, nightmare carnival, Victorian freak show, chromolithograph poster ink texture, halftone dots, limited palette (crimson, mustard, indigo, sepia), Terry Gilliam collage style, Monty Python grotesquerie, transparent background, high contrast, crisp silhouette, centered, no text, no watermark';
+const TEXTURE_STYLE =
+  'seamless tileable texture, high detail, circus horror aesthetic, big-top tent atmosphere, chromolithograph color palette, hand-painted, top-down lighting, no perspective, no text, no logos';
+const BACKDROP_STYLE =
+  'layered circus backdrop, parade spectacle tableau, menagerie silhouettes, paper collage, moody lighting, endless canvas walls, high contrast, vintage carnival grime, no text, no logos';
+
+type AssetGroup = 'core' | 'extended';
+
+type BaseImageAsset = {
+  id: string;
+  fileName: string;
+  prompt: string;
+  aspectRatio: string;
+  group: AssetGroup;
 };
 
-const GEMINI_MODEL = process.env.GOOGLE_GEMINI_MODEL || 'gemini-2.5-flash';
-const IMAGEN_MODEL = process.env.GOOGLE_IMAGEN_MODEL || 'imagen-4.0-generate-001';
+type TaggedImageAsset = BaseImageAsset & { tags: string[] };
 
-// Zod Schema for structured AI output
-const SceneManifestSchema = z.object({
-  title: z.string().optional(),
-  description: z.string().optional(),
-  backdrops: z.array(
-    z.object({
-      id: z.string(),
-      description: z.string(),
-      anim: z.enum(['static', 'slideAcross', 'parallax']),
-      layer: z.number(),
-    }),
-  ),
-  performers: z.array(
-    z.object({
-      id: z.string(),
-      type: z.enum(['tubeman', 'boxer', 'trapeze', 'backdropFreak', 'lionTamerGhost', 'strongman', 'fireBreather', 'fortuneTeller']),
-      appearancePrompt: z.string(),
-      anim: z.enum(['popup', 'drop', 'slideOutWall', 'flail', 'swing']),
-      resolveItem: z.enum(['scissors', 'lamp', 'hook', 'pin', 'net', 'mallet', 'water', 'crystal']),
-      preferredRoomType: z.enum(['deadend', 'straight', 'junction', 'crossroad']),
-    }),
-  ),
-  videoPrompts: z.object({
-    intro: z.string(),
-    win: z.string(),
-    lose: z.string(),
-  }),
-});
+type BaseVideoAsset = {
+  id: string;
+  fileName: string;
+  prompt: string;
+  aspectRatio: string;
+  durationSeconds: number;
+  group: AssetGroup;
+};
 
-type SceneManifest = z.infer<typeof SceneManifestSchema>;
+const coreFloorTextures: BaseImageAsset[] = [
+  {
+    id: 'circus_sawdust_floor_texture',
+    fileName: 'circus_sawdust_floor_texture.png',
+    prompt: `Circus sawdust floor with scattered straw and grime, ${TEXTURE_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'core',
+  },
+  {
+    id: 'dark_muddy_grass_ground_texture',
+    fileName: 'dark_muddy_grass_ground_texture.png',
+    prompt: `Dark muddy grass with puddles and trampled footprints, ${TEXTURE_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'core',
+  },
+];
 
-// System prompt for AI manifest generation
-const SYSTEM_PROMPT = `You are a deranged ringmaster designing a nightmare circus in Terry Gilliam's Monty Python collage style.
-All performers must be flat 2D paper-mache cutouts with absurd proportions and eerie vibes.
-Each performer needs a logical resolveItem that matches their type:
-- tubeman: scissors (to cut them down)
-- boxer: lamp (to scare them away)
-- trapeze: hook (to catch them)
-- backdropFreak: pin (to puncture them)
-- lionTamerGhost: net (to capture them)
-- strongman: mallet (to challenge them)
-- fireBreather: water (to douse them)
-- fortuneTeller: crystal (to disrupt their vision)
+const coreWallTextures: BaseImageAsset[] = [
+  {
+    id: 'vintage_circus_tent_canvas_texture',
+    fileName: 'vintage_circus_tent_canvas_texture.png',
+    prompt: `Aged circus tent canvas with stains, seams, and faint rope shadows, ${TEXTURE_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'core',
+  },
+  {
+    id: 'seamless_dark_hedge_texture',
+    fileName: 'seamless_dark_hedge_texture.png',
+    prompt: `Dense twisted hedge wall texture with thorny branches, ${TEXTURE_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'core',
+  },
+];
 
-Specify three video prompts for the game's narratively key moments:
-- intro: A surreal approach to the circus grounds.
-- win: The player escaping the maze as it collapses into paper confetti.
-- lose: Beppo's giant paper-mache face swallowing the camera.
+const coreCollectibles: BaseImageAsset[] = [
+  {
+    id: 'paper_mache_circus_ticket_item',
+    fileName: 'paper_mache_circus_ticket_item.png',
+    prompt: `A tattered circus ticket made of paper mache, ornate edges, eerie ink stamps, ${CUTOUT_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'core',
+  },
+  {
+    id: 'paper_mache_key_item',
+    fileName: 'paper_mache_key_item.png',
+    prompt: `An ornate paper mache key with carnival filigree and chipped paint, ${CUTOUT_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'core',
+  },
+];
 
-Backdrops should be layered circus scenes with unsettling imagery - tattered tents, shadowy crowds, twisted carnival rides.
-All descriptions should be suitable as image generation prompts for flat paper cutout style assets.
+const wallTextures: BaseImageAsset[] = [
+  {
+    id: 'wall_tattered_fabric_texture',
+    fileName: 'wall_tattered_fabric_texture.png',
+    prompt: `Tattered carnival fabric wall with frayed threads and patchwork seams, ${TEXTURE_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'wall_rusted_metal_grid_texture',
+    fileName: 'wall_rusted_metal_grid_texture.png',
+    prompt: `Rusted metal grid wall like a lion tamer cage, corroded bars, ${TEXTURE_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'wall_weathered_wood_planks_texture',
+    fileName: 'wall_weathered_wood_planks_texture.png',
+    prompt: `Weathered carnival booth wood planks with nails and peeling paint, ${TEXTURE_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'wall_backstage_canvas_texture',
+    fileName: 'wall_backstage_canvas_texture.png',
+    prompt: `Backstage canvas wall with rope lashings, pulley marks, and grime, ${TEXTURE_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'wall_velvet_drape_texture',
+    fileName: 'wall_velvet_drape_texture.png',
+    prompt: `Worn velvet drapes with heavy folds, dust, and stitched trim, ${TEXTURE_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'wall_ringmaster_banners_texture',
+    fileName: 'wall_ringmaster_banners_texture.png',
+    prompt: `Torn ringmaster banners layered on canvas wall, ${TEXTURE_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+];
 
-IMPORTANT: Respond with ONLY valid JSON matching this exact schema, no markdown or other text:
-{
-  "title": "string (e.g. 'The Hall of Hollow Grins')",
-  "description": "string (e.g. 'Enter a maze of tattered canvas where the reflections aren't your own.')",
-  "backdrops": [{ "id": "string", "description": "string", "anim": "static|slideAcross|parallax", "layer": number }],
-  "performers": [{ "id": "string", "type": "tubeman|boxer|trapeze|backdropFreak|lionTamerGhost|strongman|fireBreather|fortuneTeller", "appearancePrompt": "string", "anim": "popup|drop|slideOutWall|flail|swing", "resolveItem": "scissors|lamp|hook|pin|net|mallet|water|crystal", "preferredRoomType": "deadend|straight|junction|crossroad" }],
-  "videoPrompts": { "intro": "string", "win": "string", "lose": "string" }
-}`;
+const floorTextures: BaseImageAsset[] = [
+  {
+    id: 'floor_worn_carnival_tile_texture',
+    fileName: 'floor_worn_carnival_tile_texture.png',
+    prompt: `Worn carnival tile floor, faded checkerboard, grime in the grout, ${TEXTURE_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'floor_blood_stained_concrete_texture',
+    fileName: 'floor_blood_stained_concrete_texture.png',
+    prompt: `Blood-stained concrete with cracks and dark smears, ${TEXTURE_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'floor_creaky_boardwalk_texture',
+    fileName: 'floor_creaky_boardwalk_texture.png',
+    prompt: `Creaky wooden boardwalk with salt stains and warped planks, ${TEXTURE_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'floor_muddy_straw_texture',
+    fileName: 'floor_muddy_straw_texture.png',
+    prompt: `Muddy straw mixed with dirt and hoof prints, ${TEXTURE_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'floor_ticket_litter_texture',
+    fileName: 'floor_ticket_litter_texture.png',
+    prompt: `Littered tickets, handbill fragments, and confetti ground texture, ${TEXTURE_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'floor_greasepaint_smear_texture',
+    fileName: 'floor_greasepaint_smear_texture.png',
+    prompt: `Smudged greasepaint and chalky footprints, ${TEXTURE_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+];
 
-// Initialize Google GenAI client
-function getClient(): GoogleGenerativeAI | null {
+const obstacles: BaseImageAsset[] = [
+  {
+    id: 'popup_tubeman_cutout',
+    fileName: 'popup_tubeman.png',
+    prompt: `Wacky arm-flailing inflatable tubeman clown with manic grin, ${CUTOUT_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'popup_punching_clown_cutout',
+    fileName: 'popup_clown.png',
+    prompt: `Giant inflatable punching clown with boxing gloves and cracked paint, ${CUTOUT_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'popup_spring_jester_cutout',
+    fileName: 'popup_jester.png',
+    prompt: `Spring-loaded jester with angular limbs and bells, ${CUTOUT_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'slide_guillotine_cutout',
+    fileName: 'slide_guillotine.png',
+    prompt: `Rusty carnival guillotine blade with ornate frame, ${CUTOUT_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'slide_spiked_door_cutout',
+    fileName: 'slide_spiked_door.png',
+    prompt: `Spiked iron door with circus motifs and grime, ${CUTOUT_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'slide_carousel_spike_cutout',
+    fileName: 'slide_carousel.png',
+    prompt: `Carousel spike ring with skeletal horse motifs and chipped paint, ${CUTOUT_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'drop_hanging_chain_cutout',
+    fileName: 'drop_chain.png',
+    prompt: `Hanging chain with heavy rusted links, ${CUTOUT_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'drop_cage_door_cutout',
+    fileName: 'drop_cage.png',
+    prompt: `Falling cage door with bars and torn banners, ${CUTOUT_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'drop_net_curtain_cutout',
+    fileName: 'drop_net.png',
+    prompt: `Net curtain with frayed edges and knots, ${CUTOUT_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+];
+
+const solutionItems: BaseImageAsset[] = [
+  {
+    id: 'item_scissors_cutout',
+    fileName: 'item_scissors.png',
+    prompt: `Large ceremonial scissors with carnival filigree, ${CUTOUT_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'item_boxing_glove_cutout',
+    fileName: 'item_boxing_glove.png',
+    prompt: `Worn leather boxing glove with stitched seams, ${CUTOUT_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'item_mallet_cutout',
+    fileName: 'item_mallet.png',
+    prompt: `Carnival mallet with chipped paint and wood grain, ${CUTOUT_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'item_pin_cutout',
+    fileName: 'item_pin.png',
+    prompt: `Ornate safety pin with tiny circus charms, ${CUTOUT_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'item_net_cutout',
+    fileName: 'item_net.png',
+    prompt: `Carnival capture net coiled and frayed, ${CUTOUT_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'item_hook_cutout',
+    fileName: 'item_hook.png',
+    prompt: `Old iron hook with rope binding, ${CUTOUT_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'item_lamp_cutout',
+    fileName: 'item_lamp.png',
+    prompt: `Lantern lamp with cracked glass and glow, ${CUTOUT_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'item_key_cutout',
+    fileName: 'item_key.png',
+    prompt: `Huge iron key with carnival crest, ${CUTOUT_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'item_pitcher_cutout',
+    fileName: 'item_pitcher.png',
+    prompt: `Glass water pitcher with condensation and grime, ${CUTOUT_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+];
+
+const characters: BaseImageAsset[] = [
+  {
+    id: 'char_beppo_cutout',
+    fileName: 'char_beppo.png',
+    prompt: `Beppo the clown master, looming grin and hollow eyes, ${CUTOUT_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'char_audience_cutout',
+    fileName: 'char_audience.png',
+    prompt: `Shadowy audience silhouettes with hollow smiles, ${CUTOUT_STYLE}`,
+    aspectRatio: '16:9',
+    group: 'extended',
+  },
+  {
+    id: 'char_barker_cutout',
+    fileName: 'char_barker.png',
+    prompt: `Carnival barker in ragged coat, megaphone mouth, showman’s sash, ${CUTOUT_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'char_makeup_artist_cutout',
+    fileName: 'char_makeup_artist.png',
+    prompt: `Creepy clown makeup artist with brush hands, ${CUTOUT_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'char_ringmaster_cutout',
+    fileName: 'char_ringmaster.png',
+    prompt: `Menacing ringmaster with top hat and whip, ${CUTOUT_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'char_carousel_horse_cutout',
+    fileName: 'char_carousel_horse.png',
+    prompt: `Creepy carousel horse with hollow eyes and cracked paint, ${CUTOUT_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+  {
+    id: 'char_tent_clowns_cutout',
+    fileName: 'char_tent_clowns.png',
+    prompt: `Tent pole clowns perched on poles, elongated limbs, ${CUTOUT_STYLE}`,
+    aspectRatio: '1:1',
+    group: 'extended',
+  },
+];
+
+const backdrops: BaseImageAsset[] = [
+  {
+    id: 'backdrop_tattered_tent',
+    fileName: 'backdrop_tattered_tent.png',
+    prompt: `Tattered circus tent interior with endless canvas walls and striped rigging, ${BACKDROP_STYLE}`,
+    aspectRatio: '16:9',
+    group: 'extended',
+  },
+  {
+    id: 'backdrop_shadowy_crowd',
+    fileName: 'backdrop_shadowy_crowd.png',
+    prompt: `Shadowy carnival crowd behind torn banners and parade wagons, ${BACKDROP_STYLE}`,
+    aspectRatio: '16:9',
+    group: 'extended',
+  },
+  {
+    id: 'backdrop_twisted_rides',
+    fileName: 'backdrop_twisted_rides.png',
+    prompt: `Twisted carnival rides silhouetted in fog with menagerie cages, ${BACKDROP_STYLE}`,
+    aspectRatio: '16:9',
+    group: 'extended',
+  },
+  {
+    id: 'backdrop_backstage_corridor',
+    fileName: 'backdrop_backstage_corridor.png',
+    prompt: `Backstage corridor of the big top with rigging and shadows, ${BACKDROP_STYLE}`,
+    aspectRatio: '16:9',
+    group: 'extended',
+  },
+  {
+    id: 'backdrop_lion_cage',
+    fileName: 'backdrop_lion_cage.png',
+    prompt: `Lion tamer cage interior with bars and dangling banners, ${BACKDROP_STYLE}`,
+    aspectRatio: '16:9',
+    group: 'extended',
+  },
+];
+
+const withTags = (tags: string[], assets: BaseImageAsset[]): TaggedImageAsset[] =>
+  assets.map((asset) => ({ ...asset, tags }));
+
+const coreFloorTexturesTagged = withTags(['texture', 'floor', 'core'], coreFloorTextures);
+const coreWallTexturesTagged = withTags(['texture', 'wall', 'core'], coreWallTextures);
+const coreCollectiblesTagged = withTags(['item', 'collectible', 'core'], coreCollectibles);
+const wallTexturesTagged = withTags(['texture', 'wall', 'extended'], wallTextures);
+const floorTexturesTagged = withTags(['texture', 'floor', 'extended'], floorTextures);
+const obstaclesTagged = withTags(['obstacle', 'cutout', 'extended'], obstacles);
+const solutionItemsTagged = withTags(['item', 'solution', 'extended'], solutionItems);
+const charactersTagged = withTags(['character', 'cutout', 'extended'], characters);
+const backdropsTagged = withTags(['backdrop', 'extended'], backdrops);
+
+const IMAGE_ASSETS: TaggedImageAsset[] = [
+  ...coreFloorTexturesTagged,
+  ...coreWallTexturesTagged,
+  ...coreCollectiblesTagged,
+  ...wallTexturesTagged,
+  ...floorTexturesTagged,
+  ...obstaclesTagged,
+  ...solutionItemsTagged,
+  ...charactersTagged,
+  ...backdropsTagged,
+];
+
+const VIDEO_ASSETS: BaseVideoAsset[] = [
+  {
+    id: 'intro_beppo_emerging',
+    fileName: 'intro_beppo_emerging.mp4',
+    prompt:
+      'Cinematic approach to a decaying big-top tent; parade wagons and a distant circus train arrival dissolve into paper collage animation, swirling fog, Beppo emerging in the distance, unsettling carnival lights, Terry Gilliam style.',
+    aspectRatio: '16:9',
+    durationSeconds: 20,
+    group: 'core',
+  },
+  {
+    id: 'outro_beppo_laughing',
+    fileName: 'outro_beppo_laughing.mp4',
+    prompt:
+      'Close-up of Beppo’s giant papier-mâché face laughing as the camera is swallowed; chromolithograph poster texture, jittery collage animation, heavy shadows, surreal carnival glare.',
+    aspectRatio: '16:9',
+    durationSeconds: 10,
+    group: 'core',
+  },
+  {
+    id: 'win_escape',
+    fileName: 'win_escape.mp4',
+    prompt:
+      'The maze collapses into paper confetti as the player escapes into night air; collage animation, carnival banners tearing, cathartic glow.',
+    aspectRatio: '16:9',
+    durationSeconds: 12,
+    group: 'extended',
+  },
+];
+
+type ImageAsset = TaggedImageAsset;
+type VideoAsset = BaseVideoAsset;
+
+function getClient(): GoogleGenAI | null {
   const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GOOGLE_API_KEY;
   if (!apiKey) return null;
-  return new GoogleGenerativeAI(apiKey);
+  return new GoogleGenAI({ apiKey });
 }
 
-/**
- * Generate AI-powered manifest using Google Gemini
- */
-async function generateAIManifest(
-  client: GoogleGenerativeAI,
-  phrase: string,
-): Promise<SceneManifest | null> {
-  try {
-    console.log(`  🤖 Calling Google Gemini for: "${phrase}"...`);
-
-    const model = client.getGenerativeModel({
-      model: GEMINI_MODEL,
-      systemInstruction: SYSTEM_PROMPT,
-    });
-
-    const response = await model.generateContent(`Generate a surreal horror-circus scene manifest based on the seed phrase: "${phrase}". 
-Include 5-8 performers/freaks and 3-5 background/backdrop elements. 
-Each performer must have a detailed appearancePrompt suitable for AI image generation in flat paper cutout style.
-Make each description unique and creatively horrifying while staying in the Monty Python aesthetic.`);
-
-    const result = await response.response;
-    const text = result.text().trim();
-    if (!text) {
-      throw new Error('Empty response from Gemini');
-    }
-
-    // Parse and validate JSON
-    const parsed = JSON.parse(text);
-    const validated = SceneManifestSchema.parse(parsed);
-
-    console.log(
-      `  ✅ Generated manifest with ${validated.performers.length} performers and ${validated.backdrops.length} backdrops`,
-    );
-    return validated;
-  } catch (error) {
-    console.error(`  ❌ Gemini API error:`, error instanceof Error ? error.message : error);
-    return null;
-  }
+async function ensureDir(dir: string) {
+  await fs.mkdir(dir, { recursive: true });
 }
 
-/**
- * Generate images using Google Imagen 4
- */
-async function generateImages(
-  client: GoogleGenerativeAI,
-  manifest: SceneManifest,
-  outputDir: string,
-): Promise<void> {
-  console.log(`  🎨 Generating images with ${IMAGEN_MODEL}...`);
-
-  for (const performer of manifest.performers) {
+async function shouldGenerate(filePaths: string[]) {
+  if (FORCE_REGENERATE) return true;
+  for (const filePath of filePaths) {
     try {
-      const prompt = `${performer.appearancePrompt}, flat 2D paper cutout, high contrast silhouette, transparent background, Monty Python animation style, vintage circus poster aesthetic`;
-
-      const model = client.getGenerativeModel({ model: IMAGEN_MODEL });
-      const response = await model.generateContent(prompt);
-      // Note: Imagen 4 via GenerativeAI SDK might have a different response structure 
-      // but for now we follow the existing logic or fall back to mock.
-
-      if (response.generatedImages?.[0]?.image?.imageBytes) {
-        const imagePath = path.join(outputDir, `${performer.id}.png`);
-        await fs.writeFile(
-          imagePath,
-          Buffer.from(response.generatedImages[0].image.imageBytes, 'base64'),
-        );
-        console.log(`    ✓ Generated ${performer.id}.png`);
-      }
-    } catch (error) {
-      console.error(
-        `    ✗ Failed to generate ${performer.id}:`,
-        error instanceof Error ? error.message : error,
-      );
+      await fs.access(filePath);
+    } catch {
+      return true;
     }
   }
-
-  for (const backdrop of manifest.backdrops) {
-    try {
-      const prompt = `${backdrop.description}, flat 2D paper cutout collage, Terry Gilliam style, vintage circus backdrop, high contrast, layered paper texture`;
-
-      const response = await client.models.generateImages({
-        model: IMAGEN_MODEL,
-        prompt,
-        config: {
-          numberOfImages: 1,
-          aspectRatio: '16:9',
-        },
-      });
-
-      if (response.generatedImages?.[0]?.image?.imageBytes) {
-        const imagePath = path.join(outputDir, `${backdrop.id}.png`);
-        await fs.writeFile(
-          imagePath,
-          Buffer.from(response.generatedImages[0].image.imageBytes, 'base64'),
-        );
-        console.log(`    ✓ Generated ${backdrop.id}.png`);
-      }
-    } catch (error) {
-      console.error(
-        `    ✗ Failed to generate ${backdrop.id}:`,
-        error instanceof Error ? error.message : error,
-      );
-    }
-  }
+  return false;
 }
 
-/**
- * Generate a deterministic mock manifest for testing
- */
-function generateMockManifest(phrase: string): SceneManifest {
-  const hash = crypto.createHash('sha256').update(phrase).digest('hex');
-  random.use(parseInt(hash.slice(0, 8), 16));
+function assetIncluded(group: string) {
+  if (ASSET_GROUP === 'all') return true;
+  if (ASSET_GROUP === group) return true;
+  return ASSET_GROUP === 'extended' && group === 'core';
+}
 
-  const performerTypes: SceneManifest['performers'][0]['type'][] = [
-    'tubeman',
-    'boxer',
-    'trapeze',
-    'backdropFreak',
-    'lionTamerGhost',
-    'strongman',
-    'fireBreather',
-    'fortuneTeller',
-  ];
-  const anims: SceneManifest['performers'][0]['anim'][] = [
-    'popup',
-    'drop',
-    'slideOutWall',
-    'flail',
-    'swing',
-  ];
-  const resolveItems: Record<string, SceneManifest['performers'][0]['resolveItem']> = {
-    tubeman: 'scissors',
-    boxer: 'lamp',
-    trapeze: 'hook',
-    backdropFreak: 'pin',
-    lionTamerGhost: 'net',
-    strongman: 'mallet',
-    fireBreather: 'water',
-    fortuneTeller: 'crystal',
-  };
-  const roomTypes: SceneManifest['performers'][0]['preferredRoomType'][] = [
-    'deadend',
-    'straight',
-    'junction',
-    'crossroad',
-  ];
-
-  const numPerformers = 5 + Math.floor(random.float() * 4);
-  const performers: SceneManifest['performers'] = [];
-
-  for (let i = 0; i < numPerformers; i++) {
-    const type = performerTypes[Math.floor(random.float() * performerTypes.length)];
-    performers.push({
-      id: `perf_${String(i + 1).padStart(2, '0')}`,
-      type,
-      appearancePrompt: `Flat 2D paper cutout of a ${type === 'tubeman'
-        ? 'wacky arm-flailing inflatable clown with wild googly eyes and a manic grin'
-        : type === 'boxer'
-          ? 'giant inflatable boxing tube with a sinister painted face and menacing gloves'
-          : type === 'trapeze'
-            ? 'skeletal acrobat with paper wings and hollow eye sockets'
-            : type === 'backdropFreak'
-              ? 'twisted carnival barker with multiple heads and elongated limbs'
-              : type === 'strongman'
-                ? 'muscle-bound paper cutout lifting a barbell made of skulls'
-                : type === 'fireBreather'
-                  ? 'fiery jester spitting trails of orange paper flames'
-                  : type === 'fortuneTeller'
-                    ? 'shrouded figure with a glowing paper crystal ball'
-                    : 'spectral lion tamer with a whip of shadows and a cage of nightmares'
-        }, Terry Gilliam style, high contrast silhouette on transparent background`,
-      anim: anims[Math.floor(random.float() * anims.length)],
-      resolveItem: resolveItems[type],
-      preferredRoomType: roomTypes[Math.floor(random.float() * roomTypes.length)],
-    });
+async function generateImage(client: GoogleGenAI, asset: ImageAsset) {
+  const outputPaths = OUTPUT_IMAGES_DIRS.map((dir) => path.join(dir, asset.fileName));
+  if (!(await shouldGenerate(outputPaths))) {
+    console.log(`  ↪ Skipping ${asset.fileName} (already exists)`);
+    return;
   }
 
-  const numBackdrops = 3 + Math.floor(random.float() * 3);
-  const backdrops: SceneManifest['backdrops'] = [];
-  const backdropDescriptions = [
-    'Tattered circus tent with watchful eyes peering through torn fabric',
-    'Moving shadows of giant hands reaching from the darkness',
-    'Twisted carousel with skeletal horses frozen mid-gallop',
-    'Crowd of faceless spectators with hollow smiles',
-    'Rusted Ferris wheel silhouetted against a blood-red moon',
-  ];
+  const response = await client.models.generateImages({
+    model: IMAGE_MODEL,
+    prompt: asset.prompt,
+    config: {
+      numberOfImages: 1,
+      aspectRatio: asset.aspectRatio,
+    },
+  });
 
-  for (let i = 0; i < numBackdrops; i++) {
-    backdrops.push({
-      id: `bg_${String(i + 1).padStart(2, '0')}`,
-      description: backdropDescriptions[i % backdropDescriptions.length],
-      anim: i === 0 ? 'static' : i === 1 ? 'parallax' : 'slideAcross',
-      layer: i,
-    });
+  const imageBytes =
+    (response as { generatedImages?: { image?: { imageBytes?: string } }[] })
+      .generatedImages?.[0]?.image?.imageBytes ??
+    (response as { images?: { image?: { imageBytes?: string } }[] }).images?.[0]
+      ?.image?.imageBytes;
+  if (!imageBytes) {
+    throw new Error(`No image bytes returned for ${asset.id}`);
   }
 
-  const videoPrompts = {
-    intro: `Cinematic approach to a tattered circus tent under a ${phrase} moon, paper-mache style.`,
-    win: 'The maze walls collapse into paper confetti as the sun rises, Terry Gilliam style.',
-    lose: 'Beppo the Clown\'s giant paper-mache face fills the screen, shadows lengthening.',
-  };
+  await Promise.all(
+    outputPaths.map((outputPath) => fs.writeFile(outputPath, Buffer.from(imageBytes, 'base64'))),
+  );
+  console.log(`  ✓ Generated ${asset.fileName}`);
+}
 
-  return { performers, backdrops, videoPrompts };
+async function generateVideo(client: GoogleGenAI, asset: VideoAsset) {
+  const outputPaths = OUTPUT_VIDEOS_DIRS.map((dir) => path.join(dir, asset.fileName));
+  if (!(await shouldGenerate(outputPaths))) {
+    console.log(`  ↪ Skipping ${asset.fileName} (already exists)`);
+    return;
+  }
+
+  const response = await client.models.generateVideos({
+    model: VIDEO_MODEL,
+    prompt: asset.prompt,
+    config: {
+      durationSeconds: asset.durationSeconds,
+      aspectRatio: asset.aspectRatio,
+    },
+  });
+
+  const videoBytes =
+    (response as { generatedVideos?: { video?: { videoBytes?: string } }[] })
+      .generatedVideos?.[0]?.video?.videoBytes ??
+    (response as { videos?: { video?: { videoBytes?: string } }[] }).videos?.[0]
+      ?.video?.videoBytes;
+  if (!videoBytes) {
+    throw new Error(`No video bytes returned for ${asset.id}`);
+  }
+
+  await Promise.all(
+    outputPaths.map((outputPath) => fs.writeFile(outputPath, Buffer.from(videoBytes, 'base64'))),
+  );
+  console.log(`  ✓ Generated ${asset.fileName}`);
 }
 
 async function main() {
-  const mazesDir = path.join(process.cwd(), 'client/public/assets/mazes');
-  await fs.mkdir(mazesDir, { recursive: true });
+  await Promise.all(OUTPUT_IMAGES_DIRS.map(ensureDir));
+  await Promise.all(OUTPUT_VIDEOS_DIRS.map(ensureDir));
+  await ensureDir(path.dirname(CATALOG_OUTPUT));
 
-  const numMazes = parseInt(process.env.NUM_MAZES || '10', 10);
-  const generateImagesFlag = process.env.GENERATE_IMAGES === 'true';
   const client = getClient();
-  const hasClient = !!client;
-
-  console.log(`\n🎪 Beppo Laughs - Asset Generation Pipeline`);
-  console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-  console.log(`📦 Output: ${mazesDir}`);
-  console.log(`🎲 Generating: ${numMazes} maze manifests`);
-  console.log(`🤖 Text Gen: ${hasClient ? GEMINI_MODEL : 'Mock Data'}`);
-  console.log(`🎨 Image Gen: ${generateImagesFlag && hasClient ? IMAGEN_MODEL : 'Disabled'}`);
-  console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
-
-  if (!hasClient) {
-    console.warn('⚠️  Google GenAI credentials not set - using mock data\n');
+  if (!client) {
+    console.warn('⚠️  GOOGLE_GENERATIVE_AI_API_KEY/GOOGLE_API_KEY not set; skipping generation.');
+    return;
   }
 
-  const generatedSeeds: {
-    phrase: string;
-    hash: string;
-    title: string;
-    description: string;
-    performers: number;
-    backdrops: number;
-  }[] = [];
+  console.log('\n🎪 Beppo Laughs - Asset Generation Pipeline');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log(`📦 Images: ${OUTPUT_IMAGES_DIRS.join(', ')}`);
+  console.log(`🎬 Videos: ${OUTPUT_VIDEOS_DIRS.join(', ')}`);
+  console.log(`🎨 Imagen Model: ${IMAGE_MODEL}`);
+  console.log(`🎥 Veo Model: ${VIDEO_MODEL}`);
+  console.log(`🧩 Asset Group: ${ASSET_GROUP}`);
+  console.log(`🖼️  Generate Images: ${GENERATE_IMAGES}`);
+  console.log(`🎞️  Generate Videos: ${GENERATE_VIDEOS}`);
+  console.log(`♻️  Force Regenerate: ${FORCE_REGENERATE}`);
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
-  for (let i = 0; i < numMazes; i++) {
-    const phrase = uniqueNamesGenerator(config);
-    const hash = crypto.createHash('sha256').update(phrase).digest('hex').slice(0, 12);
-    const mazeDir = path.join(mazesDir, hash);
-    await fs.mkdir(mazeDir, { recursive: true });
+  const catalog = {
+    generatedAt: new Date().toISOString(),
+    images: {
+      coreFloorTextures: coreFloorTexturesTagged,
+      coreWallTextures: coreWallTexturesTagged,
+      coreCollectibles: coreCollectiblesTagged,
+      wallTextures: wallTexturesTagged,
+      floorTextures: floorTexturesTagged,
+      obstacles: obstaclesTagged,
+      solutionItems: solutionItemsTagged,
+      characters: charactersTagged,
+      backdrops: backdropsTagged,
+      all: IMAGE_ASSETS,
+    },
+    videos: VIDEO_ASSETS,
+  };
+  await fs.writeFile(CATALOG_OUTPUT, JSON.stringify(catalog, null, 2));
+  console.log(`📚 Wrote asset catalog: ${CATALOG_OUTPUT}`);
 
-    console.log(`[${i + 1}/${numMazes}] 🌀 Seed: "${phrase}" (${hash})`);
-
-    // Try AI generation, fall back to mock
-    let manifest = client ? await generateAIManifest(client, phrase) : null;
-    if (!manifest) {
-      manifest = generateMockManifest(phrase);
-      console.log(`  📋 Generated mock manifest`);
+  if (GENERATE_IMAGES) {
+    console.log('🎨 Generating image assets...');
+    for (const asset of IMAGE_ASSETS) {
+      if (!assetIncluded(asset.group)) continue;
+      try {
+        await generateImage(client, asset);
+      } catch (error) {
+        console.error(`  ✗ Failed ${asset.fileName}:`, error instanceof Error ? error.message : error);
+      }
     }
-
-    // Generate images if enabled and API key is available
-    if (generateImagesFlag && client) {
-      await generateImages(client, manifest, mazeDir);
-    }
-
-    // Save the manifest
-    const fullManifest = {
-      phrase,
-      hash,
-      generatedAt: new Date().toISOString(),
-      aiGenerated: !!client && manifest !== null,
-      provider: client ? 'gemini' : 'mock',
-      ...manifest,
-    };
-
-    await fs.writeFile(path.join(mazeDir, 'manifest.json'), JSON.stringify(fullManifest, null, 2));
-
-    generatedSeeds.push({
-      phrase,
-      hash,
-      title: manifest.title || `Maze ${hash.slice(0, 4)}`,
-      description: manifest.description || 'A dark and twisted challenge.',
-      performers: manifest.performers.length,
-      backdrops: manifest.backdrops.length,
-      videoPrompts: manifest.videoPrompts,
-    });
-
-    console.log(`  💾 Saved to: ${hash}/manifest.json\n`);
+  } else {
+    console.log('⏭️  Image generation disabled.');
   }
 
-  // Write index of all generated mazes
-  const indexPath = path.join(mazesDir, 'index.json');
-  await fs.writeFile(
-    indexPath,
-    JSON.stringify(
-      {
-        generatedAt: new Date().toISOString(),
-        count: generatedSeeds.length,
-        mazes: generatedSeeds,
-      },
-      null,
-      2,
-    ),
-  );
+  if (GENERATE_VIDEOS) {
+    console.log('🎬 Generating video assets...');
+    for (const asset of VIDEO_ASSETS) {
+      if (!assetIncluded(asset.group)) continue;
+      try {
+        await generateVideo(client, asset);
+      } catch (error) {
+        console.error(`  ✗ Failed ${asset.fileName}:`, error instanceof Error ? error.message : error);
+      }
+    }
+  } else {
+    console.log('⏭️  Video generation disabled.');
+  }
 
-  console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-  console.log(`✅ Generation complete!`);
-  console.log(`📁 Index saved to: ${indexPath}`);
-  console.log(`\nGenerated seeds:`);
-  generatedSeeds.forEach((s) => {
-    console.log(`  • "${s.phrase}" → ${s.performers} performers, ${s.backdrops} backdrops`);
-  });
-  console.log(`\n🎪 Ready to haunt!\n`);
+  console.log('\n✅ Asset generation complete.');
 }
 
-main().catch(console.error);
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});

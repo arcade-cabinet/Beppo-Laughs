@@ -1,25 +1,75 @@
 import { useTexture } from '@react-three/drei';
 import type React from 'react';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { DoubleSide, RepeatWrapping } from 'three';
+import { ASSET_IMAGE_BASE, loadAssetCatalog, pickSeededAsset } from '../../game/assetCatalog';
 import { MAZE_TEXTURES } from '../../game/textures';
 import { DEFAULT_CONFIG, type MazeGeometry, type WallSegment } from '../../game/maze/geometry';
+import { useGameStore } from '../../game/store';
 
 interface MazeProps {
   geometry: MazeGeometry;
 }
 
 export function Maze({ geometry }: MazeProps) {
-  const canvasTexture = useTexture(MAZE_TEXTURES.CEILING_CANVAS.url);
-  const sawdustTexture = useTexture(MAZE_TEXTURES.FLOOR_SAWDUST.url);
+  const seed = useGameStore((state) => state.seed);
+  const [catalog, setCatalog] = useState<Awaited<ReturnType<typeof loadAssetCatalog>>>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    loadAssetCatalog().then((data) => {
+      if (mounted) setCatalog(data);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const wallCandidates = useMemo(() => {
+    if (!catalog) return [];
+    return [...catalog.images.coreWallTextures, ...catalog.images.wallTextures];
+  }, [catalog]);
+
+  const floorCandidates = useMemo(() => {
+    if (!catalog) return [];
+    return [...catalog.images.coreFloorTextures, ...catalog.images.floorTextures];
+  }, [catalog]);
+
+  const wallAsset = useMemo(
+    () => pickSeededAsset(wallCandidates, seed || 'default', 'wall'),
+    [wallCandidates, seed],
+  );
+  const ceilingAsset = useMemo(
+    () => pickSeededAsset(wallCandidates, seed || 'default', 'ceiling'),
+    [wallCandidates, seed],
+  );
+  const floorAsset = useMemo(
+    () => pickSeededAsset(floorCandidates, seed || 'default', 'floor'),
+    [floorCandidates, seed],
+  );
+
+  const wallTextureUrl = wallAsset
+    ? `${ASSET_IMAGE_BASE}${wallAsset.fileName}`
+    : MAZE_TEXTURES.CEILING_CANVAS.url;
+  const ceilingTextureUrl = ceilingAsset
+    ? `${ASSET_IMAGE_BASE}${ceilingAsset.fileName}`
+    : MAZE_TEXTURES.CEILING_CANVAS.url;
+  const floorTextureUrl = floorAsset
+    ? `${ASSET_IMAGE_BASE}${floorAsset.fileName}`
+    : MAZE_TEXTURES.FLOOR_SAWDUST.url;
+
+  const wallTexture = useTexture(wallTextureUrl);
+  const ceilingTexture = useTexture(ceilingTextureUrl);
+  const floorTexture = useTexture(floorTextureUrl);
 
   useMemo(() => {
-    [canvasTexture, sawdustTexture].forEach((t) => {
+    [wallTexture, ceilingTexture, floorTexture].forEach((t) => {
       t.wrapS = t.wrapT = RepeatWrapping;
     });
-    canvasTexture.repeat.set(1, 2);
-    sawdustTexture.repeat.set(16, 16);
-  }, [canvasTexture, sawdustTexture]);
+    wallTexture.repeat.set(1, 2);
+    ceilingTexture.repeat.set(1, 2);
+    floorTexture.repeat.set(16, 16);
+  }, [wallTexture, ceilingTexture, floorTexture]);
 
   const { wallHeight } = DEFAULT_CONFIG;
 
@@ -33,14 +83,14 @@ export function Maze({ geometry }: MazeProps) {
       >
         <boxGeometry args={[wall.width, wall.height, wall.depth]} />
         <meshStandardMaterial
-          map={canvasTexture}
+          map={wallTexture}
           color="#c4a882"
           roughness={0.9}
           side={DoubleSide}
         />
       </mesh>
     ));
-  }, [geometry, canvasTexture]);
+  }, [geometry, wallTexture]);
 
   const tentPoles = useMemo(() => {
     const poles: React.ReactNode[] = [];
@@ -73,14 +123,14 @@ export function Maze({ geometry }: MazeProps) {
         receiveShadow
       >
         <planeGeometry args={[geometry.floor.width, geometry.floor.depth]} />
-        <meshStandardMaterial map={sawdustTexture} color="#8a7560" roughness={0.95} />
+        <meshStandardMaterial map={floorTexture} color="#8a7560" roughness={0.95} />
       </mesh>
 
       {/* Peaked tent ceiling - main canvas */}
       <mesh position={[geometry.floor.x, wallHeight + 4, geometry.floor.z]}>
         <coneGeometry args={[geometry.floor.width * 0.9, 8, 8, 1, true]} />
         <meshStandardMaterial
-          map={canvasTexture}
+          map={ceilingTexture}
           color="#8a7a6a"
           roughness={0.95}
           side={DoubleSide}

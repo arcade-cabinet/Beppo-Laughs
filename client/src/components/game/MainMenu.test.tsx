@@ -18,7 +18,7 @@ describe('MainMenu', () => {
       render(<MainMenu onStart={mockOnStart} />);
 
       expect(screen.getByText('BEPPO LAUGHS')).toBeInTheDocument();
-      expect(screen.getByText('Procedural Survival Horror')).toBeInTheDocument();
+      expect(screen.getByText('Trapped in the Big-Top Nightmare')).toBeInTheDocument();
       expect(screen.getByTestId('input-seed')).toBeInTheDocument();
       expect(screen.getByTestId('button-random-seed')).toBeInTheDocument();
       expect(screen.getByTestId('button-start-game')).toBeInTheDocument();

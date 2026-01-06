@@ -1,0 +1,117 @@
+name: Generate Assets
+
+on:
+  workflow_dispatch:
+    inputs:
+      asset_group:
+        description: 'Asset group to generate (core, extended, all)'
+        required: false
+        default: 'extended'
+        type: string
+      generate_images:
+        description: 'Generate image assets with Imagen 4'
+        required: false
+        default: true
+        type: boolean
+      generate_videos:
+        description: 'Generate video assets with Veo 3.1'
+        required: false
+        default: true
+        type: boolean
+      force_regenerate:
+        description: 'Force regeneration even if assets exist'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate assets
+        env:
+          GOOGLE_GENERATIVE_AI_API_KEY: ${{ secrets.GOOGLE_GENERATIVE_AI_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          GOOGLE_IMAGEN_MODEL: imagen-4.0-generate-001
+          GOOGLE_VEO_MODEL: veo-3.1-generate-001
+          ASSET_GROUP: ${{ inputs.asset_group }}
+          GENERATE_IMAGES: ${{ inputs.generate_images }}
+          GENERATE_VIDEOS: ${{ inputs.generate_videos }}
+          FORCE_REGENERATE: ${{ inputs.force_regenerate }}
+        run: |
+          echo "🎪 Starting asset generation..."
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "📊 Config:"
+          echo "   ASSET_GROUP: $ASSET_GROUP"
+          echo "   GENERATE_IMAGES: $GENERATE_IMAGES"
+          echo "   GENERATE_VIDEOS: $GENERATE_VIDEOS"
+          echo "   FORCE_REGENERATE: $FORCE_REGENERATE"
+          echo "   GOOGLE_GENERATIVE_AI_API_KEY: $([ -n "$GOOGLE_GENERATIVE_AI_API_KEY" ] && echo '✓ Set' || echo '✗ Not set')"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          npx tsx script/generate-assets.ts
+
+      - name: Commit generated assets
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          if git diff --quiet attached_assets/generated_images attached_assets/generated_videos client/public/assets/generated_images client/public/assets/generated_videos client/public/assets/asset-catalog.json; then
+            echo "📋 No changes to commit"
+          else
+            git add attached_assets/generated_images attached_assets/generated_videos client/public/assets/generated_images client/public/assets/generated_videos client/public/assets/asset-catalog.json
+            git commit -m "chore: generate game assets [skip ci]"
+            git push
+            echo "✅ Assets committed and pushed"
+          fi
+
+      - name: Summary
+        run: |
+          echo "## 🎪 Asset Generation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Asset Group | ${{ inputs.asset_group }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Images Generated | ${{ inputs.generate_images }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Videos Generated | ${{ inputs.generate_videos }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Force Regenerate | ${{ inputs.force_regenerate }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Image Assets" >> $GITHUB_STEP_SUMMARY
+          ls attached_assets/generated_images | sed 's/^/- /' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Video Assets" >> $GITHUB_STEP_SUMMARY
+          ls attached_assets/generated_videos | sed 's/^/- /' >> $GITHUB_STEP_SUMMARY

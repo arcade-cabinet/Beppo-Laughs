@@ -9,18 +9,28 @@ interface MainMenuProps {
 
 // Seed word list for random generation
 export const SEED_WORDS = [
-  'dark',
-  'blood',
-  'shadow',
-  'maze',
-  'fear',
-  'run',
-  'hide',
-  'scream',
-  'whisper',
-  'death',
-  'green',
-  'hedge',
+  'bigtop',
+  'ringmaster',
+  'menagerie',
+  'sideshow',
+  'sawdust',
+  'calliope',
+  'barker',
+  'midway',
+  'lantern',
+  'velvet',
+  'cage',
+  'caravan',
+  'train',
+  'banner',
+  'spectacle',
+  'tumbler',
+  'fortune',
+  'carnival',
+  'parade',
+  'gallows',
+  'mask',
+  'bell',
 ];
 
 // Pattern to validate three-word seeds
@@ -29,6 +39,7 @@ const SEED_PATTERN = /^\s*\w+\s+\w+\s+\w+\s*$/;
 export function MainMenu({ onStart }: MainMenuProps) {
   const [seedInput, setSeedInput] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [seedLocked, setSeedLocked] = useState(false);
 
   const normalizedSeed = useCallback(
     (value: string) => value.trim().replace(/\s+/g, ' ').toLowerCase(),
@@ -49,6 +60,7 @@ export function MainMenu({ onStart }: MainMenuProps) {
     }
     const generated = `${shuffled[0]} ${shuffled[1]} ${shuffled[2]}`;
     setSeedInput(generated);
+    setSeedLocked(false);
     setErrorMessage('');
   }, []);
 
@@ -56,8 +68,17 @@ export function MainMenu({ onStart }: MainMenuProps) {
     generateRandomSeed();
   }, [generateRandomSeed]);
 
+  useEffect(() => {
+    if (seedLocked) return;
+    const interval = setInterval(() => {
+      generateRandomSeed();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [generateRandomSeed, seedLocked]);
+
   const handleSeedChange = (value: string) => {
     setSeedInput(value);
+    setSeedLocked(value.trim().length > 0);
     if (errorMessage && isValidSeed(value)) {
       setErrorMessage('');
     }
@@ -85,10 +106,13 @@ export function MainMenu({ onStart }: MainMenuProps) {
         </h1>
 
         <p className="text-muted-foreground font-ui tracking-widest uppercase text-sm">
-          Procedural Survival Horror
+          Trapped in the Big-Top Nightmare
         </p>
 
         <div className="space-y-4 pt-8">
+          <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground/70">
+            Barker Call
+          </p>
           <div className="relative">
             <Input
               type="text"

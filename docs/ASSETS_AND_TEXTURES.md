@@ -91,11 +91,13 @@ const videoUrl = VIDEO_ASSETS.BEPPO_GAME_OVER.url;
 
 ### Generation
 
-All textures are generated using:
-- **Google Gemini 2.5 Flash**: Scene manifest generation and creative direction
-- **Google Imagen 4.0**: Image generation for 2D cutouts and textures
+All textures and videos are generated using:
+- **Google Imagen 4.0** (via Gemini API) for 2D cutouts and textures
+- **Google Veo 3.1** (via Gemini API) for video assets
 
-Generated assets are stored in `attached_assets/generated_images/` and `attached_assets/generated_videos/`.
+Generated assets are stored in `attached_assets/generated_images/` and `attached_assets/generated_videos/`, and mirrored to `client/public/assets/generated_images/` and `client/public/assets/generated_videos/` for runtime loading.
+The generation script also writes a catalog for runtime selection at `client/public/assets/asset-catalog.json`, grouped by category so seeded maze logic can deterministically select walls, floors, obstacles, and items. Each entry includes tags (e.g., `floor`, `wall`, `obstacle`) for consistent selection rules.
+For brand alignment notes and historical motif references, see `docs/VISUAL_REFERENCES.md`.
 
 ### Build Process
 
@@ -238,4 +240,3 @@ const texture = useTexture(url, (texture) => {
 - [Architecture Guide](./ARCHITECTURE.md) - Overall system design
 - [Game Design Document](./VISION.md) - Game mechanics and themes
 - [Asset Generation Script](../script/generate-assets.ts) - AI-powered asset generation
-

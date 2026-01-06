@@ -11,7 +11,7 @@ test.describe('Beppo Laughs - Main Menu', () => {
   });
 
   test('displays subtitle and warnings', async ({ page }) => {
-    await expect(page.getByText('Procedural Survival Horror')).toBeVisible();
+    await expect(page.getByText('Trapped in the Big-Top Nightmare')).toBeVisible();
     await expect(page.getByText(/GYROSCOPE.*HAPTICS/i)).toBeVisible();
     await expect(page.getByText(/HEADPHONES/i)).toBeVisible();
   });
