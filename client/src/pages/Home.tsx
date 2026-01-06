@@ -18,12 +18,19 @@ function checkWebGLSupport(): boolean {
   }
 }
 
+/**
+ * Root UI component that manages game lifecycle, fullscreen/orientation behavior, and renders the main menu, game scene, HUD, and controls.
+ *
+ * Handles starting and exiting games (resetting and seeding the store), requests fullscreen and attempts to lock orientation on mobile, monitors device orientation to show a rotate prompt when needed, and conditionally renders exit/restart controls and the MainMenu or active Scene/HUD.
+ *
+ * @returns The rendered JSX element containing the home screen UI (MainMenu, Scene, HUD, exit/restart buttons, and rotate prompt).
+ */
 export default function Home() {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [seed, setSeed] = useState<string>('');
   const [isMobile, setIsMobile] = useState(false);
   const [showRotatePrompt, setShowRotatePrompt] = useState(false);
   const [webglSupported, setWebglSupported] = useState<boolean | null>(null);
+  const seed = useGameStore((state) => state.seed);
   const setSeedStore = useGameStore((state) => state.setSeed);
   const resetGame = useGameStore((state) => state.resetGame);
   const isGameOver = useGameStore((state) => state.isGameOver);
@@ -70,7 +77,6 @@ export default function Home() {
   const handleStart = async (selectedSeed: string) => {
     resetGame();
     setSeedStore(selectedSeed);
-    setSeed(selectedSeed);
 
     // Enter fullscreen on mobile
     if (isMobile) {

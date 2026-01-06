@@ -18,24 +18,19 @@ export default defineConfig({
     globals: true,
     environment: 'happy-dom',
     setupFiles: ['./client/src/test-setup.tsx'],
-    include: ['**/*.test.{ts,tsx}'],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html', 'lcov'],
+      reporter: ['text', 'json', 'html'],
       exclude: [
         'node_modules/',
         'dist/',
         '**/*.test.{ts,tsx}',
         '**/*.spec.{ts,tsx}',
         '**/test-setup.tsx',
-        'server/',
-        'script/',
-        '*.config.*',
       ],
     },
   },
   resolve: {
-    // Note: Keep these aliases in sync with vite.config.ts
     alias: {
       // Specific mock for the video that fails to load in tests - MUST BE BEFORE @assets
       '@assets/generated_videos/beppo_clown_emerging_laughing_game_over.mp4': path.resolve(
