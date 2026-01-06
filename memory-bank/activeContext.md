@@ -18,6 +18,7 @@
 - Tests updated for blockade requirements (`client/src/game/store.test.ts`).
 - Biome config now ignores generated assets/reports; lint fixes across UI/test files for a11y and typing.
 - Spawn plan now uses safe fallback textures when catalog entries are missing.
+- Fixed cockpit polka dot color map to avoid undefined index in tests.
 
 ## Active Decisions & Considerations
 

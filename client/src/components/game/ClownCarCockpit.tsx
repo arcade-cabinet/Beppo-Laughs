@@ -4,6 +4,18 @@ import { useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '../../game/store';
 
+const DOT_COLORS = [
+  '#00ffff',
+  '#ff00ff',
+  '#ffff00',
+  '#00ff00',
+  '#0000ff',
+  '#ff0066',
+  '#66ff00',
+  '#00ffaa',
+  '#aa00ff',
+];
+
 function DashboardPanel({
   position,
   color,
@@ -269,41 +281,20 @@ export function ClownCarCockpit() {
           [0.5, 0.09, -0.2],
           [-0.25, 0.09, -0.35],
           [0.25, 0.09, -0.35],
-        ].map((pos) => (
-          <mesh key={`dot-${pos.join('-')}`} position={pos as [number, number, number]}>
-            <sphereGeometry args={[0.06, 8, 8]} />
-            <meshStandardMaterial
-              color={
-                [
-                  '#00ffff',
-                  '#ff00ff',
-                  '#ffff00',
-                  '#00ff00',
-                  '#0000ff',
-                  '#ff0066',
-                  '#66ff00',
-                  '#00ffaa',
-                  '#aa00ff',
-                ][i]
-              }
-              roughness={0.3}
-              emissive={
-                [
-                  '#00ffff',
-                  '#ff00ff',
-                  '#ffff00',
-                  '#00ff00',
-                  '#0000ff',
-                  '#ff0066',
-                  '#66ff00',
-                  '#00ffaa',
-                  '#aa00ff',
-                ][i]
-              }
-              emissiveIntensity={0.1}
-            />
-          </mesh>
-        ))}
+        ].map((pos, index) => {
+          const dotColor = DOT_COLORS[index % DOT_COLORS.length];
+          return (
+            <mesh key={`dot-${pos.join('-')}`} position={pos as [number, number, number]}>
+              <sphereGeometry args={[0.06, 8, 8]} />
+              <meshStandardMaterial
+                color={dotColor}
+                roughness={0.3}
+                emissive={dotColor}
+                emissiveIntensity={0.1}
+              />
+            </mesh>
+          );
+        })}
 
         {/* Metal blemishes/rivets - larger */}
         {[
