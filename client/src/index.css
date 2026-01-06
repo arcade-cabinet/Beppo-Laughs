@@ -82,3 +82,160 @@
 .font-creepy {
   font-family: var(--font-creepy);
 }
+
+/* HUD dashboard styling */
+.hud-cockpit-row {
+  position: absolute;
+  top: 0.5rem;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  gap: 0.5rem;
+  pointer-events: none;
+  z-index: 45;
+}
+
+.hud-dash-panel {
+  position: relative;
+  width: min(32vw, 320px);
+  transition: transform 0.2s ease, opacity 0.3s ease;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.4));
+}
+
+.hud-dash-panel--left {
+  align-self: flex-start;
+  transform-origin: top left;
+}
+
+.hud-dash-panel--right {
+  align-self: flex-start;
+  transform-origin: top right;
+}
+
+.hud-dash-hood {
+  height: 0.9rem;
+  width: 100%;
+  background: radial-gradient(circle at 30% 40%, #ffb347, #ff4400 55%, #c22b00 85%);
+  border-radius: 0.75rem 0.75rem 0.2rem 0.2rem;
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.4), 0 10px 22px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.hud-dash-window {
+  margin-top: -0.25rem;
+  background: linear-gradient(180deg, rgba(18, 12, 12, 0.92), rgba(8, 8, 12, 0.92));
+  border-radius: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+  position: relative;
+  padding: 0.65rem 0.75rem 0.8rem;
+  backdrop-filter: blur(2px);
+}
+
+.hud-dash-window::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.1), transparent 35%),
+    radial-gradient(circle at 90% 20%, rgba(255, 255, 255, 0.08), transparent 30%);
+  pointer-events: none;
+}
+
+.hud-dash-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-family: var(--font-creepy);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f8f8f8;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.35);
+  position: relative;
+  z-index: 1;
+}
+
+.hud-dash-label {
+  font-size: clamp(0.95rem, 2vw, 1.15rem);
+}
+
+.hud-dash-value {
+  font-family: 'Roboto Mono', monospace;
+  font-size: clamp(0.85rem, 1.8vw, 1rem);
+  color: #ffe8c2;
+}
+
+.hud-dash-meter-track {
+  position: relative;
+  margin-top: 0.4rem;
+  height: clamp(0.55rem, 1.4vw, 0.8rem);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.hud-dash-meter-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 200ms ease;
+}
+
+.hud-dash-meter-grid {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.03) 0,
+      rgba(255, 255, 255, 0.03) 4px,
+      transparent 4px,
+      transparent 12px
+    ),
+    radial-gradient(circle at 0% 50%, rgba(255, 255, 255, 0.08), transparent 30%),
+    radial-gradient(circle at 100% 50%, rgba(255, 255, 255, 0.08), transparent 30%);
+  pointer-events: none;
+}
+
+.hud-dash-readout {
+  margin-top: 0.45rem;
+  font-family: 'Roboto Mono', monospace;
+  font-size: clamp(0.62rem, 1.3vw, 0.8rem);
+  color: #b2b2c7;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+  .hud-cockpit-row {
+    gap: 0.25rem;
+    padding: 0.35rem 0.5rem;
+    top: 0.35rem;
+  }
+
+  .hud-dash-panel {
+    width: min(46vw, 220px);
+  }
+
+  .hud-dash-readout {
+    display: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .hud-cockpit-row {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .hud-dash-panel {
+    width: min(88vw, 340px);
+  }
+
+  .hud-dash-panel--left,
+  .hud-dash-panel--right {
+    transform-origin: top center;
+  }
+}

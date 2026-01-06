@@ -1,9 +1,77 @@
-import { useGameStore } from '@/game/store';
 import beppoVideoUrl from '@assets/generated_videos/beppo_clown_emerging_laughing_game_over.mp4';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
+import { useGameStore } from '../../game/store';
 
+type MeterPanelProps = {
+  label: string;
+  percent: number;
+  color: string;
+  side: 'left' | 'right';
+};
 
+const METER_CONFIG = {
+  gradients: {
+    left: '#ffcfb0',
+    right: '#c5ddff',
+  },
+  meters: {
+    fear: {
+      color: '#ff2d2d',
+      label: 'FEAR',
+    },
+    despair: {
+      color: '#3b82f6',
+      label: 'DESPAIR',
+    },
+  },
+} as const;
+
+/**
+ * Robustly appends alpha to a hex color or returns a safe fallback.
+ */
+function getAlphaColor(color: string, alphaHex: string): string {
+  if (color.startsWith('#') && (color.length === 7 || color.length === 4)) {
+    return `${color}${alphaHex}`;
+  }
+  return color;
+}
+
+function DashMeterPanel({ label, percent, color, side }: MeterPanelProps) {
+  const clamped = Math.max(0, Math.min(100, Math.round(percent)));
+  const isLeft = side === 'left';
+
+  return (
+    <div
+      aria-hidden
+      className={`hud-dash-panel ${
+        isLeft ? 'hud-dash-panel--left' : 'hud-dash-panel--right'
+      } pointer-events-none select-none`}
+    >
+      <div className="hud-dash-hood" />
+      <div className="hud-dash-window">
+        <div className="hud-dash-label-row">
+          <span className="hud-dash-label">{label}</span>
+          <span className="hud-dash-value">{clamped}%</span>
+        </div>
+        <div className="hud-dash-meter-track">
+          <div
+            className="hud-dash-meter-fill"
+            style={{
+              width: `${clamped}%`,
+              background: `linear-gradient(90deg, ${color}, ${METER_CONFIG.gradients[side]})`,
+              boxShadow: `0 0 22px ${getAlphaColor(color, '66')}, 0 0 8px ${getAlphaColor(color, '99')}`,
+            }}
+          />
+          <div className="hud-dash-meter-grid" />
+        </div>
+        <div className="hud-dash-readout">
+          {isLeft ? 'FRONT HOOD — LEFT' : 'FRONT HOOD — RIGHT'}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function HUD() {
   const { fear, despair, maxSanity, isGameOver, hasWon, visitedCells } = useGameStore();
@@ -11,15 +79,17 @@ export function HUD() {
   const sanityLevel = useGameStore((state) => state.getSanityLevel());
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoEnded, setVideoEnded] = useState(false);
+  const fearPercent = maxSanity > 0 ? (fear / maxSanity) * 100 : 0;
+  const despairPercent = maxSanity > 0 ? (despair / maxSanity) * 100 : 0;
 
-  const avgInsanity = (fear + despair) / 2 / maxSanity;
+  const avgInsanity = maxSanity > 0 ? (fear + despair) / 2 / maxSanity : 0;
   const redOverlayOpacity = Math.min(fear / 300, 0.2);
   const blueOverlayOpacity = Math.min(despair / 300, 0.2);
   const cellsExplored = visitedCells.size;
 
   useEffect(() => {
     if (isGameOver && videoRef.current) {
-      videoRef.current.play().catch(() => { });
+      videoRef.current.play().catch(() => {});
     }
   }, [isGameOver]);
 
@@ -29,6 +99,22 @@ export function HUD() {
 
   return (
     <div className="pointer-events-none absolute inset-0 z-40">
+      {/* Clown car console view anchored to the corners */}
+      <div className="hud-cockpit-row">
+        <DashMeterPanel
+          label={METER_CONFIG.meters.fear.label}
+          percent={fearPercent}
+          color={METER_CONFIG.meters.fear.color}
+          side="left"
+        />
+        <DashMeterPanel
+          label={METER_CONFIG.meters.despair.label}
+          percent={despairPercent}
+          color={METER_CONFIG.meters.despair.color}
+          side="right"
+        />
+      </div>
+
       {/* Vignette - intensifies with combined insanity */}
       <div
         className="absolute inset-0 transition-all duration-500"
@@ -68,9 +154,6 @@ export function HUD() {
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
         }}
       />
-
-      {/* Hint Button */}
-
 
       {/* Inverted Controls Warning */}
       <AnimatePresence>
