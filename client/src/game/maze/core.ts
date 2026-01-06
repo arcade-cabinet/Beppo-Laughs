@@ -1,4 +1,4 @@
-import seedrandom from 'seedrandom';
+import random from 'random';
 
 export interface MazeCell {
   x: number;
@@ -30,13 +30,14 @@ export interface MazeLayout {
 }
 
 export function generateMaze(width: number, height: number, seed: string): MazeLayout {
-  const rng = seedrandom(seed);
-
+  // Ensure size is odd for shared center
   if (width % 2 === 0) width++;
   if (height % 2 === 0) height++;
 
   const centerX = Math.floor(width / 2);
   const centerY = Math.floor(height / 2);
+
+  random.use(seed);
 
   const cells: MazeCell[][] = [];
   for (let y = 0; y < height; y++) {
@@ -54,18 +55,22 @@ export function generateMaze(width: number, height: number, seed: string): MazeL
   }
 
   const passages: Passage[] = [];
-  const stack: MazeCell[] = [];
+  const activeCells: MazeCell[] = [];
 
   const startCell = cells[centerY][centerX];
   startCell.visited = true;
-  stack.push(startCell);
+  activeCells.push(startCell);
 
-  while (stack.length > 0) {
-    const current = stack[stack.length - 1];
-    const neighbors = getUnvisitedNeighbors(current, cells, width, height);
+  while (activeCells.length > 0) {
+    // Growing Tree: Pick a cell from active list. 
+    // 0.7 probability of picking newest (Backtracking style), 0.3 for random (Prim's style)
+    const pickIdx = random.float() < 0.7 ? activeCells.length - 1 : Math.floor(random.float() * activeCells.length);
+    const current = activeCells[pickIdx];
+
+    const neighbors = getUnvisitedNeighbors(current, cells, width, height, 1);
 
     if (neighbors.length > 0) {
-      const idx = Math.floor(rng() * neighbors.length);
+      const idx = Math.floor(random.float() * neighbors.length);
       const { cell: next, direction } = neighbors[idx];
 
       removeWall(current, next, direction);
@@ -77,13 +82,13 @@ export function generateMaze(width: number, height: number, seed: string): MazeL
       });
 
       next.visited = true;
-      stack.push(next);
+      activeCells.push(next);
     } else {
-      stack.pop();
+      activeCells.splice(pickIdx, 1);
     }
   }
 
-  const exits = createExits(cells, width, height, rng);
+  const exits = createExits(cells, width, height);
 
   return {
     width,
@@ -100,20 +105,27 @@ function getUnvisitedNeighbors(
   cells: MazeCell[][],
   width: number,
   height: number,
+  step: number = 1
 ): { cell: MazeCell; direction: 'north' | 'south' | 'east' | 'west' }[] {
   const neighbors: { cell: MazeCell; direction: 'north' | 'south' | 'east' | 'west' }[] = [];
 
-  if (cell.y > 0 && !cells[cell.y - 1][cell.x].visited) {
-    neighbors.push({ cell: cells[cell.y - 1][cell.x], direction: 'north' });
-  }
-  if (cell.y < height - 1 && !cells[cell.y + 1][cell.x].visited) {
-    neighbors.push({ cell: cells[cell.y + 1][cell.x], direction: 'south' });
-  }
-  if (cell.x > 0 && !cells[cell.y][cell.x - 1].visited) {
-    neighbors.push({ cell: cells[cell.y][cell.x - 1], direction: 'west' });
-  }
-  if (cell.x < width - 1 && !cells[cell.y][cell.x + 1].visited) {
-    neighbors.push({ cell: cells[cell.y][cell.x + 1], direction: 'east' });
+  const dirs = [
+    { dx: 0, dy: -step, direction: 'north' as const },
+    { dx: 0, dy: step, direction: 'south' as const },
+    { dx: step, dy: 0, direction: 'east' as const },
+    { dx: -step, dy: 0, direction: 'west' as const },
+  ];
+
+  for (const { dx, dy, direction } of dirs) {
+    const nx = cell.x + dx;
+    const ny = cell.y + dy;
+
+    if (nx >= 0 && nx < width && ny >= 0 && ny < height && !cells[ny][nx].visited) {
+      neighbors.push({
+        cell: cells[ny][nx],
+        direction
+      });
+    }
   }
 
   return neighbors;
@@ -129,7 +141,6 @@ function createExits(
   cells: MazeCell[][],
   width: number,
   height: number,
-  rng: () => number,
 ): { x: number; y: number }[] {
   const exits: { x: number; y: number }[] = [];
 
@@ -148,7 +159,7 @@ function createExits(
     }
 
     if (candidates.length > 0) {
-      const exit = candidates[Math.floor(rng() * candidates.length)];
+      const exit = candidates[Math.floor(random.float() * candidates.length)];
       exit.isExit = true;
       exit.walls[side] = false;
       exits.push({ x: exit.x, y: exit.y });

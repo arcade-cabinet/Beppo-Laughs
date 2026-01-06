@@ -1,0 +1,19 @@
+{
+  "generatedAt": "2026-01-06T00:30:56.278Z",
+  "count": 1,
+  "mazes": [
+    {
+      "phrase": "macabre corpse-like shadow",
+      "hash": "ba6f4a6fb5be",
+      "title": "Maze ba6f",
+      "description": "A dark and twisted challenge.",
+      "performers": 6,
+      "backdrops": 5,
+      "videoPrompts": {
+        "intro": "Cinematic approach to a tattered circus tent under a macabre corpse-like shadow moon, paper-mache style.",
+        "win": "The maze walls collapse into paper confetti as the sun rises, Terry Gilliam style.",
+        "lose": "Beppo the Clown's giant paper-mache face fills the screen, shadows lengthening."
+      }
+    }
+  ]
+}

@@ -1,6 +1,6 @@
-import type React from 'react';
 import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
+import type React from 'react';
 import { afterEach, vi } from 'vitest';
 
 // Cleanup after each test
@@ -54,4 +54,9 @@ vi.mock('framer-motion', () => ({
     }: MotionProps) => <button {...rest}>{children}</button>,
   },
   AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
+// Mock video and audio assets
+vi.mock('@assets/generated_videos/beppo_clown_emerging_laughing_game_over.mp4', () => ({
+  default: 'mock-video-url',
 }));

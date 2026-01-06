@@ -1,27 +1,9 @@
+import { useGameStore } from '@/game/store';
 import beppoVideoUrl from '@assets/generated_videos/beppo_clown_emerging_laughing_game_over.mp4';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
-import { useGameStore } from '../../game/store';
 
-function HintButton() {
-  const { hintActive, toggleHint, isGameOver, hasWon } = useGameStore();
 
-  if (isGameOver || hasWon) return null;
-
-  return (
-    <button
-      data-testid="button-hint"
-      className={`pointer-events-auto absolute bottom-6 right-6 px-4 py-3 rounded-full font-creepy text-lg transition-all duration-300 ${
-        hintActive
-          ? 'bg-pink-600 text-white shadow-[0_0_20px_rgba(255,68,136,0.8)] animate-pulse'
-          : 'bg-amber-900/80 text-amber-200 hover:bg-amber-800 border-2 border-amber-600/50'
-      }`}
-      onClick={toggleHint}
-    >
-      {hintActive ? '👁️ SEEING' : '🤡 HINT'}
-    </button>
-  );
-}
 
 export function HUD() {
   const { fear, despair, maxSanity, isGameOver, hasWon, visitedCells } = useGameStore();
@@ -37,7 +19,7 @@ export function HUD() {
 
   useEffect(() => {
     if (isGameOver && videoRef.current) {
-      videoRef.current.play().catch(() => {});
+      videoRef.current.play().catch(() => { });
     }
   }, [isGameOver]);
 
@@ -88,7 +70,7 @@ export function HUD() {
       />
 
       {/* Hint Button */}
-      <HintButton />
+
 
       {/* Inverted Controls Warning */}
       <AnimatePresence>

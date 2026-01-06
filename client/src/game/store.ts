@@ -43,8 +43,7 @@ interface GameState {
     isExit: boolean;
   }[];
 
-  // Hint System
-  hintActive: boolean; // Whether hint overlays are visible
+
 
   // Clown Car Driving State
   carSpeed: number; // Current speed (0-5)
@@ -88,9 +87,7 @@ interface GameState {
     moves: { direction: 'north' | 'south' | 'east' | 'west'; nodeId: string; isExit: boolean }[],
   ) => void;
 
-  // Hint Actions
-  toggleHint: () => void;
-  setHintActive: (active: boolean) => void;
+
 
   // Clown Car Driving Actions
   setAccelerating: (value: boolean) => void;
@@ -150,8 +147,6 @@ export const useGameStore = create<GameState>((set, get) => ({
   cameraRotation: 0,
   availableMoves: [],
 
-  // Hint system
-  hintActive: false,
 
   // Clown car driving
   carSpeed: 0,
@@ -290,7 +285,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       moveSpeed: 1,
       cameraRotation: 0,
       availableMoves: [],
-      hintActive: false,
+
       carSpeed: 0,
       accelerating: false,
       braking: false,
@@ -356,9 +351,7 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   setAvailableMoves: (moves) => set({ availableMoves: moves }),
 
-  // Hint actions
-  toggleHint: () => set((state) => ({ hintActive: !state.hintActive })),
-  setHintActive: (active) => set({ hintActive: active }),
+
 
   // Clown car driving actions
   setAccelerating: (value) => set({ accelerating: value }),

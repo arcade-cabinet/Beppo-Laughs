@@ -1,0 +1,36 @@
+{
+  "phrase": "twisted eerie crypt",
+  "hash": "bbe6ae7bf41d",
+  "backdrops": [
+    {
+      "id": "bg_01",
+      "description": "Tattered circus tent with eyes",
+      "anim": "static",
+      "layer": 0
+    },
+    {
+      "id": "bg_02",
+      "description": "Moving shadows of giant hands",
+      "anim": "parallax",
+      "layer": 1
+    }
+  ],
+  "performers": [
+    {
+      "id": "perf_01",
+      "type": "tubeman",
+      "appearancePrompt": "Sinister flailing clown with razor teeth",
+      "anim": "flail",
+      "resolveItem": "scissors",
+      "preferredRoomType": "deadend"
+    },
+    {
+      "id": "perf_02",
+      "type": "trapeze",
+      "appearancePrompt": "Skeleton acrobat with paper wings",
+      "anim": "drop",
+      "resolveItem": "hook",
+      "preferredRoomType": "junction"
+    }
+  ]
+}

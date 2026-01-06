@@ -1,14 +1,13 @@
+import { useGameStore } from '@/game/store';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Suspense, useEffect, useRef, useState } from 'react';
 import type { PointLight } from 'three';
 import { generateMaze, type MazeLayout } from '../../game/maze/core';
 import { buildGeometry, DEFAULT_CONFIG, type MazeGeometry } from '../../game/maze/geometry';
-import { useGameStore } from '../../game/store';
 import { AudioManager } from './AudioManager';
 import { Collectibles } from './Collectibles';
 import { DriveControls } from './DriveControls';
 import { ForkPrompt } from './ForkPrompt';
-import { HintOverlay } from './HintOverlay';
 import { InteractionPrompt } from './InteractionPrompt';
 import { Maze } from './Maze';
 import { RailPlayer } from './RailPlayer';
@@ -154,7 +153,7 @@ export function Scene({ seed }: SceneProps) {
     }
   }, [seed]);
 
-  const avgInsanity = (fear + despair) / 2 / maxSanity;
+  const avgInsanity = maxSanity > 0 ? (fear + despair) / 2 / maxSanity : 0;
 
   const fogNear = Math.max(2, 12 - avgInsanity * 8);
   const fogFar = Math.max(15, 35 - avgInsanity * 20);
@@ -254,7 +253,7 @@ export function Scene({ seed }: SceneProps) {
           <Maze geometry={geometry} />
           <Villains geometry={geometry} />
           <Collectibles geometry={geometry} />
-          <HintOverlay geometry={geometry} />
+
         </Suspense>
 
         <RailPlayer geometry={geometry} />

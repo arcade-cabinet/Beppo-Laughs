@@ -1,0 +1,83 @@
+{
+  "phrase": "rotting baleful doll",
+  "hash": "f93a3ae44454",
+  "generatedAt": "2026-01-05T23:04:09.171Z",
+  "aiGenerated": true,
+  "provider": "openai",
+  "performers": [
+    {
+      "id": "perf_01",
+      "type": "trapeze",
+      "appearancePrompt": "Flat 2D paper cutout of a skeletal acrobat with paper wings and hollow eye sockets, Terry Gilliam style, high contrast silhouette on transparent background",
+      "anim": "drop",
+      "resolveItem": "hook",
+      "preferredRoomType": "junction"
+    },
+    {
+      "id": "perf_02",
+      "type": "tubeman",
+      "appearancePrompt": "Flat 2D paper cutout of a wacky arm-flailing inflatable clown with wild googly eyes and a manic grin, Terry Gilliam style, high contrast silhouette on transparent background",
+      "anim": "drop",
+      "resolveItem": "scissors",
+      "preferredRoomType": "deadend"
+    },
+    {
+      "id": "perf_03",
+      "type": "trapeze",
+      "appearancePrompt": "Flat 2D paper cutout of a skeletal acrobat with paper wings and hollow eye sockets, Terry Gilliam style, high contrast silhouette on transparent background",
+      "anim": "slideOutWall",
+      "resolveItem": "hook",
+      "preferredRoomType": "junction"
+    },
+    {
+      "id": "perf_04",
+      "type": "tubeman",
+      "appearancePrompt": "Flat 2D paper cutout of a wacky arm-flailing inflatable clown with wild googly eyes and a manic grin, Terry Gilliam style, high contrast silhouette on transparent background",
+      "anim": "slideOutWall",
+      "resolveItem": "scissors",
+      "preferredRoomType": "straight"
+    },
+    {
+      "id": "perf_05",
+      "type": "trapeze",
+      "appearancePrompt": "Flat 2D paper cutout of a skeletal acrobat with paper wings and hollow eye sockets, Terry Gilliam style, high contrast silhouette on transparent background",
+      "anim": "flail",
+      "resolveItem": "hook",
+      "preferredRoomType": "straight"
+    },
+    {
+      "id": "perf_06",
+      "type": "trapeze",
+      "appearancePrompt": "Flat 2D paper cutout of a skeletal acrobat with paper wings and hollow eye sockets, Terry Gilliam style, high contrast silhouette on transparent background",
+      "anim": "slideOutWall",
+      "resolveItem": "hook",
+      "preferredRoomType": "junction"
+    }
+  ],
+  "backdrops": [
+    {
+      "id": "bg_01",
+      "description": "Tattered circus tent with watchful eyes peering through torn fabric",
+      "anim": "static",
+      "layer": 0
+    },
+    {
+      "id": "bg_02",
+      "description": "Moving shadows of giant hands reaching from the darkness",
+      "anim": "parallax",
+      "layer": 1
+    },
+    {
+      "id": "bg_03",
+      "description": "Twisted carousel with skeletal horses frozen mid-gallop",
+      "anim": "slideAcross",
+      "layer": 2
+    },
+    {
+      "id": "bg_04",
+      "description": "Crowd of faceless spectators with hollow smiles",
+      "anim": "slideAcross",
+      "layer": 3
+    }
+  ]
+}

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { HUD } from '@/components/game/HUD';
 import { MainMenu } from '@/components/game/MainMenu';
 import { Scene } from '@/components/game/Scene';
+import { HorrorEffects } from '@/components/game/HorrorEffects';
 import { useGameStore } from '@/game/store';
 
 export default function Home() {
@@ -107,12 +108,14 @@ export default function Home() {
             <Scene seed={seed} />
           </div>
           <HUD />
+          <HorrorEffects />
 
           {/* Exit Button - hidden on mobile */}
           {!isMobile && (
             <button
+              type="button"
               onClick={handleExit}
-              className="absolute top-4 right-4 z-50 pointer-events-auto text-white/50 hover:text-white font-mono text-xs uppercase tracking-wider px-3 py-1 border border-white/20 hover:border-white/50 transition-all"
+              className="absolute top-4 right-4 z-50 pointer-events-auto text-white/50 hover:text-white font-mono text-xs uppercase tracking-wider px-3 py-1 border border-white/20 hover:border-white/50 transition-all backdrop-blur-sm"
               data-testid="button-exit"
             >
               ESC
@@ -122,8 +125,9 @@ export default function Home() {
           {/* Mobile Exit Button - touch-friendly */}
           {isMobile && (
             <button
+              type="button"
               onClick={handleExit}
-              className="absolute top-4 right-4 z-50 pointer-events-auto text-white/70 font-mono text-sm uppercase px-4 py-2 bg-black/50 border border-white/30 rounded"
+              className="absolute top-4 right-4 z-50 pointer-events-auto text-white/70 font-mono text-sm uppercase px-4 py-2 bg-black/50 border border-white/30 rounded backdrop-blur-sm"
               data-testid="button-exit-mobile"
             >
               EXIT
@@ -133,8 +137,9 @@ export default function Home() {
           {/* Restart after game over */}
           {isGameOver && (
             <button
+              type="button"
               onClick={handleExit}
-              className="absolute bottom-20 left-1/2 -translate-x-1/2 z-50 pointer-events-auto text-white hover:text-red-500 font-creepy text-2xl uppercase tracking-wider px-6 py-2 border border-white/30 hover:border-red-500 transition-all"
+              className="absolute bottom-20 left-1/2 -translate-x-1/2 z-50 pointer-events-auto text-white hover:text-red-500 font-creepy text-2xl uppercase tracking-wider px-6 py-2 border border-white/30 hover:border-red-500 transition-all backdrop-blur-sm bg-black/30"
               data-testid="button-restart"
             >
               TRY AGAIN

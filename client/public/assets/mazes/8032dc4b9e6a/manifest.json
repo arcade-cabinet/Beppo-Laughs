@@ -1,0 +1,99 @@
+{
+  "phrase": "macabre sinister curse",
+  "hash": "8032dc4b9e6a",
+  "generatedAt": "2026-01-05T23:12:59.702Z",
+  "aiGenerated": false,
+  "provider": "mock",
+  "performers": [
+    {
+      "id": "perf_01",
+      "type": "trapeze",
+      "appearancePrompt": "Flat 2D paper cutout of a skeletal acrobat with paper wings and hollow eye sockets, Terry Gilliam style, high contrast silhouette on transparent background",
+      "anim": "drop",
+      "resolveItem": "hook",
+      "preferredRoomType": "deadend"
+    },
+    {
+      "id": "perf_02",
+      "type": "boxer",
+      "appearancePrompt": "Flat 2D paper cutout of a giant inflatable boxing tube with a sinister painted face and menacing gloves, Terry Gilliam style, high contrast silhouette on transparent background",
+      "anim": "flail",
+      "resolveItem": "lamp",
+      "preferredRoomType": "junction"
+    },
+    {
+      "id": "perf_03",
+      "type": "boxer",
+      "appearancePrompt": "Flat 2D paper cutout of a giant inflatable boxing tube with a sinister painted face and menacing gloves, Terry Gilliam style, high contrast silhouette on transparent background",
+      "anim": "slideOutWall",
+      "resolveItem": "lamp",
+      "preferredRoomType": "crossroad"
+    },
+    {
+      "id": "perf_04",
+      "type": "tubeman",
+      "appearancePrompt": "Flat 2D paper cutout of a wacky arm-flailing inflatable clown with wild googly eyes and a manic grin, Terry Gilliam style, high contrast silhouette on transparent background",
+      "anim": "slideOutWall",
+      "resolveItem": "scissors",
+      "preferredRoomType": "straight"
+    },
+    {
+      "id": "perf_05",
+      "type": "backdropFreak",
+      "appearancePrompt": "Flat 2D paper cutout of a twisted carnival barker with multiple heads and elongated limbs, Terry Gilliam style, high contrast silhouette on transparent background",
+      "anim": "flail",
+      "resolveItem": "pin",
+      "preferredRoomType": "junction"
+    },
+    {
+      "id": "perf_06",
+      "type": "boxer",
+      "appearancePrompt": "Flat 2D paper cutout of a giant inflatable boxing tube with a sinister painted face and menacing gloves, Terry Gilliam style, high contrast silhouette on transparent background",
+      "anim": "slideOutWall",
+      "resolveItem": "lamp",
+      "preferredRoomType": "junction"
+    },
+    {
+      "id": "perf_07",
+      "type": "lionTamerGhost",
+      "appearancePrompt": "Flat 2D paper cutout of a spectral lion tamer with a whip of shadows and a cage of nightmares, Terry Gilliam style, high contrast silhouette on transparent background",
+      "anim": "slideOutWall",
+      "resolveItem": "net",
+      "preferredRoomType": "junction"
+    },
+    {
+      "id": "perf_08",
+      "type": "boxer",
+      "appearancePrompt": "Flat 2D paper cutout of a giant inflatable boxing tube with a sinister painted face and menacing gloves, Terry Gilliam style, high contrast silhouette on transparent background",
+      "anim": "flail",
+      "resolveItem": "lamp",
+      "preferredRoomType": "straight"
+    }
+  ],
+  "backdrops": [
+    {
+      "id": "bg_01",
+      "description": "Tattered circus tent with watchful eyes peering through torn fabric",
+      "anim": "static",
+      "layer": 0
+    },
+    {
+      "id": "bg_02",
+      "description": "Moving shadows of giant hands reaching from the darkness",
+      "anim": "parallax",
+      "layer": 1
+    },
+    {
+      "id": "bg_03",
+      "description": "Twisted carousel with skeletal horses frozen mid-gallop",
+      "anim": "slideAcross",
+      "layer": 2
+    },
+    {
+      "id": "bg_04",
+      "description": "Crowd of faceless spectators with hollow smiles",
+      "anim": "slideAcross",
+      "layer": 3
+    }
+  ]
+}
