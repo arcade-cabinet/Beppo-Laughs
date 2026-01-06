@@ -1,5 +1,5 @@
 import { Billboard, Text, useTexture } from '@react-three/drei';
-import { useFrame, useThree } from '@react-three/fiber';
+import { useFrame } from '@react-three/fiber';
 import { useMemo, useRef } from 'react';
 import type { Group, Texture } from 'three';
 import { useGameStore } from '../../game/store';
@@ -9,8 +9,58 @@ interface BlockadesProps {
   blockades: BlockadePlan[];
 }
 
+const LABEL_DISTANCE = 5.5;
+const BLOCKADE_HEIGHT = 1.4;
+const BLOCKADE_SIZE = 2.2;
+const LABEL_OFFSET = -1.6;
+
+function BlockadeCutout({
+  blockade,
+  texture,
+}: {
+  blockade: BlockadePlan;
+  texture?: Texture;
+}) {
+  const groupRef = useRef<Group>(null);
+  const labelRef = useRef<Group>(null);
+
+  useFrame((state) => {
+    if (!labelRef.current || !groupRef.current) return;
+    const distance = Math.hypot(
+      state.camera.position.x - groupRef.current.position.x,
+      state.camera.position.y - (BLOCKADE_HEIGHT + 0.1),
+      state.camera.position.z - groupRef.current.position.z,
+    );
+    labelRef.current.visible = distance < LABEL_DISTANCE;
+  });
+
+  return (
+    <group ref={groupRef} position={[blockade.worldX, BLOCKADE_HEIGHT, blockade.worldZ]}>
+      <Billboard follow={true}>
+        <mesh>
+          <planeGeometry args={[BLOCKADE_SIZE, BLOCKADE_SIZE]} />
+          <meshStandardMaterial
+            map={texture}
+            transparent
+            opacity={0.95}
+            emissive="#ff3b1a"
+            emissiveIntensity={0.35}
+          />
+        </mesh>
+      </Billboard>
+
+      <group ref={labelRef} visible={false}>
+        <Billboard>
+          <Text position={[0, LABEL_OFFSET, 0]} fontSize={0.2} color="#ffcc66" anchorX="center">
+            Requires: {blockade.requiredItemName}
+          </Text>
+        </Billboard>
+      </group>
+    </group>
+  );
+}
+
 export function Blockades({ blockades }: BlockadesProps) {
-  const { camera } = useThree();
   const groupRef = useRef<Group>(null);
   const { blockades: blockedCells } = useGameStore();
 
@@ -44,36 +94,8 @@ export function Blockades({ blockades }: BlockadesProps) {
         const texture = textureByNodeId.get(blockade.nodeId);
         if (!blockedCells.has(blockade.nodeId)) return null;
 
-        const distance = Math.hypot(
-          camera.position.x - blockade.worldX,
-          camera.position.y - 1.5,
-          camera.position.z - blockade.worldZ,
-        );
-        const showLabel = distance < 5.5;
-
         return (
-          <group key={blockade.nodeId} position={[blockade.worldX, 1.4, blockade.worldZ]}>
-            <Billboard follow={true}>
-              <mesh>
-                <planeGeometry args={[2.2, 2.2]} />
-                <meshStandardMaterial
-                  map={texture}
-                  transparent
-                  opacity={0.95}
-                  emissive="#ff3b1a"
-                  emissiveIntensity={0.35}
-                />
-              </mesh>
-            </Billboard>
-
-            {showLabel && (
-              <Billboard>
-                <Text position={[0, -1.6, 0]} fontSize={0.2} color="#ffcc66" anchorX="center">
-                  Requires: {blockade.requiredItemName}
-                </Text>
-              </Billboard>
-            )}
-          </group>
+          <BlockadeCutout key={blockade.nodeId} blockade={blockade} texture={texture} />
         );
       })}
     </group>

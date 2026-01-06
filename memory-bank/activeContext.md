@@ -12,7 +12,8 @@
 - Collectibles now seeded from catalog with fallback (`client/src/components/game/Collectibles.tsx`).
 - Added deterministic blockade + collectible pairing via spawn plan (`client/src/game/spawnPlan.ts`).
 - Added blockade rendering for paper-mache cutouts (`client/src/components/game/Blockades.tsx`).
-- Store now tracks blockade requirements and only clears matching blockade on collect (`client/src/game/store.ts`).
+- Blockade labels now toggle based on camera distance using `useFrame` refs.
+- Store now tracks blockade requirements and clears only matching blockade on collect (`client/src/game/store.ts`).
 - Tests updated for blockade requirements (`client/src/game/store.test.ts`).
 
 ## Active Decisions & Considerations
@@ -24,7 +25,7 @@
 
 ## Pending Tasks
 - [ ] Run `pnpm test:e2e` to validate new blockade/item flow.
-- [ ] Confirm asset workflow behavior after latest catalog changes.
+- [ ] Confirm asset workflow behavior after recent catalog additions.
 - [ ] Expand UI/UX to surface required-item names more clearly (if needed).
 - [ ] Plan video pipeline once Gemini/Veo model access is confirmed.
 
