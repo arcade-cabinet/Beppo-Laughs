@@ -1,7 +1,9 @@
 import { Billboard, Text, useTexture } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import seedrandom from 'seedrandom';
 import type { Group } from 'three';
+import { ASSET_IMAGE_BASE, loadAssetCatalog } from '../../game/assetCatalog';
 import { COLLECTIBLE_NAMES, COLLECTIBLE_TEXTURE_URLS } from '../../game/textures';
 import type { MazeGeometry } from '../../game/maze/geometry';
 import { useGameStore } from '../../game/store';
@@ -15,12 +17,12 @@ interface CollectibleItem {
   worldX: number;
   worldZ: number;
   nodeId: string;
-  textureIndex: number;
+  textureUrl: string;
   name: string;
 }
 
 function Collectible({ item }: { item: CollectibleItem }) {
-  const texture = useTexture(COLLECTIBLE_TEXTURE_URLS[item.textureIndex]);
+  const texture = useTexture(item.textureUrl);
   const groupRef = useRef<Group>(null);
   const { blockades, currentNode, collectedItems, setNearbyItem, nearbyItem } = useGameStore();
   const mountTimeRef = useRef(performance.now());
@@ -163,13 +165,36 @@ function Collectible({ item }: { item: CollectibleItem }) {
 }
 
 export function Collectibles({ geometry }: CollectiblesProps) {
-  const { collectedItems } = useGameStore();
+  const { collectedItems, seed } = useGameStore();
+  const [catalog, setCatalog] = useState<Awaited<ReturnType<typeof loadAssetCatalog>>>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    loadAssetCatalog().then((data) => {
+      if (mounted) setCatalog(data);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const assetCandidates = useMemo(() => {
+    if (!catalog) return null;
+    return [...catalog.images.coreCollectibles, ...catalog.images.solutionItems];
+  }, [catalog]);
+
+  const fallbackAssets = useMemo(() => {
+    return COLLECTIBLE_TEXTURE_URLS.map((url, index) => ({
+      url,
+      name: COLLECTIBLE_NAMES[index] ?? 'COLLECTIBLE',
+    }));
+  }, []);
 
   const items = useMemo(() => {
     const generated: CollectibleItem[] = [];
     const nodes = Array.from(geometry.railNodes.values());
     const itemCount = Math.floor(nodes.length / 8);
-
+    const rng = seedrandom(`${seed || 'default'}:collectibles`);
     const avoidNodes = new Set([geometry.centerNodeId, ...geometry.exitNodeIds]);
 
     for (let i = 0; i < itemCount; i++) {
@@ -177,7 +202,7 @@ export function Collectibles({ geometry }: CollectiblesProps) {
       let attempts = 0;
 
       do {
-        const idx = Math.floor(Math.random() * nodes.length);
+        const idx = Math.floor(rng() * nodes.length);
         selectedNode = nodes[idx];
         attempts++;
       } while (
@@ -188,20 +213,33 @@ export function Collectibles({ geometry }: CollectiblesProps) {
       );
 
       if (attempts < 50 && selectedNode) {
-        const textureIndex = Math.floor(Math.random() * COLLECTIBLE_TEXTURE_URLS.length);
+        const useCatalog = assetCandidates && assetCandidates.length > 0;
+        const pickIndex = useCatalog
+          ? Math.floor(rng() * assetCandidates.length)
+          : Math.floor(rng() * fallbackAssets.length);
+        const fallback = fallbackAssets[pickIndex % fallbackAssets.length];
+        const asset = useCatalog ? assetCandidates![pickIndex] : null;
+        const name = asset
+          ? asset.fileName
+              .replace(/\.png$/i, '')
+              .replace(/^(paper_mache_|item_)/, '')
+              .replace(/_/g, ' ')
+              .toUpperCase()
+          : fallback.name;
+        const textureUrl = asset ? `${ASSET_IMAGE_BASE}${asset.fileName}` : fallback.url;
         generated.push({
           id: `item-${selectedNode.id}`,
           worldX: selectedNode.worldX,
           worldZ: selectedNode.worldZ,
           nodeId: selectedNode.id,
-          textureIndex,
-          name: COLLECTIBLE_NAMES[textureIndex],
+          textureUrl,
+          name,
         });
       }
     }
 
     return generated;
-  }, [geometry]);
+  }, [geometry, seed, assetCandidates, fallbackAssets]);
 
   return (
     <group>

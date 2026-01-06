@@ -94,6 +94,20 @@ Non-interactive performers that enhance atmosphere:
 - **Style**: Surreal transformation, chaos and escape
 - **Purpose**: Victory celebration (if implement win condition)
 
+## Video Roadmap (Planned, Not Yet Required)
+
+Video is intentionally **optional** in the current build because gameplay reads as 2D/3D mixed media without it. When we introduce video, it should be limited to **narrative bookends** so it reinforces the brand without overwhelming performance or style coherence.
+
+### Priority Use Cases
+1. **Intro splash** (establishes the big-top nightmare + Beppo)
+2. **Loss state** (Beppo dominates the frame and consumes the player)
+3. **Win state** (escape + collapse into paper confetti)
+
+### Guardrails
+- Keep video length short (5–20 seconds) to avoid long blocking.
+- Match the paper-mâché / chromolithograph look to maintain consistency with cutouts and textures.
+- Treat video as a cinematic accent, not core gameplay.
+
 ## Asset Counts Summary
 
 ```
@@ -214,4 +228,3 @@ attached_assets/
 - ✅ Minimal asset redundancy
 - ✅ Easier to expand with new wall/floor/obstacle types
 - ✅ No waste on procedural generation
-
