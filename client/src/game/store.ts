@@ -44,8 +44,6 @@ interface GameState {
     isExit: boolean;
   }[];
 
-
-
   // Clown Car Driving State
   carSpeed: number; // Current speed (0-5)
   accelerating: boolean; // Is accelerator pressed
@@ -91,8 +89,6 @@ interface GameState {
   setAvailableMoves: (
     moves: { direction: 'north' | 'south' | 'east' | 'west'; nodeId: string; isExit: boolean }[],
   ) => void;
-
-
 
   // Clown Car Driving Actions
   setAccelerating: (value: boolean) => void;
@@ -152,7 +148,6 @@ export const useGameStore = create<GameState>((set, get) => ({
   moveSpeed: 1,
   cameraRotation: 0,
   availableMoves: [],
-
 
   // Clown car driving
   carSpeed: 0,
@@ -361,8 +356,6 @@ export const useGameStore = create<GameState>((set, get) => ({
   setCameraRotation: (rotation) => set({ cameraRotation: rotation }),
 
   setAvailableMoves: (moves) => set({ availableMoves: moves }),
-
-
 
   // Clown car driving actions
   setAccelerating: (value) => set({ accelerating: value }),

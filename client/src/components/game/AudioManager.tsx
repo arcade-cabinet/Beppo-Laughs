@@ -3,7 +3,7 @@ import { audioSystem } from '../../game/audio';
 import { useGameStore } from '../../game/store';
 
 export function AudioManager() {
-  const { fear, despair, isGameOver } = useGameStore();
+  const { fear, isGameOver } = useGameStore();
   const sanityLevel = useGameStore((state) => state.getSanityLevel());
 
   const lastFear = useRef(0);

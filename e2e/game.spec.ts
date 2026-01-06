@@ -46,7 +46,9 @@ test.describe('Beppo Laughs - Main Menu', () => {
     await page.getByTestId('button-start-game').click({ force: true });
 
     // Menu should disappear, game canvas should appear
-    await expect(page.getByRole('heading', { name: 'BEPPO LAUGHS' })).not.toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('heading', { name: 'BEPPO LAUGHS' })).not.toBeVisible({
+      timeout: 5000,
+    });
   });
 });
 
@@ -71,10 +73,10 @@ test.describe('Beppo Laughs - Gameplay', () => {
     await exitBtn.click();
 
     // Should be back at main menu - use role selector for specificity
-    await expect(page.getByRole('heading', { name: 'BEPPO LAUGHS' })).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('heading', { name: 'BEPPO LAUGHS' })).toBeVisible({
+      timeout: 5000,
+    });
   });
-
-
 });
 
 test.describe('Beppo Laughs - Accessibility', () => {
@@ -91,8 +93,6 @@ test.describe('Beppo Laughs - Accessibility', () => {
     await page.goto('/');
     await page.getByTestId('button-start-game').click({ force: true });
     await page.waitForTimeout(2000);
-
-
   });
 });
 

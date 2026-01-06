@@ -223,12 +223,10 @@ function Villain({
   worldX,
   worldZ,
   playerPos,
-  cellKey,
 }: {
   worldX: number;
   worldZ: number;
   playerPos: Vector3;
-  cellKey: string;
 }) {
   const groupRef = useRef<Group>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -261,11 +259,7 @@ function Villain({
 
   return (
     <group ref={groupRef} position={[worldX, 1.5, worldZ]}>
-      <SDFVillainMesh
-        position={[0, 0, 0]}
-        isVisible={isVisible}
-        fearLevel={fearLevel}
-      />
+      <SDFVillainMesh position={[0, 0, 0]} isVisible={isVisible} fearLevel={fearLevel} />
 
       {isVisible && (
         <Billboard>
@@ -319,14 +313,8 @@ export function Villains({ geometry }: VillainsProps) {
 
   return (
     <group>
-      {villains.map((v, i) => (
-        <Villain
-          key={i}
-          worldX={v.worldX}
-          worldZ={v.worldZ}
-          playerPos={camera.position}
-          cellKey={v.cellKey}
-        />
+      {villains.map((v) => (
+        <Villain key={v.cellKey} worldX={v.worldX} worldZ={v.worldZ} playerPos={camera.position} />
       ))}
     </group>
   );

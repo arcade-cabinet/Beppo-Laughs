@@ -2,8 +2,8 @@ import { Billboard, Text, useTexture } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { useMemo, useRef } from 'react';
 import type { Group, Texture } from 'three';
-import { useGameStore } from '../../game/store';
 import type { BlockadePlan } from '../../game/spawnPlan';
+import { useGameStore } from '../../game/store';
 
 interface BlockadesProps {
   blockades: BlockadePlan[];
@@ -14,13 +14,7 @@ const BLOCKADE_HEIGHT = 1.4;
 const BLOCKADE_SIZE = 2.2;
 const LABEL_OFFSET = -1.6;
 
-function BlockadeCutout({
-  blockade,
-  texture,
-}: {
-  blockade: BlockadePlan;
-  texture?: Texture;
-}) {
+function BlockadeCutout({ blockade, texture }: { blockade: BlockadePlan; texture?: Texture }) {
   const groupRef = useRef<Group>(null);
   const labelRef = useRef<Group>(null);
 
@@ -64,10 +58,7 @@ export function Blockades({ blockades }: BlockadesProps) {
   const groupRef = useRef<Group>(null);
   const { blockades: blockedCells } = useGameStore();
 
-  const textureUrls = useMemo(
-    () => blockades.map((blockade) => blockade.textureUrl),
-    [blockades],
-  );
+  const textureUrls = useMemo(() => blockades.map((blockade) => blockade.textureUrl), [blockades]);
   const textures = useTexture(textureUrls) as Texture[] | Texture;
 
   const textureByNodeId = useMemo(() => {
@@ -91,9 +82,7 @@ export function Blockades({ blockades }: BlockadesProps) {
         const texture = textureByNodeId.get(blockade.nodeId);
         if (!blockedCells.has(blockade.nodeId)) return null;
 
-        return (
-          <BlockadeCutout key={blockade.nodeId} blockade={blockade} texture={texture} />
-        );
+        return <BlockadeCutout key={blockade.nodeId} blockade={blockade} texture={texture} />;
       })}
     </group>
   );

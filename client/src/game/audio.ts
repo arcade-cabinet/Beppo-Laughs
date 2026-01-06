@@ -198,6 +198,11 @@ class ProceduralAudio {
     this.droneGain.gain.value = 0.1 + fearLevel * 0.15;
     this.droneGain.connect(this.masterGain);
 
+    const droneGain = this.droneGain;
+    if (!droneGain) {
+      return;
+    }
+
     // Low rumbling frequencies
     [40, 60, 80, 120].forEach((freq, i) => {
       const osc = this.context?.createOscillator();
@@ -217,7 +222,7 @@ class ProceduralAudio {
       oscGain.gain.value = 0.1 / (i + 1);
 
       osc.connect(oscGain);
-      oscGain.connect(this.droneGain!);
+      oscGain.connect(droneGain);
 
       osc.start();
       this.droneOscillators.push(osc, lfo);
@@ -237,7 +242,7 @@ class ProceduralAudio {
 
     noise.connect(lowpass);
     lowpass.connect(noiseGain);
-    noiseGain.connect(this.droneGain);
+    noiseGain.connect(droneGain);
     noise.start();
 
     this.activeSources.push(noise);

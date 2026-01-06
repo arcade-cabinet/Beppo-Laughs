@@ -1,7 +1,7 @@
-import { useGameStore } from '@/game/store';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import type { PointLight } from 'three';
+import { useGameStore } from '@/game/store';
 import { loadAssetCatalog } from '../../game/assetCatalog';
 import { generateMaze, type MazeLayout } from '../../game/maze/core';
 import { buildGeometry, DEFAULT_CONFIG, type MazeGeometry } from '../../game/maze/geometry';
@@ -152,17 +152,14 @@ export function Scene({ seed }: SceneProps) {
   const fogHue = 30 + avgInsanity * 60;
   const fogColor = `hsl(${fogHue}, ${30 - avgInsanity * 15}%, ${20 - avgInsanity * 10}%)`;
 
-  if (!mazeData) return null;
-
-  const spawnPlan = useMemo(
-    () =>
-      buildSpawnPlan({
-        geometry: mazeData.geometry,
-        seed,
-        catalog,
-      }),
-    [mazeData.geometry, seed, catalog],
-  );
+  const spawnPlan = useMemo(() => {
+    if (!mazeData) return null;
+    return buildSpawnPlan({
+      geometry: mazeData.geometry,
+      seed,
+      catalog,
+    });
+  }, [mazeData, seed, catalog]);
 
   useEffect(() => {
     const store = useGameStore.getState();
@@ -184,17 +181,16 @@ export function Scene({ seed }: SceneProps) {
     store.setBlockadeRequirements(requirements);
   }, [spawnPlan]);
 
-  const { layout, geometry } = mazeData;
+  if (!mazeData) return null;
+
+  const { geometry } = mazeData;
   const centerWorld = { x: geometry.floor.x, z: geometry.floor.z };
 
   return (
     <>
       <AudioManager />
 
-      <Canvas
-        shadows
-        camera={{ position: [0, 1.4, 0], fov: 70, near: 0.1, far: 100 }}
-      >
+      <Canvas shadows camera={{ position: [0, 1.4, 0], fov: 70, near: 0.1, far: 100 }}>
         <color attach="background" args={[bgColor]} />
         <fog attach="fog" args={[fogColor, fogNear, fogFar]} />
 

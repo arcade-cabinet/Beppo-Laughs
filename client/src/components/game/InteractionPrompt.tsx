@@ -73,6 +73,7 @@ export function InteractionPrompt() {
           >
             <button
               data-testid="button-collect-item"
+              type="button"
               onClick={collectNearbyItem}
               className="pointer-events-auto bg-gradient-to-b from-yellow-500 to-amber-700 
                          border-4 border-yellow-300 rounded-xl px-8 py-4 
@@ -100,6 +101,7 @@ export function InteractionPrompt() {
           >
             <button
               data-testid="button-escape-exit"
+              type="button"
               onClick={triggerExitInteraction}
               className="pointer-events-auto bg-gradient-to-b from-green-500 to-green-700 
                          border-4 border-green-300 rounded-xl px-10 py-5 

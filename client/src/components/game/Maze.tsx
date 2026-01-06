@@ -3,9 +3,9 @@ import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { DoubleSide, RepeatWrapping } from 'three';
 import { ASSET_IMAGE_BASE, loadAssetCatalog, pickSeededAsset } from '../../game/assetCatalog';
-import { MAZE_TEXTURES } from '../../game/textures';
 import { DEFAULT_CONFIG, type MazeGeometry, type WallSegment } from '../../game/maze/geometry';
 import { useGameStore } from '../../game/store';
+import { MAZE_TEXTURES } from '../../game/textures';
 
 interface MazeProps {
   geometry: MazeGeometry;
@@ -74,20 +74,15 @@ export function Maze({ geometry }: MazeProps) {
   const { wallHeight } = DEFAULT_CONFIG;
 
   const wallMeshes = useMemo(() => {
-    return geometry.walls.map((wall: WallSegment, idx: number) => (
+    return geometry.walls.map((wall: WallSegment) => (
       <mesh
-        key={`wall-${idx}`}
+        key={`wall-${wall.x}-${wall.z}-${wall.width}-${wall.depth}`}
         position={[wall.x, wall.height / 2, wall.z]}
         castShadow
         receiveShadow
       >
         <boxGeometry args={[wall.width, wall.height, wall.depth]} />
-        <meshStandardMaterial
-          map={wallTexture}
-          color="#c4a882"
-          roughness={0.9}
-          side={DoubleSide}
-        />
+        <meshStandardMaterial map={wallTexture} color="#c4a882" roughness={0.9} side={DoubleSide} />
       </mesh>
     ));
   }, [geometry, wallTexture]);
@@ -97,11 +92,11 @@ export function Maze({ geometry }: MazeProps) {
     const nodes = Array.from(geometry.railNodes.values());
     const poleSpacing = 3;
 
-    nodes.forEach((node, idx) => {
+    nodes.forEach((node) => {
       if (node.gridX % poleSpacing === 0 && node.gridY % poleSpacing === 0) {
         poles.push(
           <mesh
-            key={`pole-${idx}`}
+            key={`pole-${node.id}`}
             position={[node.worldX, wallHeight / 2 + 1, node.worldZ]}
             castShadow
           >

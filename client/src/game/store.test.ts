@@ -168,9 +168,7 @@ describe('GameStore', () => {
         .getState()
         .setBlockadeRequirements(new Map([['5,5', { itemId: 'unlock-5,5', itemName: 'Net' }]]));
 
-      useGameStore
-        .getState()
-        .setNearbyItem({ id: 'unlock-5,5', name: 'Net', nodeId: '6,6' });
+      useGameStore.getState().setNearbyItem({ id: 'unlock-5,5', name: 'Net', nodeId: '6,6' });
       useGameStore.getState().collectNearbyItem();
 
       const state = useGameStore.getState();
@@ -184,9 +182,7 @@ describe('GameStore', () => {
         .getState()
         .setBlockadeRequirements(new Map([['7,7', { itemId: 'unlock-7,7', itemName: 'Key' }]]));
 
-      useGameStore
-        .getState()
-        .setNearbyItem({ id: 'item-else', name: 'Lamp', nodeId: '8,8' });
+      useGameStore.getState().setNearbyItem({ id: 'item-else', name: 'Lamp', nodeId: '8,8' });
       useGameStore.getState().collectNearbyItem();
 
       expect(useGameStore.getState().blockades.has('7,7')).toBe(true);

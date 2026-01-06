@@ -26,6 +26,16 @@ vi.mock('@/game/store', () => ({
   useGameStore: vi.fn(),
 }));
 
+type StoreState = {
+  seed: string;
+  setSeed: (seed: string) => void;
+  resetGame: () => void;
+  isGameOver: boolean;
+};
+type Selector<T> = (state: StoreState) => T;
+const applySelector = <T,>(state: StoreState, selector?: Selector<T>) =>
+  selector ? selector(state) : (state as unknown as T);
+
 describe('Home', () => {
   let mockResetGame: ReturnType<typeof vi.fn>;
   let mockSetSeed: ReturnType<typeof vi.fn>;
@@ -35,15 +45,25 @@ describe('Home', () => {
     mockSetSeed = vi.fn();
 
     // Mock useGameStore
-    vi.mocked(useGameStore).mockImplementation((selector: any) => {
-      const state = {
-        seed: '',
-        setSeed: mockSetSeed,
-        resetGame: mockResetGame,
-        isGameOver: false,
-      };
-      return selector ? selector(state) : state;
-    });
+    type StoreState = {
+      seed: string;
+      setSeed: typeof mockSetSeed;
+      resetGame: typeof mockResetGame;
+      isGameOver: boolean;
+    };
+    type Selector<T> = (state: StoreState) => T;
+
+    vi.mocked(useGameStore).mockImplementation(<T,>(selector?: Selector<T>) =>
+      applySelector(
+        {
+          seed: '',
+          setSeed: mockSetSeed,
+          resetGame: mockResetGame,
+          isGameOver: false,
+        },
+        selector,
+      ),
+    );
 
     // Mock navigator.userAgent
     Object.defineProperty(navigator, 'userAgent', {
@@ -54,9 +74,9 @@ describe('Home', () => {
     // Mock WebGL support
     const mockCanvas = {
       getContext: vi.fn(() => ({})),
-    };
+    } as HTMLCanvasElement;
     document.createElement = vi.fn((tag: string) => {
-      if (tag === 'canvas') return mockCanvas as any;
+      if (tag === 'canvas') return mockCanvas;
       return document.createElementNS('http://www.w3.org/1999/xhtml', tag);
     });
   });
@@ -138,14 +158,14 @@ describe('Home', () => {
     });
 
     it('passes seed to Scene component', async () => {
-      vi.mocked(useGameStore).mockImplementation((selector: any) => {
+      vi.mocked(useGameStore).mockImplementation((selector?: Selector<unknown>) => {
         const state = {
           seed: 'test seed',
           setSeed: mockSetSeed,
           resetGame: mockResetGame,
           isGameOver: false,
         };
-        return selector ? selector(state) : state;
+        return applySelector(state, selector);
       });
 
       render(<Home />);
@@ -264,14 +284,14 @@ describe('Home', () => {
 
   describe('Game Over State', () => {
     beforeEach(() => {
-      vi.mocked(useGameStore).mockImplementation((selector: any) => {
+      vi.mocked(useGameStore).mockImplementation((selector?: Selector<unknown>) => {
         const state = {
           seed: 'test seed',
           setSeed: mockSetSeed,
           resetGame: mockResetGame,
           isGameOver: true,
         };
-        return selector ? selector(state) : state;
+        return applySelector(state, selector);
       });
     });
 

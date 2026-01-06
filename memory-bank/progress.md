@@ -10,6 +10,7 @@
 - [x] Runtime asset catalog integration (maze textures, collectibles, blockades).
 - [x] Deterministic blockade + collectible pairing based on seed.
 - [x] Store logic updated for blockade requirements.
+- [x] CI lint cleanup (Biome ignores for generated assets + a11y/type fixes).
 - [x] Unit tests updated and passing.
 
 ## What Works
@@ -30,7 +31,7 @@
 - [ ] Room-based dynamic geometry loading (LOD optimization).
 
 ## Current Status
-Core gameplay is deterministic with catalog-driven assets for textures, collectibles, and blockades. Asset generation is Gemini-only and mirrored into runtime assets. Tests are passing; E2E still needs a run after recent changes.
+Core gameplay is deterministic with catalog-driven assets for textures, collectibles, and blockades. Asset generation is Gemini-only and mirrored into runtime assets. Lint is clean after Biome adjustments; E2E still needs a run after recent changes.
 
 ## Known Issues
 - Entire maze still loads at once (room-based LOD is a future optimization).

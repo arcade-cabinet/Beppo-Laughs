@@ -71,10 +71,7 @@ export const buildSpawnPlan = ({
   if (!catalog) return null;
 
   const obstacleAssets = catalog.images.obstacles;
-  const solutionAssets = [
-    ...catalog.images.coreCollectibles,
-    ...catalog.images.solutionItems,
-  ];
+  const solutionAssets = [...catalog.images.coreCollectibles, ...catalog.images.solutionItems];
 
   if (!obstacleAssets.length || !solutionAssets.length) return null;
 

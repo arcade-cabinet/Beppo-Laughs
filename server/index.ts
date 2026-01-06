@@ -36,7 +36,7 @@ export function log(message: string, source = 'express') {
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined;
+  let capturedJsonResponse: Record<string, unknown> | undefined;
 
   const originalResJson = res.json;
   res.json = (bodyJson, ...args) => {
@@ -62,9 +62,14 @@ app.use((req, res, next) => {
 (async () => {
   await registerRoutes(httpServer, app);
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || 'Internal Server Error';
+  app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+    const errorStatus =
+      typeof err === 'object' && err
+        ? ((err as { status?: number; statusCode?: number }).status ??
+          (err as { statusCode?: number }).statusCode)
+        : undefined;
+    const status = errorStatus ?? 500;
+    const message = err instanceof Error ? err.message : 'Internal Server Error';
 
     res.status(status).json({ message });
     throw err;

@@ -1,7 +1,7 @@
-import { VIDEO_ASSETS } from '../../game/textures';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { useGameStore } from '../../game/store';
+import { VIDEO_ASSETS } from '../../game/textures';
 
 type MeterPanelProps = {
   label: string;

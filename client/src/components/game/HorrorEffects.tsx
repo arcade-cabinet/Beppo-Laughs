@@ -1,9 +1,4 @@
-import {
-  ChromaticAberration,
-  EffectComposer,
-  Noise,
-  Vignette,
-} from '@react-three/postprocessing';
+import { ChromaticAberration, EffectComposer, Noise, Vignette } from '@react-three/postprocessing';
 import { BlendFunction } from 'postprocessing';
 import { useMemo } from 'react';
 import { Vector2 } from 'three';
@@ -52,11 +47,7 @@ export function HorrorEffects() {
   return (
     <EffectComposer>
       {/* Vignette - darker edges, intensifies with despair */}
-      <Vignette
-        offset={0.3}
-        darkness={vignetteDarkness}
-        blendFunction={BlendFunction.NORMAL}
-      />
+      <Vignette offset={0.3} darkness={vignetteDarkness} blendFunction={BlendFunction.NORMAL} />
 
       {/* Chromatic aberration - color distortion with fear */}
       <ChromaticAberration

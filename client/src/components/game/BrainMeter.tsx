@@ -1,6 +1,6 @@
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
-import { Color, type Mesh, type MeshStandardMaterial } from 'three';
+import { Color, type Group, type Mesh, type MeshStandardMaterial } from 'three';
 import { useGameStore } from '../../game/store';
 
 function BrainHemisphere({
@@ -63,7 +63,7 @@ function BrainHemisphere({
 
 function Brain3D() {
   const { fear, despair, maxSanity } = useGameStore();
-  const groupRef = useRef<any>(null);
+  const groupRef = useRef<Group>(null);
 
   useFrame((state) => {
     if (groupRef.current) {
@@ -87,8 +87,8 @@ function Brain3D() {
       </mesh>
 
       {/* Brain folds texture via additional smaller spheres */}
-      {[-0.15, 0.15].map((xOffset, i) => (
-        <mesh key={i} position={[xOffset, 0.15, 0.2]} scale={0.15}>
+      {[-0.15, 0.15].map((xOffset) => (
+        <mesh key={`fold-${xOffset}`} position={[xOffset, 0.15, 0.2]} scale={0.15}>
           <sphereGeometry args={[1, 12, 12]} />
           <meshStandardMaterial color="#dac8c8" roughness={0.7} />
         </mesh>

@@ -5,6 +5,7 @@
 - Runtime integration of asset catalog into maze textures, collectibles, and blockade visuals.
 - Stabilizing the asset workflow and documenting video generation as next phase.
 - Preparing work on a dedicated PR branch so other agents can pick up cleanly.
+- CI lint cleanup to keep PR checks green.
 
 ## Recent Changes
 - Added asset catalog loader and seeded selection helpers (`client/src/game/assetCatalog.ts`).
@@ -15,6 +16,7 @@
 - Added blockade rendering for paper-mache cutouts with distance-gated labels (`client/src/components/game/Blockades.tsx`).
 - Store now tracks blockade requirements and clears only matching blockade on collect (`client/src/game/store.ts`).
 - Tests updated for blockade requirements (`client/src/game/store.test.ts`).
+- Biome config now ignores generated assets/reports; lint fixes across UI/test files for a11y and typing.
 
 ## Active Decisions & Considerations
 - **AI Provider**: Gemini API only (no Vertex AI, no OpenAI fallback).

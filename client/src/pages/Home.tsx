@@ -38,21 +38,30 @@ export default function Home() {
   // Request fullscreen and lock orientation
   const enterFullscreen = useCallback(async () => {
     try {
-      const elem = document.documentElement;
+      type FullscreenElement = HTMLElement & {
+        webkitRequestFullscreen?: () => Promise<void>;
+        msRequestFullscreen?: () => Promise<void>;
+      };
+      type ScreenOrientationWithLock = ScreenOrientation & {
+        lock?: (orientation: string) => Promise<void>;
+      };
+
+      const elem = document.documentElement as FullscreenElement;
 
       // Request fullscreen
       if (elem.requestFullscreen) {
         await elem.requestFullscreen();
-      } else if ((elem as any).webkitRequestFullscreen) {
-        await (elem as any).webkitRequestFullscreen();
-      } else if ((elem as any).msRequestFullscreen) {
-        await (elem as any).msRequestFullscreen();
+      } else if (elem.webkitRequestFullscreen) {
+        await elem.webkitRequestFullscreen();
+      } else if (elem.msRequestFullscreen) {
+        await elem.msRequestFullscreen();
       }
 
       // Lock orientation to landscape
-      if (screen.orientation && (screen.orientation as any).lock) {
+      const screenOrientation = screen.orientation as ScreenOrientationWithLock | null;
+      if (screenOrientation?.lock) {
         try {
-          await (screen.orientation as any).lock('landscape');
+          await screenOrientation.lock('landscape');
         } catch (_e) {
           // Orientation lock may not be supported
           console.log('Orientation lock not supported');
@@ -134,10 +143,12 @@ export default function Home() {
       <div className="relative w-full h-screen bg-black flex flex-col items-center justify-center p-8">
         <div className="text-red-500 font-creepy text-4xl mb-6">BROWSER NOT SUPPORTED</div>
         <div className="text-white/80 font-mono text-center max-w-md mb-4">
-          This game requires WebGL to run. Your browser does not support WebGL or it has been disabled.
+          This game requires WebGL to run. Your browser does not support WebGL or it has been
+          disabled.
         </div>
         <div className="text-white/60 font-mono text-sm text-center max-w-md">
-          Please try a modern browser like Chrome, Firefox, Safari, or Edge with hardware acceleration enabled.
+          Please try a modern browser like Chrome, Firefox, Safari, or Edge with hardware
+          acceleration enabled.
         </div>
       </div>
     );

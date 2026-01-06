@@ -58,7 +58,8 @@ function DashboardPanel({
 }
 
 function SpeedometerPanel({ position }: { position: [number, number, number] }) {
-  const speedTextRef = useRef<any>(null);
+  type SpeedText = THREE.Mesh & { text: string };
+  const speedTextRef = useRef<SpeedText>(null);
   const needleRef = useRef<THREE.Mesh>(null);
 
   useFrame(() => {
@@ -268,8 +269,8 @@ export function ClownCarCockpit() {
           [0.5, 0.09, -0.2],
           [-0.25, 0.09, -0.35],
           [0.25, 0.09, -0.35],
-        ].map((pos, i) => (
-          <mesh key={`dot-${i}`} position={pos as [number, number, number]}>
+        ].map((pos) => (
+          <mesh key={`dot-${pos.join('-')}`} position={pos as [number, number, number]}>
             <sphereGeometry args={[0.06, 8, 8]} />
             <meshStandardMaterial
               color={
@@ -314,8 +315,8 @@ export function ClownCarCockpit() {
           [0.3, 0.08, -0.4],
           [-0.7, 0.08, 0],
           [0.7, 0.08, 0],
-        ].map((pos, i) => (
-          <mesh key={`rivet-${i}`} position={pos as [number, number, number]}>
+        ].map((pos) => (
+          <mesh key={`rivet-${pos.join('-')}`} position={pos as [number, number, number]}>
             <cylinderGeometry args={[0.025, 0.025, 0.03, 8]} />
             <meshStandardMaterial color="#888866" roughness={0.8} metalness={0.6} />
           </mesh>
@@ -357,8 +358,8 @@ export function ClownCarCockpit() {
           <meshStandardMaterial color="#d45b00" roughness={0.4} metalness={0.6} />
         </mesh>
         {/* Accent rings */}
-        {[0.04, 0.12, 0.2].map((y, idx) => (
-          <mesh key={`ring-${idx}`} position={[0, y, 0]}>
+        {[0.04, 0.12, 0.2].map((y) => (
+          <mesh key={`ring-${y}`} position={[0, y, 0]}>
             <torusGeometry args={[0.05, 0.01, 8, 24]} />
             <meshStandardMaterial color="#f5c400" emissive="#f5c400" emissiveIntensity={0.25} />
           </mesh>

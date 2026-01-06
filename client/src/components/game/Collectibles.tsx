@@ -2,11 +2,11 @@ import { Billboard, Text, useTexture } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import seedrandom from 'seedrandom';
-import type { Group } from 'three';
+import type { Group, Mesh, Object3D } from 'three';
 import { ASSET_IMAGE_BASE, loadAssetCatalog } from '../../game/assetCatalog';
-import { COLLECTIBLE_NAMES, COLLECTIBLE_TEXTURE_URLS } from '../../game/textures';
 import type { MazeGeometry } from '../../game/maze/geometry';
 import { useGameStore } from '../../game/store';
+import { COLLECTIBLE_NAMES, COLLECTIBLE_TEXTURE_URLS } from '../../game/textures';
 
 interface CollectiblesProps {
   geometry: MazeGeometry;
@@ -25,7 +25,7 @@ interface CollectibleItem {
 function Collectible({ item }: { item: CollectibleItem }) {
   const texture = useTexture(item.textureUrl);
   const groupRef = useRef<Group>(null);
-  const { blockades, currentNode, collectedItems, setNearbyItem, nearbyItem } = useGameStore();
+  const { blockades, collectedItems, setNearbyItem, nearbyItem } = useGameStore();
   const mountTimeRef = useRef(performance.now());
   const collectionTimeRef = useRef<number | null>(null);
 
@@ -72,16 +72,20 @@ function Collectible({ item }: { item: CollectibleItem }) {
     if (isCollected) {
       groupRef.current.position.y = 0.8 + popdownY;
       groupRef.current.scale.setScalar(popdownScale);
-      if (groupRef.current.children[0]) {
-        const billboard = groupRef.current.children[0] as any;
-        if (billboard.children[0]) {
-          billboard.children[0].traverse((child: any) => {
-            if (child.material) {
-              child.material.opacity = popdownOpacity;
-            }
-          });
+      const billboard = groupRef.current.children[0] as Group | undefined;
+      const billboardMesh = billboard?.children[0] as Object3D | undefined;
+      billboardMesh?.traverse((child) => {
+        const mesh = child as Mesh;
+        if (mesh.material) {
+          if (Array.isArray(mesh.material)) {
+            mesh.material.forEach((material) => {
+              material.opacity = popdownOpacity;
+            });
+          } else {
+            mesh.material.opacity = popdownOpacity;
+          }
         }
-      }
+      });
       return;
     }
 
@@ -109,7 +113,11 @@ function Collectible({ item }: { item: CollectibleItem }) {
     groupRef.current.scale.setScalar(finalScale);
   });
 
-  if (isCollected && collectionTimeRef.current && (performance.now() - collectionTimeRef.current) > 500) {
+  if (
+    isCollected &&
+    collectionTimeRef.current &&
+    performance.now() - collectionTimeRef.current > 500
+  ) {
     return null;
   }
 
@@ -219,7 +227,7 @@ export function Collectibles({ geometry, items: providedItems }: CollectiblesPro
           ? Math.floor(rng() * assetCandidates.length)
           : Math.floor(rng() * fallbackAssets.length);
         const fallback = fallbackAssets[pickIndex % fallbackAssets.length];
-        const asset = useCatalog ? assetCandidates![pickIndex] : null;
+        const asset = useCatalog ? (assetCandidates?.[pickIndex] ?? null) : null;
         const name = asset
           ? asset.fileName
               .replace(/\.png$/i, '')
