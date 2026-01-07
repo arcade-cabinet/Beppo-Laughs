@@ -83,9 +83,7 @@ describe('RailPlayer', () => {
   });
 
   it('renders with Suspense boundary', () => {
-    const { container } = render(
-      <RailPlayer geometry={mockGeometry} />,
-    );
+    const { container } = render(<RailPlayer geometry={mockGeometry} />);
     expect(container).toBeTruthy();
   });
 });
