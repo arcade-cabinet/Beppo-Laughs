@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { waitForGameState } from './utils/test-helpers';
 
 test.describe('Beppo Laughs - Main Menu', () => {
   test.beforeEach(async ({ page }) => {
@@ -59,8 +60,8 @@ test.describe('Beppo Laughs - Gameplay', () => {
     const seedInput = page.getByTestId('input-seed');
     await seedInput.fill('test seed alpha');
     await page.getByTestId('button-start-game').click({ force: true });
-    // Wait for game to load
-    await page.waitForTimeout(2000);
+    // Wait for game to load using state-based wait
+    await waitForGameState(page, 'playing');
   });
 
   test('shows exit button during gameplay', async ({ page }) => {
@@ -92,7 +93,7 @@ test.describe('Beppo Laughs - Accessibility', () => {
   test('buttons have proper aria attributes', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('button-start-game').click({ force: true });
-    await page.waitForTimeout(2000);
+    await waitForGameState(page, 'playing');
   });
 });
 
@@ -100,7 +101,7 @@ test.describe('Beppo Laughs - Visual Effects', () => {
   test('screen effects are present during gameplay', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('button-start-game').click({ force: true });
-    await page.waitForTimeout(2000);
+    await waitForGameState(page, 'playing');
 
     // The game should have loaded
     const exitBtn = page.getByTestId('button-exit');
