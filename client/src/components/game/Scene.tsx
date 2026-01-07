@@ -1,6 +1,9 @@
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
+import type { PointLight } from 'three';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { ErrorFallback } from '@/components/ErrorFallback';
 import { useGameStore } from '@/game/store';
 import { loadAssetCatalog } from '../../game/assetCatalog';
 import { generateMaze, type MazeLayout } from '../../game/maze/core';
@@ -184,102 +187,62 @@ export function Scene({ seed }: SceneProps) {
     <>
       <AudioManager />
 
-      <div className="w-full h-full">
-        <Canvas
-          shadows
-          camera={{ position: [0, 0.15, -2.2], fov: 78, near: 0.1, far: 100 }}
-          gl={{ antialias: graphicsQuality !== 'low', alpha: false }}
-          onCreated={({ gl }) => {
-            if (graphicsQuality !== 'low') {
-              gl.toneMapping = THREE.ACESFilmicToneMapping;
-              gl.toneMappingExposure = 1.1;
-            }
-          }}
-        >
-          <color attach="background" args={[bgColor]} />
-
-          {/* Fog for depth perception - essential for 3D feel */}
-          <fog attach="fog" args={[fogColor, fogNear, fogFar]} />
-
-          {/* Increased ambient light to make maze visible */}
-          <ambientLight intensity={0.6} color="#ffffff" />
-
-          <FlickeringLight
-            position={[centerWorld.x, 4, centerWorld.z]}
-            color="#ffaa55"
-            intensity={1.2 * (1 - avgInsanity * 0.4)}
-            distance={30}
+      <ErrorBoundary
+        fallback={({ error, resetError }) => (
+          <ErrorFallback
+            error={error}
+            resetError={resetError}
+            title="WebGL rendering encountered an error"
+            message="The 3D renderer failed. This could be due to graphics driver issues or browser compatibility. Try restarting the game."
           />
+        )}
+        onReset={() => {
+          useGameStore.getState().resetGame();
+        }}
+      >
+        <div className="w-full h-full">
+          <Canvas
+            shadows
+            camera={{ position: [0, 1.4, 0], fov: 70, near: 0.1, far: 100 }}
+            gl={{ antialias: graphicsQuality !== 'low', alpha: false }}
+            onCreated={({ gl }) => {
+              if (graphicsQuality !== 'low') {
+                gl.toneMapping = THREE.ACESFilmicToneMapping;
+                gl.toneMappingExposure = 1.1;
+              }
+            }}
+          >
+            <color attach="background" args={[bgColor]} />
 
-          <FlickeringLight
-            position={[4, 3.5, 4]}
-            color="#ff9944"
-            intensity={0.8 * (1 - avgInsanity * 0.3)}
-            distance={15}
-          />
-          <FlickeringLight
-            position={[centerWorld.x * 2 - 4, 3.5, 4]}
-            color="#ffaa66"
-            intensity={0.7 * (1 - avgInsanity * 0.3)}
-            distance={15}
-          />
-          <FlickeringLight
-            position={[4, 3.5, centerWorld.z * 2 - 4]}
-            color="#ff8833"
-            intensity={0.7 * (1 - avgInsanity * 0.3)}
-            distance={15}
-          />
-          <FlickeringLight
-            position={[centerWorld.x * 2 - 4, 3.5, centerWorld.z * 2 - 4]}
-            color="#ffbb77"
-            intensity={0.8 * (1 - avgInsanity * 0.3)}
-            distance={15}
-          />
+            {/* Fog for depth perception - essential for 3D feel */}
+            <fog attach="fog" args={[fogColor, fogNear, fogFar]} />
 
-          {avgInsanity > 0.2 && (
-            <>
-              <pointLight
-                position={[centerWorld.x - 5, 2, centerWorld.z - 5]}
-                intensity={avgInsanity * 0.5}
-                color="#8b0000"
-                distance={12}
-              />
-              <pointLight
-                position={[centerWorld.x + 5, 2, centerWorld.z + 5]}
-                intensity={avgInsanity * 0.4}
-                color="#4a0066"
-                distance={12}
-              />
-            </>
-          )}
+            {/* Increased ambient light to make maze visible */}
+            <ambientLight intensity={0.6} color="#ffffff" />
 
-          {avgInsanity > 0.5 && (
-            <spotLight
-              position={[centerWorld.x, 6, centerWorld.z]}
-              angle={0.4}
-              penumbra={0.8}
-              intensity={avgInsanity * 2}
-              color="#ff4400"
-              distance={20}
-              target-position={[centerWorld.x, 0, centerWorld.z]}
+            <FlickeringLight
+              position={[centerWorld.x, 4, centerWorld.z]}
+              color="#ffaa55"
+              intensity={1.2 * (1 - avgInsanity * 0.4)}
+              distance={30}
             />
-          )}
 
-          <Suspense fallback={null}>
-            <Maze geometry={geometry} />
-            {spawnPlan?.blockades.length ? <Blockades blockades={spawnPlan.blockades} /> : null}
-            <Collectibles geometry={geometry} items={spawnPlan?.collectibles} />
-            <RailPlayer geometry={geometry} />
-            <Villains geometry={geometry} />
+            <Suspense fallback={null}>
+              <Maze geometry={geometry} />
+              {spawnPlan?.blockades.length ? <Blockades blockades={spawnPlan.blockades} /> : null}
+              <Collectibles geometry={geometry} items={spawnPlan?.collectibles} />
+              <RailPlayer geometry={geometry} />
+              <Villains geometry={geometry} />
 
-            {/* 3D Cockpit attached to camera */}
-            <CameraAttachedCockpit />
-          </Suspense>
+              {/* 3D Cockpit attached to camera */}
+              <CameraAttachedCockpit />
+            </Suspense>
 
-          {/* GPU post-processing effects for horror atmosphere */}
-          {graphicsQuality !== 'low' && <HorrorEffects />}
-        </Canvas>
-      </div>
+            {/* GPU post-processing effects for horror atmosphere */}
+            {graphicsQuality !== 'low' && <HorrorEffects />}
+          </Canvas>
+        </div>
+      </ErrorBoundary>
 
       {/* HTML overlays for UI that needs to be 2D */}
       <ForkPrompt />
