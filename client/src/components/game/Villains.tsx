@@ -266,7 +266,7 @@ function Villain({
           <Text
             position={[0.8, 2.2, 0]}
             fontSize={0.45}
-            color={isBlocked ? '#ff0000' : '#8b0000'}
+            color={'#8b0000'} // Dark red - consistent villain color (isBlocked prop removed)
             anchorX="center"
           >
             {laughText}

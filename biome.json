@@ -59,7 +59,8 @@
       "!**/client/public/assets",
       "!**/playwright-report",
       "!**/test-results",
-      "!**/*.css"
+      "!**/*.css",
+      "!**/*.astro"
     ],
     "ignoreUnknown": true
   }
