@@ -9,7 +9,9 @@
 // Get base URL from Vite/Astro environment (includes GitHub Pages base path if deployed)
 const BASE_URL = import.meta.env.BASE_URL || '/';
 // Ensure BASE_URL ends with slash for proper path concatenation
-const ASSETS_BASE = BASE_URL.endsWith('/') ? `${BASE_URL}assets/generated_images/` : `${BASE_URL}/assets/generated_images/`;
+const ASSETS_BASE = BASE_URL.endsWith('/')
+  ? `${BASE_URL}assets/generated_images/`
+  : `${BASE_URL}/assets/generated_images/`;
 
 // Helper to create asset URL
 const asset = (filename: string) => `${ASSETS_BASE}${filename}`;

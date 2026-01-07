@@ -39,7 +39,7 @@ function TapZone({ targetNode, currentNode, direction, onTap }: TapZoneProps) {
   };
 
   return (
-    // biome-ignore lint/a11y/useSemanticElements: R3F mesh is not a DOM button.
+    // @ts-expect-error - React Three Fiber mesh props don't include DOM role attribute
     <mesh
       position={[markerX, 0.5, markerZ]}
       role="button"

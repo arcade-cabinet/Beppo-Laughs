@@ -154,14 +154,14 @@ export function Scene({ seed }: SceneProps) {
 
   const avgInsanity = maxSanity > 0 ? (fear + despair) / 2 / maxSanity : 0;
 
-  const fogNear = Math.max(2, 12 - avgInsanity * 8);
-  const fogFar = Math.max(15, 35 - avgInsanity * 20);
+  // Calculate fog parameters (currently disabled but kept for future use)
+  // const fogNear = Math.max(2, 12 - avgInsanity * 8);
+  // const fogFar = Math.max(15, 35 - avgInsanity * 20);
+  // const fogHue = 30 + avgInsanity * 60;
+  // const fogColor = `hsl(${fogHue}, ${30 - avgInsanity * 15}%, ${20 - avgInsanity * 10}%)`;
 
   const bgBrightness = Math.max(8, 25 - avgInsanity * 17);
   const bgColor = `hsl(30, 40%, ${bgBrightness}%)`;
-
-  const fogHue = 30 + avgInsanity * 60;
-  const fogColor = `hsl(${fogHue}, ${30 - avgInsanity * 15}%, ${20 - avgInsanity * 10}%)`;
 
   const spawnPlan = useMemo(() => {
     if (!mazeData) return null;
@@ -202,89 +202,86 @@ export function Scene({ seed }: SceneProps) {
       <AudioManager />
 
       <div className="w-full h-full">
-        <Canvas
-          shadows
-          camera={{ position: [0, 1.4, 0], fov: 70, near: 0.1, far: 100 }}
-        >
-        <color attach="background" args={[bgColor]} />
-        {/* Fog temporarily disabled - was obscuring 3D geometry */}
-        {/* <fog attach="fog" args={[fogColor, fogNear, fogFar]} /> */}
+        <Canvas shadows camera={{ position: [0, 1.4, 0], fov: 70, near: 0.1, far: 100 }}>
+          <color attach="background" args={[bgColor]} />
+          {/* Fog temporarily disabled - was obscuring 3D geometry */}
+          {/* <fog attach="fog" args={[fogColor, fogNear, fogFar]} /> */}
 
-        {/* Increased ambient light to make maze visible */}
-        <ambientLight intensity={0.8} color="#ffffff" />
+          {/* Increased ambient light to make maze visible */}
+          <ambientLight intensity={0.8} color="#ffffff" />
 
-        <FlickeringLight
-          position={[centerWorld.x, 4, centerWorld.z]}
-          color="#ffaa55"
-          intensity={1.2 * (1 - avgInsanity * 0.4)}
-          distance={30}
-        />
-
-        <FlickeringLight
-          position={[4, 3.5, 4]}
-          color="#ff9944"
-          intensity={0.8 * (1 - avgInsanity * 0.3)}
-          distance={15}
-        />
-        <FlickeringLight
-          position={[centerWorld.x * 2 - 4, 3.5, 4]}
-          color="#ffaa66"
-          intensity={0.7 * (1 - avgInsanity * 0.3)}
-          distance={15}
-        />
-        <FlickeringLight
-          position={[4, 3.5, centerWorld.z * 2 - 4]}
-          color="#ff8833"
-          intensity={0.7 * (1 - avgInsanity * 0.3)}
-          distance={15}
-        />
-        <FlickeringLight
-          position={[centerWorld.x * 2 - 4, 3.5, centerWorld.z * 2 - 4]}
-          color="#ffbb77"
-          intensity={0.8 * (1 - avgInsanity * 0.3)}
-          distance={15}
-        />
-
-        {avgInsanity > 0.2 && (
-          <>
-            <pointLight
-              position={[centerWorld.x - 5, 2, centerWorld.z - 5]}
-              intensity={avgInsanity * 0.5}
-              color="#8b0000"
-              distance={12}
-            />
-            <pointLight
-              position={[centerWorld.x + 5, 2, centerWorld.z + 5]}
-              intensity={avgInsanity * 0.4}
-              color="#4a0066"
-              distance={12}
-            />
-          </>
-        )}
-
-        {avgInsanity > 0.5 && (
-          <spotLight
-            position={[centerWorld.x, 6, centerWorld.z]}
-            angle={0.4}
-            penumbra={0.8}
-            intensity={avgInsanity * 2}
-            color="#ff4400"
-            distance={20}
-            target-position={[centerWorld.x, 0, centerWorld.z]}
+          <FlickeringLight
+            position={[centerWorld.x, 4, centerWorld.z]}
+            color="#ffaa55"
+            intensity={1.2 * (1 - avgInsanity * 0.4)}
+            distance={30}
           />
-        )}
 
-        <Suspense fallback={null}>
-          <Maze geometry={geometry} />
-          {spawnPlan?.blockades.length ? <Blockades blockades={spawnPlan.blockades} /> : null}
-          <Collectibles geometry={geometry} items={spawnPlan?.collectibles} />
-          <RailPlayer geometry={geometry} />
-          <Villains geometry={geometry} />
-        </Suspense>
+          <FlickeringLight
+            position={[4, 3.5, 4]}
+            color="#ff9944"
+            intensity={0.8 * (1 - avgInsanity * 0.3)}
+            distance={15}
+          />
+          <FlickeringLight
+            position={[centerWorld.x * 2 - 4, 3.5, 4]}
+            color="#ffaa66"
+            intensity={0.7 * (1 - avgInsanity * 0.3)}
+            distance={15}
+          />
+          <FlickeringLight
+            position={[4, 3.5, centerWorld.z * 2 - 4]}
+            color="#ff8833"
+            intensity={0.7 * (1 - avgInsanity * 0.3)}
+            distance={15}
+          />
+          <FlickeringLight
+            position={[centerWorld.x * 2 - 4, 3.5, centerWorld.z * 2 - 4]}
+            color="#ffbb77"
+            intensity={0.8 * (1 - avgInsanity * 0.3)}
+            distance={15}
+          />
 
-        {/* GPU post-processing effects for horror atmosphere */}
-        <HorrorEffects />
-      </Canvas>
+          {avgInsanity > 0.2 && (
+            <>
+              <pointLight
+                position={[centerWorld.x - 5, 2, centerWorld.z - 5]}
+                intensity={avgInsanity * 0.5}
+                color="#8b0000"
+                distance={12}
+              />
+              <pointLight
+                position={[centerWorld.x + 5, 2, centerWorld.z + 5]}
+                intensity={avgInsanity * 0.4}
+                color="#4a0066"
+                distance={12}
+              />
+            </>
+          )}
+
+          {avgInsanity > 0.5 && (
+            <spotLight
+              position={[centerWorld.x, 6, centerWorld.z]}
+              angle={0.4}
+              penumbra={0.8}
+              intensity={avgInsanity * 2}
+              color="#ff4400"
+              distance={20}
+              target-position={[centerWorld.x, 0, centerWorld.z]}
+            />
+          )}
+
+          <Suspense fallback={null}>
+            <Maze geometry={geometry} />
+            {spawnPlan?.blockades.length ? <Blockades blockades={spawnPlan.blockades} /> : null}
+            <Collectibles geometry={geometry} items={spawnPlan?.collectibles} />
+            <RailPlayer geometry={geometry} />
+            <Villains geometry={geometry} />
+          </Suspense>
+
+          {/* GPU post-processing effects for horror atmosphere */}
+          <HorrorEffects />
+        </Canvas>
       </div>
 
       <DriveControls />

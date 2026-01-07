@@ -3,12 +3,12 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useRef, useState } from 'react';
 import { MathUtils, Vector3 } from 'three';
 import { resolveCollision } from '../../game/collision';
-import type { MazeGenerator } from '../../game/MazeGenerator';
+import type { Maze } from '../../game/maze';
 import { useGameStore } from '../../game/store';
 
 interface PlayerProps {
   onMove?: (pos: Vector3) => void;
-  maze: MazeGenerator;
+  maze: Maze;
 }
 
 export function Player({ onMove, maze }: PlayerProps) {

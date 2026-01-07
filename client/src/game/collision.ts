@@ -1,5 +1,5 @@
 import { Vector3 } from 'three';
-import type { MazeGenerator } from './MazeGenerator';
+import type { Maze } from './maze';
 
 const CELL_SIZE = 2;
 const PLAYER_RADIUS = 0.3;
@@ -10,7 +10,7 @@ const cellKey = (gridX: number, gridZ: number) => `${gridX},${gridZ}`;
 
 export function checkCollision(
   position: Vector3,
-  maze: MazeGenerator,
+  maze: Maze,
   blockades?: Set<string>,
 ): boolean {
   // Convert world position to grid coordinates
@@ -81,7 +81,7 @@ export function checkCollision(
 export function resolveCollision(
   currentPos: Vector3,
   targetPos: Vector3,
-  maze: MazeGenerator,
+  maze: Maze,
   blockades?: Set<string>,
 ): Vector3 {
   if (!checkCollision(targetPos, maze, blockades)) {
