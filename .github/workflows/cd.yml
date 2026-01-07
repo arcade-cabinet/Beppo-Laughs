@@ -33,9 +33,6 @@ jobs:
           path: . # The root location of your Astro project inside the repository
           node-version: 24 # The specific version of Node from .nvmrc
           package-manager: pnpm@10 # Use specific pnpm version for reproducibility
-          # Skip astro check (type errors handled by CI with continue-on-error)
-          # Use build:client to match CI behavior
-          build-command: pnpm run build:client
 
   deploy:
     needs: build
