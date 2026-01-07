@@ -154,7 +154,8 @@ export function Scene({ seed }: SceneProps) {
 
   const avgInsanity = maxSanity > 0 ? (fear + despair) / 2 / maxSanity : 0;
 
-  // Calculate fog parameters (currently disabled but kept for future use)
+  // TODO: Fog calculations disabled for visibility debugging
+  // Re-enable once 3D maze rendering is fully optimized
   // const fogNear = Math.max(2, 12 - avgInsanity * 8);
   // const fogFar = Math.max(15, 35 - avgInsanity * 20);
   // const fogHue = 30 + avgInsanity * 60;

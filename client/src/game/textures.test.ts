@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   COLLECTIBLE_NAMES,
-  COLLECTIBLE_TEXTURES,
   COLLECTIBLE_TEXTURE_URLS,
+  COLLECTIBLE_TEXTURES,
   getRandomCollectibleTexture,
   getTexturesByCategory,
   MAZE_TEXTURES,
@@ -23,12 +23,12 @@ describe('textures', () => {
 
     it('texture URLs are properly formatted', () => {
       // All texture URLs should be valid asset paths
-      Object.values(COLLECTIBLE_TEXTURES).forEach(texture => {
+      Object.values(COLLECTIBLE_TEXTURES).forEach((texture) => {
         expect(texture.url).toContain('assets/generated_images/');
         expect(texture.url).toMatch(/\.png$/);
       });
 
-      Object.values(MAZE_TEXTURES).forEach(texture => {
+      Object.values(MAZE_TEXTURES).forEach((texture) => {
         expect(texture.url).toContain('assets/generated_images/');
         expect(texture.url).toMatch(/\.png$/);
       });
@@ -39,7 +39,9 @@ describe('textures', () => {
     it('contains CIRCUS_TICKET texture', () => {
       expect(COLLECTIBLE_TEXTURES.CIRCUS_TICKET).toBeDefined();
       expect(COLLECTIBLE_TEXTURES.CIRCUS_TICKET.name).toBe('CIRCUS TICKET');
-      expect(COLLECTIBLE_TEXTURES.CIRCUS_TICKET.url).toContain('paper_mache_circus_ticket_item.png');
+      expect(COLLECTIBLE_TEXTURES.CIRCUS_TICKET.url).toContain(
+        'paper_mache_circus_ticket_item.png',
+      );
     });
 
     it('contains MYSTERY_KEY texture', () => {
@@ -49,7 +51,7 @@ describe('textures', () => {
     });
 
     it('all textures have required properties', () => {
-      Object.values(COLLECTIBLE_TEXTURES).forEach(texture => {
+      Object.values(COLLECTIBLE_TEXTURES).forEach((texture) => {
         expect(texture).toHaveProperty('url');
         expect(texture).toHaveProperty('name');
         expect(texture).toHaveProperty('description');
@@ -60,13 +62,13 @@ describe('textures', () => {
     });
 
     it('all texture names are uppercase', () => {
-      Object.values(COLLECTIBLE_TEXTURES).forEach(texture => {
+      Object.values(COLLECTIBLE_TEXTURES).forEach((texture) => {
         expect(texture.name).toBe(texture.name.toUpperCase());
       });
     });
 
     it('all descriptions are meaningful', () => {
-      Object.values(COLLECTIBLE_TEXTURES).forEach(texture => {
+      Object.values(COLLECTIBLE_TEXTURES).forEach((texture) => {
         expect(texture.description.length).toBeGreaterThan(10);
         expect(texture.description).toContain('paper mâché');
       });
@@ -80,19 +82,19 @@ describe('textures', () => {
     });
 
     it('all URLs are strings', () => {
-      COLLECTIBLE_TEXTURE_URLS.forEach(url => {
+      COLLECTIBLE_TEXTURE_URLS.forEach((url) => {
         expect(typeof url).toBe('string');
       });
     });
 
     it('all URLs point to PNG files', () => {
-      COLLECTIBLE_TEXTURE_URLS.forEach(url => {
+      COLLECTIBLE_TEXTURE_URLS.forEach((url) => {
         expect(url).toMatch(/\.png$/);
       });
     });
 
     it('matches URLs from COLLECTIBLE_TEXTURES', () => {
-      const textureUrls = Object.values(COLLECTIBLE_TEXTURES).map(t => t.url);
+      const textureUrls = Object.values(COLLECTIBLE_TEXTURES).map((t) => t.url);
       expect(COLLECTIBLE_TEXTURE_URLS).toEqual(textureUrls);
     });
   });
@@ -104,19 +106,19 @@ describe('textures', () => {
     });
 
     it('all names are strings', () => {
-      COLLECTIBLE_NAMES.forEach(name => {
+      COLLECTIBLE_NAMES.forEach((name) => {
         expect(typeof name).toBe('string');
       });
     });
 
     it('all names are non-empty', () => {
-      COLLECTIBLE_NAMES.forEach(name => {
+      COLLECTIBLE_NAMES.forEach((name) => {
         expect(name.length).toBeGreaterThan(0);
       });
     });
 
     it('matches names from COLLECTIBLE_TEXTURES', () => {
-      const textureNames = Object.values(COLLECTIBLE_TEXTURES).map(t => t.name);
+      const textureNames = Object.values(COLLECTIBLE_TEXTURES).map((t) => t.name);
       expect(COLLECTIBLE_NAMES).toEqual(textureNames);
     });
   });
@@ -143,7 +145,7 @@ describe('textures', () => {
     });
 
     it('all textures have required properties', () => {
-      Object.values(MAZE_TEXTURES).forEach(texture => {
+      Object.values(MAZE_TEXTURES).forEach((texture) => {
         expect(texture).toHaveProperty('url');
         expect(texture).toHaveProperty('name');
         expect(texture).toHaveProperty('description');
@@ -151,20 +153,20 @@ describe('textures', () => {
     });
 
     it('all URLs are valid paths', () => {
-      Object.values(MAZE_TEXTURES).forEach(texture => {
+      Object.values(MAZE_TEXTURES).forEach((texture) => {
         expect(texture.url).toContain('assets/generated_images/');
         expect(texture.url).toMatch(/\.png$/);
       });
     });
 
     it('all names are descriptive', () => {
-      Object.values(MAZE_TEXTURES).forEach(texture => {
+      Object.values(MAZE_TEXTURES).forEach((texture) => {
         expect(texture.name.length).toBeGreaterThan(5);
       });
     });
 
     it('all descriptions are meaningful', () => {
-      Object.values(MAZE_TEXTURES).forEach(texture => {
+      Object.values(MAZE_TEXTURES).forEach((texture) => {
         expect(texture.description.length).toBeGreaterThan(10);
       });
     });
@@ -186,7 +188,7 @@ describe('textures', () => {
     });
 
     it('all videos have required properties', () => {
-      Object.values(VIDEO_ASSETS).forEach(video => {
+      Object.values(VIDEO_ASSETS).forEach((video) => {
         expect(video).toHaveProperty('url');
         expect(video).toHaveProperty('name');
         expect(video).toHaveProperty('description');
@@ -224,18 +226,18 @@ describe('textures', () => {
     it('returns a valid collectible texture', () => {
       const texture = getRandomCollectibleTexture();
       const allTextures = Object.values(COLLECTIBLE_TEXTURES);
-      
+
       expect(allTextures).toContain(texture);
     });
 
     it('returns different textures on multiple calls (probabilistic)', () => {
       const results = new Set();
-      
+
       for (let i = 0; i < 50; i++) {
         const texture = getRandomCollectibleTexture();
         results.add(texture.name);
       }
-      
+
       // With 2 collectibles and 50 calls, should get both at least once
       // (probability of not getting one: (1/2)^50 ≈ 0)
       expect(results.size).toBeGreaterThan(1);
@@ -243,7 +245,7 @@ describe('textures', () => {
 
     it('returned texture has all required properties', () => {
       const texture = getRandomCollectibleTexture();
-      
+
       expect(texture).toHaveProperty('url');
       expect(texture).toHaveProperty('name');
       expect(texture).toHaveProperty('description');
@@ -263,16 +265,16 @@ describe('textures', () => {
     it('distribution is roughly uniform (statistical test)', () => {
       const counts: Record<string, number> = {};
       const iterations = 1000;
-      
+
       for (let i = 0; i < iterations; i++) {
         const texture = getRandomCollectibleTexture();
         counts[texture.name] = (counts[texture.name] || 0) + 1;
       }
-      
+
       // With 2 collectibles and 1000 iterations, each should appear ~500 times
       // Allow 30% deviation
       const expectedCount = iterations / Object.keys(COLLECTIBLE_TEXTURES).length;
-      Object.values(counts).forEach(count => {
+      Object.values(counts).forEach((count) => {
         expect(count).toBeGreaterThan(expectedCount * 0.7);
         expect(count).toBeLessThan(expectedCount * 1.3);
       });
@@ -311,26 +313,26 @@ describe('textures', () => {
     it('returns readonly references', () => {
       const ref1 = getTexturesByCategory('collectibles');
       const ref2 = getTexturesByCategory('collectibles');
-      
+
       expect(ref1).toBe(ref2); // Same reference
     });
   });
 
   describe('Texture Consistency', () => {
     it('all collectible texture URLs end with .png', () => {
-      COLLECTIBLE_TEXTURE_URLS.forEach(url => {
+      COLLECTIBLE_TEXTURE_URLS.forEach((url) => {
         expect(url).toMatch(/\.png$/);
       });
     });
 
     it('all maze texture URLs end with .png', () => {
-      Object.values(MAZE_TEXTURES).forEach(texture => {
+      Object.values(MAZE_TEXTURES).forEach((texture) => {
         expect(texture.url).toMatch(/\.png$/);
       });
     });
 
     it('video URLs are properly formatted or empty', () => {
-      Object.values(VIDEO_ASSETS).forEach(video => {
+      Object.values(VIDEO_ASSETS).forEach((video) => {
         expect(typeof video.url).toBe('string');
         // Currently empty, but should be empty string not undefined
         expect(video.url).toBe('');
@@ -350,7 +352,7 @@ describe('textures', () => {
     });
 
     it('no duplicate texture URLs across maze textures', () => {
-      const urls = Object.values(MAZE_TEXTURES).map(t => t.url);
+      const urls = Object.values(MAZE_TEXTURES).map((t) => t.url);
       const uniqueUrls = new Set(urls);
       expect(uniqueUrls.size).toBe(urls.length);
     });
@@ -372,8 +374,8 @@ describe('textures', () => {
     it('helper functions handle all enum values', () => {
       // getTexturesByCategory should handle all TEXTURE_METADATA keys
       const categories: Array<keyof typeof TEXTURE_METADATA> = ['collectibles', 'maze', 'videos'];
-      
-      categories.forEach(category => {
+
+      categories.forEach((category) => {
         expect(() => getTexturesByCategory(category)).not.toThrow();
       });
     });
