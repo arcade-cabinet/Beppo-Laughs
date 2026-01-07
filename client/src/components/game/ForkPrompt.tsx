@@ -46,10 +46,7 @@ export function ForkPrompt() {
   };
 
   return (
-    <div 
-      className="absolute inset-0 pointer-events-none z-40"
-      data-has-fork="true"
-    >
+    <div className="absolute inset-0 pointer-events-none z-40" data-has-fork="true">
       {pendingFork.options.map((option, _idx) => (
         <button
           key={option.nodeId}

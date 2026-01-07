@@ -98,7 +98,7 @@ export function HUD() {
   };
 
   return (
-    <div 
+    <div
       className="pointer-events-none absolute inset-0 z-40"
       data-fear={fear.toString()}
       data-despair={despair.toString()}

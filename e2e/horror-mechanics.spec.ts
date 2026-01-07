@@ -34,7 +34,10 @@ test.describe('Beppo Laughs - Horror Mechanics', () => {
       const forkCount = await forkButtons.count();
       if (forkCount > 0) {
         await forkButtons.first().click();
-        await page.locator('[data-has-fork="true"]').waitFor({ state: 'detached', timeout: 2000 }).catch(() => {});
+        await page
+          .locator('[data-has-fork="true"]')
+          .waitFor({ state: 'detached', timeout: 2000 })
+          .catch(() => {});
       }
 
       await page.screenshot({
@@ -68,7 +71,10 @@ test.describe('Beppo Laughs - Horror Mechanics', () => {
       const forkCount = await forkButtons.count();
       if (forkCount > 0) {
         await forkButtons.first().click();
-        await page.locator('[data-has-fork="true"]').waitFor({ state: 'detached', timeout: 2000 }).catch(() => {});
+        await page
+          .locator('[data-has-fork="true"]')
+          .waitFor({ state: 'detached', timeout: 2000 })
+          .catch(() => {});
       }
 
       // Capture screenshots to show progressive horror effects
@@ -97,7 +103,10 @@ test.describe('Beppo Laughs - Horror Mechanics', () => {
       const forkCount = await forkButtons.count();
       if (forkCount > 0) {
         await forkButtons.first().click();
-        await page.locator('[data-has-fork="true"]').waitFor({ state: 'detached', timeout: 2000 }).catch(() => {});
+        await page
+          .locator('[data-has-fork="true"]')
+          .waitFor({ state: 'detached', timeout: 2000 })
+          .catch(() => {});
       }
 
       // Check for blockades (villain-created obstacles)
@@ -164,7 +173,10 @@ test.describe('Beppo Laughs - Horror Mechanics', () => {
         } else {
           await forkButtons.first().click();
         }
-        await page.locator('[data-has-fork="true"]').waitFor({ state: 'detached', timeout: 2000 }).catch(() => {});
+        await page
+          .locator('[data-has-fork="true"]')
+          .waitFor({ state: 'detached', timeout: 2000 })
+          .catch(() => {});
       }
 
       // Periodic screenshots
@@ -196,7 +208,10 @@ test.describe('Beppo Laughs - Horror Mechanics', () => {
       const forkCount = await forkButtons.count();
       if (forkCount > 0) {
         await forkButtons.first().click();
-        await page.locator('[data-has-fork="true"]').waitFor({ state: 'detached', timeout: 2000 }).catch(() => {});
+        await page
+          .locator('[data-has-fork="true"]')
+          .waitFor({ state: 'detached', timeout: 2000 })
+          .catch(() => {});
       }
 
       // Capture brain meter state
@@ -242,7 +257,10 @@ test.describe('Beppo Laughs - Horror Mechanics', () => {
     if (forkCount > 0) {
       await page.screenshot({ path: 'test-results/screenshots/horror-audio-fork-before.png' });
       await forkButtons.first().click();
-      await page.locator('[data-has-fork="true"]').waitFor({ state: 'detached', timeout: 2000 }).catch(() => {});
+      await page
+        .locator('[data-has-fork="true"]')
+        .waitFor({ state: 'detached', timeout: 2000 })
+        .catch(() => {});
       await page.screenshot({ path: 'test-results/screenshots/horror-audio-fork-after.png' });
     }
   });

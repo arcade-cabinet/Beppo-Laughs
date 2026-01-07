@@ -146,7 +146,10 @@ test.describe('Beppo Laughs - Mobile Controls', () => {
 
         // Test tapping a fork button
         await forkButtons.first().tap();
-        await page.locator('[data-has-fork="true"]').waitFor({ state: 'detached', timeout: 2000 }).catch(() => {});
+        await page
+          .locator('[data-has-fork="true"]')
+          .waitFor({ state: 'detached', timeout: 2000 })
+          .catch(() => {});
         await page.screenshot({
           path: 'test-results/screenshots/mobile-fork-selected.png',
         });

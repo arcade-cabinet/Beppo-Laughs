@@ -20,11 +20,7 @@ export async function waitForGameState(
  * @param moving - Expected movement state: true if moving, false if stopped
  * @param timeout - Maximum time to wait in milliseconds (default: 5000ms)
  */
-export async function waitForMovement(
-  page: Page,
-  moving: boolean,
-  timeout = 5000,
-): Promise<void> {
+export async function waitForMovement(page: Page, moving: boolean, timeout = 5000): Promise<void> {
   await page.locator(`[data-moving="${moving}"]`).waitFor({ timeout });
 }
 
