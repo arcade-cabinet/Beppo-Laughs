@@ -44,7 +44,7 @@ describe('HorrorEffects', () => {
     const { unmount } = render(<HorrorEffects />);
     expect(() => unmount()).not.toThrow();
   });
-});
+
 
   describe('Effect Intensity', () => {
     it('increases vignette darkness with despair', () => {
@@ -90,7 +90,7 @@ describe('HorrorEffects', () => {
 
       expect(() => render(<HorrorEffects />)).not.toThrow();
     });
-  });
+  
 
   describe('Dynamic Updates', () => {
     it('updates effects when fear changes', () => {
@@ -126,7 +126,7 @@ describe('HorrorEffects', () => {
       
       expect(() => rerender(<HorrorEffects />)).not.toThrow();
     });
-  });
+  
 
   describe('Edge Cases', () => {
     it('handles zero sanity loss', () => {
@@ -159,4 +159,5 @@ describe('HorrorEffects - structure', () => {
     const { container } = render(<HorrorEffects />);
     expect(container).toBeDefined();
   });
+});
 });

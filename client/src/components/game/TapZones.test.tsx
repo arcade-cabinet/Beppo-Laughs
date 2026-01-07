@@ -75,7 +75,7 @@ describe('TapZones', () => {
     const { unmount } = render(<TapZones geometry={mockGeometry} />);
     expect(() => unmount()).not.toThrow();
   });
-});
+
 
   describe('Villain Visibility', () => {
     it('renders when visible', () => {
@@ -118,7 +118,7 @@ describe('TapZones', () => {
       
       expect(() => rerender(<SDFVillain position={[0, 0, 0]} isVisible={true} />)).not.toThrow();
     });
-  });
+  
 
   describe('Fear Integration', () => {
     it('reacts to fear level changes', () => {
@@ -150,7 +150,7 @@ describe('TapZones', () => {
 
       expect(() => render(<SDFVillain position={[0, 1, -5]} isVisible={true} />)).not.toThrow();
     });
-  });
+  
 
   describe('Position Variations', () => {
     it('renders at different positions', () => {
@@ -172,7 +172,7 @@ describe('TapZones', () => {
         expect(() => render(<SDFVillain position={pos} isVisible={true} />)).not.toThrow();
       });
     });
-  });
+  
 
   describe('Edge Cases', () => {
     it('handles zero fear level', () => {
@@ -223,7 +223,7 @@ describe('TapZones', () => {
 
       expect(() => render(<TapZones geometry={mockGeometryMulti} />)).not.toThrow();
     });
-  });
+  
 
   describe('Edge Cases', () => {
     it('handles node with no connections', () => {

@@ -45,7 +45,7 @@ describe('DriveControls', () => {
     const { unmount } = render(<DriveControls />);
     expect(() => unmount()).not.toThrow();
   });
-});
+
 
   describe('Lever Interaction', () => {
     it('starts acceleration on lever pull', () => {
@@ -134,7 +134,7 @@ describe('DriveControls', () => {
       
       expect(screen.queryByText('Pull the lever!')).not.toBeInTheDocument();
     });
-  });
+  
 
   describe('Fork Interaction', () => {
     it('disables lever when at fork', () => {
@@ -194,7 +194,7 @@ describe('DriveControls', () => {
       rerender(<DriveControls />);
       expect(screen.getByTestId('lever-control')).not.toBeDisabled();
     });
-  });
+  
 
   describe('Speed Display', () => {
     it('shows speed percentage', () => {
@@ -235,7 +235,7 @@ describe('DriveControls', () => {
       
       expect(screen.getByText('SPEED')).toBeInTheDocument();
     });
-  });
+  
 
   describe('Game State', () => {
     it('hides controls when game is over', () => {
@@ -271,7 +271,7 @@ describe('DriveControls', () => {
       const { container } = render(<DriveControls />);
       expect(container.firstChild).toBeNull();
     });
-  });
+  
 
   describe('Edge Cases', () => {
     it('handles mouse leave during lever pull', () => {
@@ -371,4 +371,5 @@ describe('DriveControls - accessibility and keyboard', () => {
     lever.dispatchEvent(new KeyboardEvent('keyup', { key: ' ' }));
     expect(setAccelerating).toHaveBeenCalledWith(false);
   });
+});
 });

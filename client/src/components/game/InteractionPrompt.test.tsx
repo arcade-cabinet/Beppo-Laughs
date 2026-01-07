@@ -37,7 +37,7 @@ describe('InteractionPrompt', () => {
     const { unmount } = render(<InteractionPrompt />);
     expect(() => unmount()).not.toThrow();
   });
-});
+
 
   describe('Item Interaction', () => {
     it('shows collect button when nearby item exists', () => {
@@ -103,7 +103,7 @@ describe('InteractionPrompt', () => {
       
       expect(screen.queryByTestId('button-collect-item')).not.toBeInTheDocument();
     });
-  });
+  
 
   describe('Exit Interaction', () => {
     it('shows exit button when nearby exit exists', () => {
@@ -170,7 +170,7 @@ describe('InteractionPrompt', () => {
       expect(screen.getByTestId('button-collect-item')).toBeInTheDocument();
       expect(screen.queryByTestId('button-escape-exit')).not.toBeInTheDocument();
     });
-  });
+  
 
   describe('Collection Popup', () => {
     it('shows popup after item collection', () => {
@@ -218,7 +218,7 @@ describe('InteractionPrompt', () => {
       
       vi.useRealTimers();
     });
-  });
+  
 
   describe('Inventory Display', () => {
     it('shows item count when inventory not empty', () => {
@@ -261,7 +261,7 @@ describe('InteractionPrompt', () => {
       
       expect(screen.queryByTestId('display-inventory')).not.toBeInTheDocument();
     });
-  });
+  
 
   describe('Game State', () => {
     it('hides all prompts when game over', () => {
@@ -342,4 +342,5 @@ describe('InteractionPrompt - popup and counters', () => {
     const { container } = render(<InteractionPrompt />);
     expect(container.firstChild).toBeNull();
   });
+});
 });

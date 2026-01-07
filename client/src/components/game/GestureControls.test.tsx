@@ -34,7 +34,7 @@ describe('GestureControls', () => {
     // Test that it doesn't crash when canvas is not found
     expect(() => render(<GestureControls />)).not.toThrow();
   });
-});
+
 
   describe('Component Lifecycle', () => {
     it('sets up event listeners on mount', () => {
@@ -55,7 +55,7 @@ describe('GestureControls', () => {
       
       expect(removeEventListener).toHaveBeenCalled();
     });
-  });
+  
 
   describe('Store Integration', () => {
     it('uses available moves from store', () => {
@@ -108,7 +108,7 @@ describe('GestureControls', () => {
       render(<GestureControls />);
       expect(setCameraRotation).toBeDefined();
     });
-  });
+  
 
   describe('Edge Cases', () => {
     it('handles no available moves', () => {
@@ -146,7 +146,7 @@ describe('GestureControls', () => {
       
       expect(() => rerender(<GestureControls />)).not.toThrow();
     });
-  });
+  
 
   describe('Canvas Dependency', () => {
     it('handles missing canvas gracefully on mount', () => {
@@ -199,4 +199,5 @@ describe('GestureControls - gestures', () => {
     for (let i=0;i<50;i++) { rotation += 10; rerender(<GestureControls />); }
     expect(rotation).toBeDefined();
   });
+});
 });

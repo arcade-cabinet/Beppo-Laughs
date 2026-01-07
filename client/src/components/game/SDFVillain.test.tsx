@@ -50,7 +50,7 @@ describe('SDFVillain', () => {
     const { unmount } = render(<SDFVillain {...mockProps} />);
     expect(() => unmount()).not.toThrow();
   });
-});
+
 
   describe('Villain Visibility', () => {
     it('renders when visible', () => {
@@ -93,7 +93,7 @@ describe('SDFVillain', () => {
       
       expect(() => rerender(<SDFVillain position={[0, 0, 0]} isVisible={true} />)).not.toThrow();
     });
-  });
+  
 
   describe('Fear Integration', () => {
     it('reacts to fear level changes', () => {
@@ -125,7 +125,7 @@ describe('SDFVillain', () => {
 
       expect(() => render(<SDFVillain position={[0, 1, -5]} isVisible={true} />)).not.toThrow();
     });
-  });
+  
 
   describe('Position Variations', () => {
     it('renders at different positions', () => {
@@ -147,7 +147,7 @@ describe('SDFVillain', () => {
         expect(() => render(<SDFVillain position={pos} isVisible={true} />)).not.toThrow();
       });
     });
-  });
+  
 
   describe('Edge Cases', () => {
     it('handles zero fear level', () => {
@@ -178,91 +178,6 @@ describe('SDFVillain', () => {
       }
       
       expect(() => rerender(<SDFVillain position={[0, 0, 0]} isVisible={true} />)).not.toThrow();
-    });
-  });
-});
- -4, worldZ: 0, connections: ['center'], isCenter: false, isExit: false }],
-        ]),
-        exitNodeIds: [],
-      };
-
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
-        currentNode: 'center',
-        isMoving: false,
-        startMoveTo: vi.fn(),
-        blockades: new Set(),
-        setAvailableMoves: vi.fn(),
-      }));
-
-      expect(() => render(<TapZones geometry={mockGeometryMulti} />)).not.toThrow();
-    });
-  });
-
-  describe('Edge Cases', () => {
-    it('handles node with no connections', () => {
-      const deadEndGeometry: MazeGeometry = {
-        walls: [],
-        floor: { x: 0, z: 0, width: 10, depth: 10 },
-        centerNodeId: 'center',
-        railNodes: new Map([
-          [
-            'center',
-            {
-              id: 'center',
-              gridX: 0,
-              gridY: 0,
-              worldX: 0,
-              worldZ: 0,
-              connections: [],
-              isCenter: true,
-              isExit: false,
-            },
-          ],
-        ]),
-        exitNodeIds: [],
-      };
-
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
-        currentNode: 'center',
-        isMoving: false,
-        startMoveTo: vi.fn(),
-        blockades: new Set(),
-        setAvailableMoves: vi.fn(),
-      }));
-
-      expect(() => render(<TapZones geometry={deadEndGeometry} />)).not.toThrow();
-    });
-
-    it('handles invalid current node', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
-        currentNode: 'nonexistent',
-        isMoving: false,
-        startMoveTo: vi.fn(),
-        blockades: new Set(),
-        setAvailableMoves: vi.fn(),
-      }));
-
-      expect(() => render(<TapZones geometry={mockGeometry} />)).not.toThrow();
-    });
-
-    it('handles all nodes blocked', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
-        currentNode: 'center',
-        isMoving: false,
-        startMoveTo: vi.fn(),
-        blockades: new Set(['node1', 'node2', 'node3']),
-        setAvailableMoves: vi.fn(),
-      }));
-
-      expect(() => render(<TapZones geometry={mockGeometry} />)).not.toThrow();
     });
   });
 });

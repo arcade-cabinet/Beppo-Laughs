@@ -48,7 +48,7 @@ describe('BrainMeter', () => {
     const { unmount } = render(<BrainMeter />);
     expect(() => unmount()).not.toThrow();
   });
-});
+
 
   describe('Sanity Meter Display', () => {
     it('displays fear percentage correctly', () => {
@@ -112,7 +112,7 @@ describe('BrainMeter', () => {
       rerender(<BrainMeter />);
       expect(container.textContent).toContain('75%');
     });
-  });
+  
 
   describe('Visual Effects', () => {
     it('applies blur effect at high insanity levels', () => {
@@ -158,7 +158,7 @@ describe('BrainMeter', () => {
       // Should contain canvas for 3D rendering
       expect(container.querySelector('canvas')).toBeTruthy();
     });
-  });
+  
 
   describe('Extreme Values', () => {
     it('handles zero fear and despair', () => {
@@ -212,7 +212,7 @@ describe('BrainMeter', () => {
       const { container } = render(<BrainMeter />);
       expect(container.textContent).toContain('100%');
     });
-  });
+  
 
   describe('Accessibility', () => {
     it('contains readable text labels', () => {
@@ -238,7 +238,7 @@ describe('BrainMeter', () => {
       expect(percentages).toBeTruthy();
       expect(percentages?.length).toBeGreaterThanOrEqual(2);
     });
-  });
+  
 
   describe('Edge Cases', () => {
     it('handles rapid state changes', () => {
@@ -309,4 +309,5 @@ describe('BrainMeter - edge calculations', () => {
     // 25/50 => 50%
     expect(container.textContent).toContain('50%');
   });
+});
 });

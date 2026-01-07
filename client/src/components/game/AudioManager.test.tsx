@@ -46,7 +46,7 @@ describe('AudioManager', () => {
     const { unmount } = render(<AudioManager />);
     expect(() => unmount()).not.toThrow();
   });
-});
+
 
   describe('Audio System Integration', () => {
     it('initializes audio system on mount', async () => {
@@ -92,7 +92,7 @@ describe('AudioManager', () => {
       unmount();
       expect(audioSystem.cleanup).toHaveBeenCalled();
     });
-  });
+  
 
   describe('Fear-based Audio Triggers', () => {
     it('plays jump scare on large fear spike', () => {
@@ -166,7 +166,7 @@ describe('AudioManager', () => {
       
       expect(audioSystem.playJumpScare).toHaveBeenCalled();
     });
-  });
+  
 
   describe('Edge Cases', () => {
     it('handles missing audio context gracefully', () => {
@@ -246,4 +246,5 @@ describe('AudioManager - additional coverage', () => {
     await new Promise(r => setTimeout(r, 120));
     expect(audioSystem.playSanityDistortion).not.toHaveBeenCalled();
   });
+});
 });

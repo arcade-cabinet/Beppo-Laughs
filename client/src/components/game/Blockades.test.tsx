@@ -99,7 +99,7 @@ describe('Blockades', () => {
       ),
     ).not.toThrow();
   });
-});
+
 
   describe('Blockade Visibility', () => {
     it('shows blockades only when they are in blocked cells', () => {
@@ -193,7 +193,7 @@ describe('Blockades', () => {
       
       expect(() => rerender(<Suspense fallback={null}><Blockades blockades={blockades} /></Suspense>)).not.toThrow();
     });
-  });
+  
 
   describe('Blockade Properties', () => {
     it('displays required item name for each blockade', () => {
@@ -270,7 +270,7 @@ describe('Blockades', () => {
         ),
       ).not.toThrow();
     });
-  });
+  
 
   describe('Texture Loading', () => {
     it('handles missing textures gracefully', () => {
@@ -353,7 +353,7 @@ describe('Blockades', () => {
 
       expect(useTexture).toHaveBeenCalledWith(['/texture1.png', '/texture2.png', '/texture3.png']);
     });
-  });
+  
 
   describe('Edge Cases', () => {
     it('handles empty blockades gracefully', () => {
@@ -469,4 +469,5 @@ describe('Blockades - robustness', () => {
       render(<Suspense fallback={null}><Blockades blockades={list} /></Suspense>)
     ).not.toThrow();
   });
+});
 });

@@ -11,7 +11,7 @@ describe('MainMenu', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
-  });
+  
 
   describe('Rendering', () => {
     it('renders the main menu with all elements', () => {
@@ -39,7 +39,7 @@ describe('MainMenu', () => {
       expect(screen.getByTestId('button-random-seed')).toHaveTextContent('Randomize');
       expect(screen.getByTestId('button-start-game')).toHaveTextContent('ENTER MAZE');
     });
-  });
+  
 
   describe('Initial State', () => {
     it('generates a random seed on mount', () => {
@@ -65,7 +65,7 @@ describe('MainMenu', () => {
       const startButton = screen.getByTestId('button-start-game');
       expect(startButton).not.toBeDisabled();
     });
-  });
+  
 
   describe('Seed Input Validation', () => {
     it('accepts valid three-word seed', () => {
@@ -163,7 +163,7 @@ describe('MainMenu', () => {
       expect(mockOnStart).not.toHaveBeenCalled();
       expect(screen.getByTestId('text-seed-error')).toBeInTheDocument();
     });
-  });
+  
 
   describe('Error Messages', () => {
     it('shows error when clicking start with invalid seed', () => {
@@ -208,7 +208,7 @@ describe('MainMenu', () => {
       // Error should not appear until we try to start
       expect(screen.queryByTestId('text-seed-error')).not.toBeInTheDocument();
     });
-  });
+  
 
   describe('Random Seed Generation', () => {
     it('generates new seed when randomize button is clicked', () => {
@@ -281,7 +281,7 @@ describe('MainMenu', () => {
         }
       }
     });
-  });
+  
 
   describe('Starting the Game', () => {
     it('calls onStart with normalized seed when valid', () => {
@@ -367,7 +367,7 @@ describe('MainMenu', () => {
 
       expect(mockOnStart).toHaveBeenCalledTimes(1);
     });
-  });
+  
 
   describe('Input Interaction', () => {
     it('updates seed input when user types', () => {
@@ -402,7 +402,7 @@ describe('MainMenu', () => {
       expect(input.value).toBe('manual seed input');
       expect(input.value).not.toBe(randomSeed);
     });
-  });
+  
 
   describe('Button States', () => {
     it('enables start button with valid seed', () => {
@@ -440,7 +440,7 @@ describe('MainMenu', () => {
 
       expect(randomizeButton).not.toBeDisabled();
     });
-  });
+  
 
   describe('Edge Cases', () => {
     it('handles seed with alphanumeric words', () => {
@@ -502,7 +502,7 @@ describe('MainMenu', () => {
       const words = input.value.trim().split(/\s+/);
       expect(words).toHaveLength(3);
     });
-  });
+  
 
   describe('Accessibility', () => {
     it('has proper test ids for automation', () => {
@@ -574,4 +574,5 @@ describe('MainMenu', () => {
       expect(screen.getByRole('alert')).toHaveAttribute('id', 'seed-error');
     });
   });
+});
 });
