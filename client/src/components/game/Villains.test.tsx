@@ -74,3 +74,15 @@ describe('Villains', () => {
     expect(container).toBeTruthy();
   });
 });
+
+// Additional tests: Villains rendering stability
+describe('Villains - stability', () => {
+  it('renders with empty villains array', () => {
+    expect(() => render(<Villains villains={[]} />)).not.toThrow();
+  });
+
+  it('handles duplicate villain entries', () => {
+    const v = { id: 'v1', worldX: 0, worldZ: 0, kind: 'shadow' } as any;
+    expect(() => render(<Villains villains={[v, { ...v }]} />)).not.toThrow();
+  });
+});

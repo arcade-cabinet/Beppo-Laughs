@@ -76,3 +76,243 @@ describe('TapZones', () => {
     expect(() => unmount()).not.toThrow();
   });
 });
+
+  describe('Villain Visibility', () => {
+    it('renders when visible', () => {
+      const { useGameStore } = require('../../game/store');
+      
+      useGameStore.mockImplementation(() => ({
+        fear: 50,
+        despair: 0,
+        maxSanity: 100,
+      }));
+
+      expect(() => render(<SDFVillain position={[0, 1, -5]} isVisible={true} />)).not.toThrow();
+    });
+
+    it('hides when not visible', () => {
+      const { useGameStore } = require('../../game/store');
+      
+      useGameStore.mockImplementation(() => ({
+        fear: 0,
+        despair: 0,
+        maxSanity: 100,
+      }));
+
+      const { container } = render(<SDFVillain position={[0, 1, -5]} isVisible={false} />);
+      expect(container.firstChild).toBeNull();
+    });
+
+    it('toggles visibility', () => {
+      const { useGameStore } = require('../../game/store');
+      
+      useGameStore.mockImplementation(() => ({
+        fear: 30,
+        despair: 0,
+        maxSanity: 100,
+      }));
+
+      const { rerender } = render(<SDFVillain position={[0, 0, 0]} isVisible={false} />);
+      
+      rerender(<SDFVillain position={[0, 0, 0]} isVisible={true} />);
+      
+      expect(() => rerender(<SDFVillain position={[0, 0, 0]} isVisible={true} />)).not.toThrow();
+    });
+  });
+
+  describe('Fear Integration', () => {
+    it('reacts to fear level changes', () => {
+      const { useGameStore } = require('../../game/store');
+      let fear = 10;
+      
+      useGameStore.mockImplementation(() => ({
+        fear,
+        despair: 0,
+        maxSanity: 100,
+      }));
+
+      const { rerender } = render(<SDFVillain position={[0, 0, 0]} isVisible={true} />);
+      
+      fear = 80;
+      rerender(<SDFVillain position={[0, 0, 0]} isVisible={true} />);
+      
+      expect(() => rerender(<SDFVillain position={[0, 0, 0]} isVisible={true} />)).not.toThrow();
+    });
+
+    it('handles maximum fear level', () => {
+      const { useGameStore } = require('../../game/store');
+      
+      useGameStore.mockImplementation(() => ({
+        fear: 100,
+        despair: 0,
+        maxSanity: 100,
+      }));
+
+      expect(() => render(<SDFVillain position={[0, 1, -5]} isVisible={true} />)).not.toThrow();
+    });
+  });
+
+  describe('Position Variations', () => {
+    it('renders at different positions', () => {
+      const { useGameStore } = require('../../game/store');
+      
+      useGameStore.mockImplementation(() => ({
+        fear: 50,
+        despair: 0,
+        maxSanity: 100,
+      }));
+
+      const positions: [number, number, number][] = [
+        [0, 0, 0],
+        [5, 2, -3],
+        [-5, 1, 10],
+      ];
+
+      positions.forEach(pos => {
+        expect(() => render(<SDFVillain position={pos} isVisible={true} />)).not.toThrow();
+      });
+    });
+  });
+
+  describe('Edge Cases', () => {
+    it('handles zero fear level', () => {
+      const { useGameStore } = require('../../game/store');
+      
+      useGameStore.mockImplementation(() => ({
+        fear: 0,
+        despair: 0,
+        maxSanity: 100,
+      }));
+
+      expect(() => render(<SDFVillain position={[0, 0, 0]} isVisible={true} />)).not.toThrow();
+    });
+
+    it('handles rapid visibility toggles', () => {
+      const { useGameStore } = require('../../game/store');
+      
+      useGameStore.mockImplementation(() => ({
+        fear: 40,
+        despair: 0,
+        maxSanity: 100,
+      }));
+
+      const { rerender } = render(<SDFVillain position={[0, 0, 0]} isVisible={true} />);
+      
+      for (let i = 0; i < 10; i++) {
+        rerender(<SDFVillain position={[0, 0, 0]} isVisible={i % 2 === 0} />);
+      }
+      
+      expect(() => rerender(<SDFVillain position={[0, 0, 0]} isVisible={true} />)).not.toThrow();
+    });
+  });
+});
+ -4, worldZ: 0, connections: ['center'], isCenter: false, isExit: false }],
+        ]),
+        exitNodeIds: [],
+      };
+
+      const { useGameStore } = require('../../game/store');
+      
+      useGameStore.mockImplementation(() => ({
+        currentNode: 'center',
+        isMoving: false,
+        startMoveTo: vi.fn(),
+        blockades: new Set(),
+        setAvailableMoves: vi.fn(),
+      }));
+
+      expect(() => render(<TapZones geometry={mockGeometryMulti} />)).not.toThrow();
+    });
+  });
+
+  describe('Edge Cases', () => {
+    it('handles node with no connections', () => {
+      const deadEndGeometry: MazeGeometry = {
+        walls: [],
+        floor: { x: 0, z: 0, width: 10, depth: 10 },
+        centerNodeId: 'center',
+        railNodes: new Map([
+          [
+            'center',
+            {
+              id: 'center',
+              gridX: 0,
+              gridY: 0,
+              worldX: 0,
+              worldZ: 0,
+              connections: [],
+              isCenter: true,
+              isExit: false,
+            },
+          ],
+        ]),
+        exitNodeIds: [],
+      };
+
+      const { useGameStore } = require('../../game/store');
+      
+      useGameStore.mockImplementation(() => ({
+        currentNode: 'center',
+        isMoving: false,
+        startMoveTo: vi.fn(),
+        blockades: new Set(),
+        setAvailableMoves: vi.fn(),
+      }));
+
+      expect(() => render(<TapZones geometry={deadEndGeometry} />)).not.toThrow();
+    });
+
+    it('handles invalid current node', () => {
+      const { useGameStore } = require('../../game/store');
+      
+      useGameStore.mockImplementation(() => ({
+        currentNode: 'nonexistent',
+        isMoving: false,
+        startMoveTo: vi.fn(),
+        blockades: new Set(),
+        setAvailableMoves: vi.fn(),
+      }));
+
+      expect(() => render(<TapZones geometry={mockGeometry} />)).not.toThrow();
+    });
+
+    it('handles all nodes blocked', () => {
+      const { useGameStore } = require('../../game/store');
+      
+      useGameStore.mockImplementation(() => ({
+        currentNode: 'center',
+        isMoving: false,
+        startMoveTo: vi.fn(),
+        blockades: new Set(['node1', 'node2', 'node3']),
+        setAvailableMoves: vi.fn(),
+      }));
+
+      expect(() => render(<TapZones geometry={mockGeometry} />)).not.toThrow();
+    });
+  });
+});
+
+// Additional tests: TapZones interactions
+describe('TapZones - interactions and a11y', () => {
+  it('hides zones when moving', () => {
+    const { useGameStore } = require('../../game/store');
+    useGameStore.mockImplementation(() => ({
+      availableMoves: [{ direction: 'north', nodeId: 'n1', isExit: false }],
+      isMoving: true,
+      startMoveTo: vi.fn(),
+    }));
+    const { container } = render(<TapZones />);
+    expect(container.querySelector('[data-testid^="tap-zone-"]')).toBeNull();
+  });
+
+  it('renders buttons with roles for available moves', () => {
+    const { useGameStore } = require('../../game/store');
+    useGameStore.mockImplementation(() => ({
+      availableMoves: [{ direction: 'north', nodeId: 'n1', isExit: false }],
+      isMoving: false,
+      startMoveTo: vi.fn(),
+    }));
+    const { getByRole } = render(<TapZones />);
+    expect(getByRole('button')).toBeInTheDocument();
+  });
+});
