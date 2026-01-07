@@ -46,27 +46,30 @@ export async function waitForSanityChange(
   previousDespair: number,
   timeout = 10000,
 ): Promise<{ fear: number; despair: number }> {
-  const startTime = Date.now();
+  // Use Playwright's waitForFunction for proper condition-based waiting
+  await page.waitForFunction(
+    ({ prevFear, prevDespair }) => {
+      const hudElement = document.querySelector('[data-fear][data-despair]');
+      if (!hudElement) return false;
 
-  while (Date.now() - startTime < timeout) {
-    const hudElement = await page.locator('[data-fear][data-despair]').first();
-    const fearStr = await hudElement.getAttribute('data-fear');
-    const despairStr = await hudElement.getAttribute('data-despair');
+      const currentFear = parseFloat(hudElement.getAttribute('data-fear') || '0');
+      const currentDespair = parseFloat(hudElement.getAttribute('data-despair') || '0');
 
-    const currentFear = parseFloat(fearStr || '0');
-    const currentDespair = parseFloat(despairStr || '0');
-
-    if (currentFear !== previousFear || currentDespair !== previousDespair) {
-      return { fear: currentFear, despair: currentDespair };
-    }
-
-    // Wait a bit before checking again
-    await page.waitForTimeout(100);
-  }
-
-  throw new Error(
-    `Sanity values did not change within ${timeout}ms. Previous: fear=${previousFear}, despair=${previousDespair}`,
+      return currentFear !== prevFear || currentDespair !== prevDespair;
+    },
+    { previousFear, previousDespair },
+    { timeout },
   );
+
+  // Retrieve the final values after the condition is met
+  const hudElement = await page.locator('[data-fear][data-despair]').first();
+  const fearStr = await hudElement.getAttribute('data-fear');
+  const despairStr = await hudElement.getAttribute('data-despair');
+
+  return {
+    fear: parseFloat(fearStr || '0'),
+    despair: parseFloat(despairStr || '0'),
+  };
 }
 
 /**
@@ -88,19 +91,21 @@ export async function performLeverPull(
   // Wait for acceleration to start
   await page.locator('[data-accelerating="true"]').waitFor({ timeout: 1000 });
 
-  // Hold for the specified duration or until we reach a reasonable speed
-  const startTime = Date.now();
-  while (Date.now() - startTime < duration) {
-    const speedStr = await leverControl.getAttribute('data-car-speed');
-    const speed = parseFloat(speedStr || '0');
+  // Use waitForFunction to wait for either duration to elapse or speed threshold to be reached
+  await page.waitForFunction(
+    ({ minDuration, startTimestamp }) => {
+      const leverElement = document.querySelector('[data-testid="lever-control"]');
+      if (!leverElement) return false;
 
-    // If we've reached a decent speed, we can continue
-    if (speed > 1.0) {
-      break;
-    }
+      const speed = parseFloat(leverElement.getAttribute('data-car-speed') || '0');
+      const elapsed = Date.now() - startTimestamp;
 
-    await page.waitForTimeout(100);
-  }
+      // Return true if we've reached decent speed OR duration has elapsed
+      return speed > 1.0 || elapsed >= minDuration;
+    },
+    { minDuration: duration, startTimestamp: Date.now() },
+    { timeout: duration + 2000 }, // Add buffer to the timeout
+  );
 
   // Release lever
   await leverControl.dispatchEvent('mouseup');

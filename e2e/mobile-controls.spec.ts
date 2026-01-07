@@ -75,9 +75,10 @@ test.describe('Beppo Laughs - Mobile Controls', () => {
     if (tapZoneCount > 0) {
       await page.screenshot({ path: 'test-results/screenshots/mobile-tap-zones.png' });
 
-      // Test tapping a zone
+      // Test tapping a zone - wait for any state changes
       await tapZones.first().tap();
-      await page.waitForTimeout(500);
+      // Wait briefly for tap to register, use short timeout as fallback
+      await page.waitForTimeout(300);
       await page.screenshot({ path: 'test-results/screenshots/mobile-tap-zone-activated.png' });
     }
   });
@@ -102,7 +103,8 @@ test.describe('Beppo Laughs - Mobile Controls', () => {
       await page.mouse.down();
       await page.mouse.move(viewport.width * 0.8, viewport.height * 0.5);
       await page.mouse.up();
-      await page.waitForTimeout(500);
+      // Wait briefly for gesture to process
+      await page.waitForTimeout(300);
       await page.screenshot({ path: 'test-results/screenshots/mobile-gestures-swipe-right.png' });
 
       // Swipe left
@@ -110,7 +112,8 @@ test.describe('Beppo Laughs - Mobile Controls', () => {
       await page.mouse.down();
       await page.mouse.move(viewport.width * 0.2, viewport.height * 0.5);
       await page.mouse.up();
-      await page.waitForTimeout(500);
+      // Wait briefly for gesture to process
+      await page.waitForTimeout(300);
       await page.screenshot({ path: 'test-results/screenshots/mobile-gestures-swipe-left.png' });
     }
   });
