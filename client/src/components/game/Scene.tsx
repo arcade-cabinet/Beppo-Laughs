@@ -61,6 +61,17 @@ function getDirectionFromDelta(dx: number, dy: number): 'north' | 'south' | 'eas
   return 'west';
 }
 
+/**
+ * Renders the 3D maze scene driven by the provided seed.
+ *
+ * Generates maze geometry from `seed`, loads the asset catalog, updates game state
+ * (current node, available moves, blockades and blockade requirements), and renders
+ * the interactive 3D scene including lighting, maze geometry, spawn objects, villains,
+ * audio, post-processing, and UI controls.
+ *
+ * @param seed - Seed string used to deterministically generate the maze and spawn plan
+ * @returns A React element that renders the full 3D maze scene, or `null` while the maze is being generated
+ */
 export function Scene({ seed }: SceneProps) {
   const [mazeData, setMazeData] = useState<{ layout: MazeLayout; geometry: MazeGeometry } | null>(
     null,

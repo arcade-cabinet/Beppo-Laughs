@@ -41,6 +41,13 @@ const BASE_URL = import.meta.env.BASE_URL || '/';
 export const ASSET_CATALOG_PATH = BASE_URL.endsWith('/') ? `${BASE_URL}assets/asset-catalog.json` : `${BASE_URL}/assets/asset-catalog.json`;
 export const ASSET_IMAGE_BASE = BASE_URL.endsWith('/') ? `${BASE_URL}assets/generated_images/` : `${BASE_URL}/assets/generated_images/`;
 
+/**
+ * Load and parse the asset catalog JSON from the configured assets path.
+ *
+ * If the catalog cannot be retrieved or parsed, `null` is returned.
+ *
+ * @returns The parsed `AssetCatalog`, or `null` if the catalog could not be retrieved or parsed.
+ */
 export async function loadAssetCatalog(): Promise<AssetCatalog | null> {
   try {
     const response = await fetch(ASSET_CATALOG_PATH, { cache: 'no-store' });
