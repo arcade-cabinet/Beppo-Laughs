@@ -7,8 +7,9 @@ The application was failing to route correctly when deployed to GitHub Pages at 
 ## Root Cause Analysis
 
 ### 1. Build System Clarification
-- **Project uses**: Vite + React (NOT Astro)
-- **Routing library**: Wouter v3.9.0
+
+- **Project uses**: Astro 5 + React (Astro wraps Vite internally)
+- **Entry point**: `src/pages/index.astro` with React islands
 - **Deployment target**: GitHub Pages with base path `/Beppo-Laughs`
 
 ### 2. The Routing Issue
@@ -61,20 +62,22 @@ function Router() {
 
 ## Deployment Workflow
 
-The deployment is configured in `.github/workflows/cd.yml`:
+The deployment is configured in `.github/workflows/cd.yml` using the official Astro action:
 
 ```yaml
-- name: Build with Vite
-  env:
-    VITE_BASE_PATH: /Beppo-Laughs
-  run: pnpm run build:client
+- name: Install, build, and upload your site
+  uses: withastro/action@fd83e9d976da29fe29a0cc268443b7203c18f9ba
+  with:
+    path: .
+    node-version: 24
+    package-manager: pnpm@10
 ```
 
-This environment variable is used by `vite.config.ts`:
+The base path is configured in `astro.config.mjs`:
 
-```typescript
+```javascript
 export default defineConfig({
-  base: process.env.VITE_BASE_PATH || '/',
+  base: process.env.ASTRO_BASE_PATH || '/Beppo-Laughs',
   // ... rest of config
 });
 ```
@@ -82,13 +85,16 @@ export default defineConfig({
 ## Testing
 
 ### Local Testing with Base Path
+
 To test the build locally with the GitHub Pages base path:
 
 ```bash
-VITE_BASE_PATH=/Beppo-Laughs pnpm run build:client
+pnpm run build
+pnpm run preview
 ```
 
 ### E2E Testing
+
 New comprehensive E2E tests have been added:
 - `e2e/full-gameplay.spec.ts` - Full gameplay sequences with screenshots
 - `e2e/mobile-controls.spec.ts` - Mobile and tablet device testing
@@ -108,6 +114,7 @@ pnpm run test:e2e
 ## Future Considerations
 
 If moving to a custom domain (e.g., `beppo-laughs.com`):
-1. Remove `VITE_BASE_PATH` from the deployment workflow
+
+1. Update `astro.config.mjs` to set `base: '/'`
 2. The application will automatically use `/` as the base path
 3. No code changes needed - the solution is already dynamic

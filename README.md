@@ -9,7 +9,7 @@ A horror clown maze game built with React, Three.js, and React Three Fiber. Trap
 ## 🛠️ Technology Stack
 
 - **Frontend Framework**: React 19 + TypeScript
-- **Build Tool**: Vite 7
+- **Build Tool**: Astro 5 (wraps Vite internally)
 - **3D Graphics**: Three.js + React Three Fiber
 - **Routing**: Wouter
 - **State Management**: Zustand
@@ -48,6 +48,7 @@ pnpm run build
 ## 🧪 Testing
 
 ### Unit Tests
+
 ```bash
 # Run unit tests
 pnpm run test
@@ -60,6 +61,7 @@ pnpm run test:watch
 ```
 
 ### E2E Tests
+
 ```bash
 # Run E2E tests
 pnpm run test:e2e
@@ -69,6 +71,7 @@ pnpm run test:e2e:ui
 ```
 
 ### Linting
+
 ```bash
 # Check code quality
 pnpm run lint

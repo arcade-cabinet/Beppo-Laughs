@@ -31,11 +31,7 @@ function TapZone({ targetNode, currentNode, direction, onTap }: TapZoneProps) {
   const markerZ = currentNode.worldZ + offset[1];
 
   return (
-    <mesh
-      position={[markerX, 0.5, markerZ]}
-      onClick={onTap}
-      onPointerDown={onTap}
-    >
+    <mesh position={[markerX, 0.5, markerZ]} onClick={onTap} onPointerDown={onTap}>
       <boxGeometry args={[2.5, 1.5, 2.5]} />
       <meshBasicMaterial transparent opacity={0} />
     </mesh>

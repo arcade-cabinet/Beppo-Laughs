@@ -86,7 +86,7 @@ class ProceduralAudio {
 
       frequencies.forEach((baseFreq, i) => {
         if (!this.context) return;
-        
+
         const osc = this.context.createOscillator();
         const oscGain = this.context.createGain();
 
@@ -155,7 +155,7 @@ class ProceduralAudio {
     // Multiple harmonics for organ sound
     [1, 2, 3, 4, 5, 6].forEach((harmonic, i) => {
       if (!this.context) return;
-      
+
       const osc = this.context.createOscillator();
       const oscGain = this.context.createGain();
 
@@ -210,7 +210,7 @@ class ProceduralAudio {
     // Low rumbling frequencies
     [40, 60, 80, 120].forEach((freq, i) => {
       if (!this.context) return;
-      
+
       const osc = this.context.createOscillator();
       osc.type = 'sine';
       osc.frequency.value = freq + Math.random() * 5;
@@ -304,7 +304,7 @@ class ProceduralAudio {
     // Harsh, dissonant chord
     [150, 158, 200, 237, 316].forEach((freq) => {
       if (!this.context) return;
-      
+
       const osc = this.context.createOscillator();
       osc.type = 'sawtooth';
       osc.frequency.value = freq;

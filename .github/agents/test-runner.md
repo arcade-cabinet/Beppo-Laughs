@@ -181,5 +181,5 @@ Tests run automatically in GitHub Actions:
 - E2E tests: Run on PR
 - Build verification: Always run
 
-Check `.github/workflows/` for GitHub Actions configuration.
+Check `.github/workflows/` for GitHub Actions CI configuration.
 

@@ -6,9 +6,9 @@ import NotFound from '@/pages/not-found';
 import { queryClient } from './lib/queryClient';
 
 /**
- * Get base path for router from Vite's BASE_URL.
+ * Get base path for router from import.meta.env.BASE_URL.
  * - Development: BASE_URL = '/' (default)
- * - GitHub Pages: BASE_URL = '/Beppo-Laughs/' (from VITE_BASE_PATH env var in build)
+ * - GitHub Pages: BASE_URL = '/Beppo-Laughs/' (from Astro's base config in astro.config.mjs)
  * This allows the router to correctly handle subpath deployments.
  */
 const basePath = import.meta.env.BASE_URL || '/';

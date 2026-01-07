@@ -19,6 +19,9 @@ coverage/
 # Build artifacts
 *.tsbuildinfo
 
+# Astro build artifacts
+.astro/
+
 # Test outputs
 test-results/
 playwright-report/

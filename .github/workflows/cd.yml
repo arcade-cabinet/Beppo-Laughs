@@ -32,7 +32,7 @@ jobs:
         with:
           path: . # The root location of your Astro project inside the repository
           node-version: 24 # The specific version of Node from .nvmrc
-          package-manager: pnpm@latest # Use pnpm as package manager
+          package-manager: pnpm@10 # Use specific pnpm version for reproducibility
 
   deploy:
     needs: build

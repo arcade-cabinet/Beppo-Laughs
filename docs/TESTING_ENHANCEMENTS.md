@@ -11,15 +11,15 @@ This document summarizes the comprehensive testing enhancements and deployment f
 
 **Root Cause**: The wouter router was not configured to handle the base path `/Beppo-Laughs`, causing all routes to fail.
 
-**Solution**: Configured the Router component in `client/src/App.tsx` to use `import.meta.env.BASE_URL` from Vite, which is set via `VITE_BASE_PATH` environment variable during build.
+**Solution**: Configured the Router component in `client/src/App.tsx` to use `import.meta.env.BASE_URL`, which is set via Astro's `base` config in `astro.config.mjs`.
 
-**Verification**: Build tested with `VITE_BASE_PATH=/Beppo-Laughs pnpm run build:client` - all assets correctly prefixed.
+**Verification**: Build tested with `pnpm run build` - all assets correctly prefixed.
 
-### 2. Build System Clarification - Vite, not Astro
+### 2. Build System - Astro 5 + React
 
-**Clarification**: The project uses Vite as its build tool, not Astro. There is no Astro configuration or official Astro GitHub Action in use.
+**Clarification**: The project uses Astro 5 as its build tool with React integration. The official Astro GitHub Action is used for deployment.
 
-**Documentation**: Updated README.md and created GITHUB_PAGES_FIX.md to clarify the technology stack.
+**Documentation**: Updated README.md and GITHUB_PAGES_FIX.md to reflect the Astro architecture.
 
 ## Testing Enhancements
 
@@ -127,27 +127,22 @@ pnpm run test:e2e:ui
 ### Successful Builds
 
 ```bash
-# Standard build
-✓ pnpm run build:client
-  Output: dist/public/ (index.html + assets)
-  
-# Build with GitHub Pages base path
-✓ VITE_BASE_PATH=/Beppo-Laughs pnpm run build:client
-  Output: dist/public/ with /Beppo-Laughs/ prefix
-  
+# Standard build (Astro)
+✓ pnpm run build
+  Output: dist/ (index.html + assets with /Beppo-Laughs/ prefix)
+
 # Unit tests
 ✓ pnpm run test
-  Result: 176 tests passed across 8 files
-  
+  Result: 301 tests passed across 13 files
+
 # Linting
-✓ pnpm run lint:fix
-  Result: 1 file fixed, 122 files checked
+✓ pnpm run lint
+  Result: All files checked
 ```
 
 ### Known Issues (Pre-existing)
 
 - TypeScript errors in tests (non-blocking, marked with `continue-on-error: true` in CI)
-- No Astro configuration needed (project is Vite-based)
 
 ## CI/CD Integration
 
@@ -159,10 +154,10 @@ pnpm run test:e2e:ui
 - E2E tests would be added here
 
 **CD Workflow** (`.github/workflows/cd.yml`):
+
 - Triggers on push to main
-- Sets `VITE_BASE_PATH=/Beppo-Laughs` for build
-- Deploys to GitHub Pages
-- **Now includes proper router configuration**
+- Uses official `withastro/action` for build and deploy
+- Deploys to GitHub Pages with proper base path configuration
 
 ## Documentation Additions
 
@@ -232,7 +227,7 @@ pnpm run test:e2e:ui
 ✅ Screenshot capture for visual regression
 ✅ Documentation complete and clear
 ✅ All existing tests continue to pass
-✅ Build system clarified (Vite, not Astro)
+✅ Build system clarified (Astro 5 + React)
 
 ## Next Steps
 
