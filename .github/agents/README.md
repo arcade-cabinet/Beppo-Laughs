@@ -34,6 +34,7 @@ pnpm run lint      # Biome linting
 AI agents should reference these files for repository-specific guidance.
 
 ### Key Documentation
+
 - `/AGENTS.md` - Specialized agent routing and patterns
 - `/CLAUDE.md` - AI development guide with tech stack
 - `docs/` - Architecture, vision, testing guides
