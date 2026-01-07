@@ -1,0 +1,12 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Home from '../../client/src/pages/Home';
+---
+
+<Layout title="Beppo Laughs - Horror Maze Game">
+  <!-- 
+    client:only="react" ensures this runs ONLY on client side
+    This is critical for Three.js/WebGL which needs browser APIs
+  -->
+  <Home client:only="react" />
+</Layout>
