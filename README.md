@@ -40,9 +40,9 @@ The app will be available at `http://localhost:5000`
 
 ```bash
 # Build for production
-pnpm run build:client
+pnpm run build
 
-# Build outputs to dist/public/
+# Build outputs to dist/
 ```
 
 ## 🧪 Testing
