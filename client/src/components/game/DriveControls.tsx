@@ -35,10 +35,10 @@ export function DriveControls() {
         <button
           type="button"
           data-testid="lever-control"
-          disabled={leverDisabled}
+          disabled={!!leverDisabled}
           aria-label="Drive lever - hold to accelerate"
           aria-pressed={accelerating}
-          aria-disabled={leverDisabled}
+          aria-disabled={!!leverDisabled}
           className={`relative w-28 h-40 flex flex-col items-center justify-end select-none touch-none transition-transform ${leverDisabled ? 'opacity-50 cursor-not-allowed' : 'active:scale-95'}`}
           onMouseDown={handleLeverPullStart}
           onMouseUp={handleLeverPullEnd}

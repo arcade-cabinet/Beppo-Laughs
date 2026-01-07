@@ -49,9 +49,6 @@
     }
   },
   "files": {
-    "ignore": [
-      "**/*.astro"
-    ],
     "includes": [
       "**",
       "!**/node_modules",
@@ -62,7 +59,8 @@
       "!**/client/public/assets",
       "!**/playwright-report",
       "!**/test-results",
-      "!**/*.css"
+      "!**/*.css",
+      "!**/*.astro"
     ],
     "ignoreUnknown": true
   }

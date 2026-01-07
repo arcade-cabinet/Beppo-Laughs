@@ -300,6 +300,9 @@ importers:
       '@types/react-dom':
         specifier: ^19.2.0
         version: 19.2.3(@types/react@19.2.7)
+      '@types/seedrandom':
+        specifier: ^3.0.8
+        version: 3.0.8
       '@types/ws':
         specifier: ^8.5.13
         version: 8.18.1
@@ -2414,6 +2417,9 @@ packages:
 
   '@types/sax@1.2.7':
     resolution: {integrity: sha512-rO73L89PJxeYM3s3pPPjiPgVVcymqU490g0YO5n5By0k2Erzj6tay/4lr1CHAAU4JyOWd1rpQ8bCf6cZfHU96A==}
+
+  '@types/seedrandom@3.0.8':
+    resolution: {integrity: sha512-TY1eezMU2zH2ozQoAFAQFOPpvP15g+ZgSfTZt31AUUH/Rxtnz3H+A/Sv1Snw2/amp//omibc+AEkTaA8KUeOLQ==}
 
   '@types/send@1.2.1':
     resolution: {integrity: sha512-arsCikDvlU99zl1g69TcAB3mzZPpxgw0UQnaHeC1Nwb015xp8bknZv5rIfri9xTOcMuaVgvabfIRA7PSZVuZIQ==}
@@ -7292,6 +7298,8 @@ snapshots:
   '@types/sax@1.2.7':
     dependencies:
       '@types/node': 25.0.3
+
+  '@types/seedrandom@3.0.8': {}
 
   '@types/send@1.2.1':
     dependencies:
