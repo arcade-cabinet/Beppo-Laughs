@@ -13,6 +13,14 @@ import { queryClient } from './lib/queryClient';
  */
 const basePath = import.meta.env.BASE_URL || '/';
 
+/**
+ * Sets up application routing using Wouter and the configured base path.
+ *
+ * Renders the application's route tree: Home at "/" and a catch-all NotFound route,
+ * wrapped in a Wouter router configured with the module-level `basePath`.
+ *
+ * @returns The router element containing the defined routes.
+ */
 function Router() {
   return (
     <WouterRouter base={basePath}>
