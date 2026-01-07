@@ -2,21 +2,30 @@
  * Global Texture Library
  *
  * Centralized management of all game textures and asset URLs.
- * All textures are imported from the attached_assets directory and bundled
- * by Vite during the build process.
+ * All textures are loaded from the public/assets directory at runtime
+ * with proper base path support for GitHub Pages deployment.
  */
 
-// Maze environment textures
-import sawdustFloorUrl from '@assets/generated_images/circus_sawdust_floor_texture.png';
-import grassGroundUrl from '@assets/generated_images/dark_muddy_grass_ground_texture.png';
-// Paper mâché collectible items
-import ticketItemUrl from '@assets/generated_images/paper_mache_circus_ticket_item.png';
-import keyItemUrl from '@assets/generated_images/paper_mache_key_item.png';
-import hedgeWallUrl from '@assets/generated_images/seamless_dark_hedge_texture.png';
-import canvasCeilingUrl from '@assets/generated_images/vintage_circus_tent_canvas_texture.png';
+// Get base URL from Vite/Astro environment (includes GitHub Pages base path if deployed)
+const BASE_URL = import.meta.env.BASE_URL || '/';
+// Ensure BASE_URL ends with slash for proper path concatenation
+const ASSETS_BASE = BASE_URL.endsWith('/') ? `${BASE_URL}assets/generated_images/` : `${BASE_URL}/assets/generated_images/`;
 
-// Video assets
-import beppoGameOverUrl from '@assets/generated_videos/beppo_clown_emerging_laughing_game_over.mp4';
+// Helper to create asset URL
+const asset = (filename: string) => `${ASSETS_BASE}${filename}`;
+
+// Maze environment textures
+const sawdustFloorUrl = asset('circus_sawdust_floor_texture.png');
+const grassGroundUrl = asset('dark_muddy_grass_ground_texture.png');
+// Paper mâché collectible items
+const ticketItemUrl = asset('paper_mache_circus_ticket_item.png');
+const keyItemUrl = asset('paper_mache_key_item.png');
+const hedgeWallUrl = asset('seamless_dark_hedge_texture.png');
+const canvasCeilingUrl = asset('vintage_circus_tent_canvas_texture.png');
+
+// Video assets - Future feature for cutscene videos
+// TODO: Implement video support when asset generation pipeline includes video rendering
+const beppoGameOverUrl = '';
 
 /**
  * Collectible item texture definitions

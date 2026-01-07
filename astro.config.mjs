@@ -23,6 +23,13 @@ export default defineConfig({
   
   // Vite configuration passthrough (Tailwind CSS 4 is handled via PostCSS)
   vite: {
+    resolve: {
+      alias: {
+        '@': '/client/src',
+        '@shared': '/shared',
+        '@assets': '/public/assets',
+      },
+    },
     css: {
       transformer: 'postcss',
     },

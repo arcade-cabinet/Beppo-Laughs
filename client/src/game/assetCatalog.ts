@@ -35,8 +35,11 @@ export type CatalogVideoAsset = {
   group: 'core' | 'extended';
 };
 
-export const ASSET_CATALOG_PATH = '/assets/asset-catalog.json';
-export const ASSET_IMAGE_BASE = '/assets/generated_images/';
+// Get base URL from Vite/Astro environment (includes GitHub Pages base path if deployed)
+const BASE_URL = import.meta.env.BASE_URL || '/';
+
+export const ASSET_CATALOG_PATH = BASE_URL.endsWith('/') ? `${BASE_URL}assets/asset-catalog.json` : `${BASE_URL}/assets/asset-catalog.json`;
+export const ASSET_IMAGE_BASE = BASE_URL.endsWith('/') ? `${BASE_URL}assets/generated_images/` : `${BASE_URL}/assets/generated_images/`;
 
 export async function loadAssetCatalog(): Promise<AssetCatalog | null> {
   try {
