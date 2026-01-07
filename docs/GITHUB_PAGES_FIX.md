@@ -101,7 +101,7 @@ pnpm run test:e2e
 
 ## References
 
-- [Wouter Documentation - Base Path](https://github.com/molefrog/wouter#%EF%B8%8F-router-props)
+- [Wouter Documentation - Base Path](https://github.com/molefrog/wouter#router-props)
 - [Vite Documentation - Base Path](https://vite.dev/config/shared-options.html#base)
 - [GitHub Pages - Custom Domain](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site)
 
