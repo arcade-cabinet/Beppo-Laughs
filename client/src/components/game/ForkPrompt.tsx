@@ -75,7 +75,10 @@ export function ForkPrompt() {
   if (!pendingFork || isGameOver || hasWon) return null;
 
   return (
-    <div className="absolute inset-0 pointer-events-none z-40">
+    <div
+      className="absolute inset-0 pointer-events-none z-40"
+      data-has-fork="true"
+    >
       {pendingFork.options.map((option) => {
         const relativeDir = getCameraRelativeDirection(option.direction, cameraRotation);
         return (
@@ -105,14 +108,12 @@ export function ForkPrompt() {
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
                       text-center pointer-events-none"
       >
-        <div
-          className="text-pink-400 text-xl font-bold animate-pulse
-                        drop-shadow-lg"
-          style={{ textShadow: '0 0 10px #ff69b4' }}
-        >
-          CHOOSE YOUR PATH!
+        <div className="text-white/80 font-creepy text-2xl mb-2 drop-shadow-lg">
+          CHOOSE YOUR PATH
         </div>
-        <div className="text-pink-300 text-sm mt-2">Tap a glowing hand</div>
+        <div className="text-white/60 font-mono text-sm uppercase tracking-wider">
+          Click a hand to proceed
+        </div>
       </div>
     </div>
   );

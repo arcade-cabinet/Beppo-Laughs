@@ -98,7 +98,12 @@ export function HUD() {
   };
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-40">
+    <div
+      className="pointer-events-none absolute inset-0 z-40"
+      data-fear={fear.toString()}
+      data-despair={despair.toString()}
+      data-sanity-level={sanityLevel.toString()}
+    >
       {/* Vignette - intensifies with combined insanity */}
       <div
         className="absolute inset-0 transition-all duration-500"
