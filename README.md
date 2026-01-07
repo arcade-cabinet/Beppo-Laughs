@@ -31,7 +31,7 @@ A horror clown maze game built with React, Three.js, and React Three Fiber. Trap
 pnpm install
 
 # Run development server
-pnpm run dev:client
+pnpm run dev
 ```
 
 The app will be available at `http://localhost:5000`
