@@ -31,6 +31,7 @@ function TapZone({ targetNode, currentNode, direction, onTap }: TapZoneProps) {
   const markerZ = currentNode.worldZ + offset[1];
 
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: R3F mesh is not an HTML element
     <mesh position={[markerX, 0.5, markerZ]} onClick={onTap} onPointerDown={onTap}>
       <boxGeometry args={[2.5, 1.5, 2.5]} />
       <meshBasicMaterial transparent opacity={0} />

@@ -44,7 +44,7 @@ vi.mock('../../game/assetCatalog', () => ({
         coreFloorTextures: [],
         floorTextures: [],
       },
-    })
+    }),
   ),
   pickSeededAsset: vi.fn(() => null),
 }));
