@@ -11,6 +11,14 @@ interface MazeProps {
   geometry: MazeGeometry;
 }
 
+/**
+ * Render a 3D maze scene composed of floor, ceiling, walls, and decorative tent poles using the provided geometry and seeded asset selection.
+ *
+ * The component loads an asset catalog, picks textures deterministically from the current seed, applies texture wrapping/repetition, and builds meshes for the floor, peaked tent ceiling, inner ceiling layer, wall segments, and regularly spaced poles.
+ *
+ * @param geometry - Maze geometry containing floor dimensions, wall segments, and rail nodes used to position meshes
+ * @returns A React element (group) containing the assembled 3D maze scene
+ */
 export function Maze({ geometry }: MazeProps) {
   const seed = useGameStore((state) => state.seed);
   const [catalog, setCatalog] = useState<Awaited<ReturnType<typeof loadAssetCatalog>>>(null);
