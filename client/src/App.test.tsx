@@ -4,7 +4,7 @@ import App from './App';
 
 // Mock child components
 vi.mock('./pages/Home', () => ({
-  default: () => <div data-testid="home-page">Home Page</div>,
+  default: () => <div data-testid="home-page">Beppo Laughs - Home Page</div>,
 }));
 
 vi.mock('./pages/not-found', () => ({
