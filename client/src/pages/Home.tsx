@@ -160,7 +160,7 @@ export default function Home() {
 
       {isPlaying && (
         <>
-          <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 z-0 w-full h-full">
             <Scene seed={seed} />
           </div>
           <HUD />
