@@ -85,16 +85,18 @@ class ProceduralAudio {
       const syllableDuration = 0.15 + Math.random() * 0.1;
 
       frequencies.forEach((baseFreq, i) => {
-        const osc = this.context?.createOscillator();
-        const oscGain = this.context?.createGain();
+        if (!this.context) return;
+        
+        const osc = this.context.createOscillator();
+        const oscGain = this.context.createGain();
 
         // Use different waveforms for texture
         osc.type = i % 2 === 0 ? 'sawtooth' : 'triangle';
         osc.frequency.value = baseFreq * (0.9 + Math.random() * 0.2);
 
         // Vibrato for creepiness
-        const vibrato = this.context?.createOscillator();
-        const vibratoGain = this.context?.createGain();
+        const vibrato = this.context.createOscillator();
+        const vibratoGain = this.context.createGain();
         vibrato.frequency.value = 5 + Math.random() * 3;
         vibratoGain.gain.value = 10 + intensity * 20;
         vibrato.connect(vibratoGain);
@@ -152,8 +154,10 @@ class ProceduralAudio {
 
     // Multiple harmonics for organ sound
     [1, 2, 3, 4, 5, 6].forEach((harmonic, i) => {
-      const osc = this.context?.createOscillator();
-      const oscGain = this.context?.createGain();
+      if (!this.context) return;
+      
+      const osc = this.context.createOscillator();
+      const oscGain = this.context.createGain();
 
       osc.type = i % 2 === 0 ? 'sine' : 'triangle';
       osc.frequency.value = freq * harmonic;
@@ -205,20 +209,22 @@ class ProceduralAudio {
 
     // Low rumbling frequencies
     [40, 60, 80, 120].forEach((freq, i) => {
-      const osc = this.context?.createOscillator();
+      if (!this.context) return;
+      
+      const osc = this.context.createOscillator();
       osc.type = 'sine';
       osc.frequency.value = freq + Math.random() * 5;
 
       // Slow wobble
-      const lfo = this.context?.createOscillator();
-      const lfoGain = this.context?.createGain();
+      const lfo = this.context.createOscillator();
+      const lfoGain = this.context.createGain();
       lfo.frequency.value = 0.1 + Math.random() * 0.2;
       lfoGain.gain.value = 3;
       lfo.connect(lfoGain);
       lfoGain.connect(osc.frequency);
       lfo.start();
 
-      const oscGain = this.context?.createGain();
+      const oscGain = this.context.createGain();
       oscGain.gain.value = 0.1 / (i + 1);
 
       osc.connect(oscGain);
@@ -297,7 +303,9 @@ class ProceduralAudio {
 
     // Harsh, dissonant chord
     [150, 158, 200, 237, 316].forEach((freq) => {
-      const osc = this.context?.createOscillator();
+      if (!this.context) return;
+      
+      const osc = this.context.createOscillator();
       osc.type = 'sawtooth';
       osc.frequency.value = freq;
       osc.connect(stingerGain);
