@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
 language: en-US
-tone_instructions: ''
+tone_instructions: 'Be concise and actionable. Focus on code quality, security, and performance.'
 early_access: true
 enable_free_tier: true
 inheritance: true
@@ -24,7 +24,23 @@ reviews:
   related_issues: true
   related_prs: true
   suggested_labels: true
-  labeling_instructions: []
+  labeling_instructions:
+    - label: "bug"
+      instructions: "Apply when the PR fixes a bug or addresses an error"
+    - label: "game/rendering"
+      instructions: "Apply when changes affect 3D rendering, Three.js, or R3F components"
+    - label: "game/gameplay"
+      instructions: "Apply when changes affect game mechanics, player movement, or controls"
+    - label: "game/maze"
+      instructions: "Apply when changes affect maze generation or navigation"
+    - label: "game/audio"
+      instructions: "Apply when changes affect audio systems or sound effects"
+    - label: "game/horror"
+      instructions: "Apply when changes affect horror effects, sanity, or atmosphere"
+    - label: "ci/cd"
+      instructions: "Apply when changes affect GitHub Actions, deployment, or build scripts"
+    - label: "synthesis"
+      instructions: "Apply when changes affect documentation, tests, or code quality"
   auto_apply_labels: true
   suggested_reviewers: true
   auto_assign_reviewers: true
@@ -32,16 +48,46 @@ reviews:
   poem: true
   enable_prompt_for_ai_agents: true
   path_filters: []
-  path_instructions: []
+  path_instructions:
+    - path: "client/src/components/game/**"
+      instructions: |
+        This is a React Three Fiber game component. Check for:
+        - Performance issues (avoid creating new objects in render loop)
+        - Proper use of useFrame for animations
+        - Memory leaks (dispose textures/geometries)
+        - Correct use of refs vs state for animation values
+        - Suspense boundaries for async resources
+    - path: "client/src/game/**"
+      instructions: |
+        Game logic and state management. Check for:
+        - Zustand store best practices
+        - Pure functions where possible
+        - Deterministic behavior for seeded randomness
+    - path: "e2e/**"
+      instructions: |
+        Playwright E2E tests. Check for:
+        - Use of role-based selectors over test IDs
+        - Avoid waitForTimeout, prefer condition-based waits
+        - Proper test isolation
+    - path: ".github/workflows/**"
+      instructions: |
+        GitHub Actions workflows. Check for:
+        - Pinned action versions (SHA preferred)
+        - Proper secret handling
+        - Efficient caching strategies
   abort_on_close: true
   disable_cache: false
   auto_review:
     enabled: true
     auto_incremental_review: true
-    ignore_title_keywords: []
+    ignore_title_keywords:
+      - "WIP"
+      - "[skip ci]"
+      - "[skip review]"
     labels: []
-    drafts: false
-    base_branches: []
+    drafts: true  # Review draft PRs too
+    base_branches:
+      - main
     ignore_usernames: []
   finishing_touches:
     docstrings:
@@ -51,15 +97,26 @@ reviews:
   pre_merge_checks:
     docstrings:
       mode: warning
-      threshold: 80
+      threshold: 60  # Reasonable threshold for game code
     title:
       mode: warning
-      requirements: ''
+      requirements: 'Use conventional commit format (feat:, fix:, docs:, chore:, refactor:, test:)'
     description:
       mode: warning
     issue_assessment:
       mode: warning
-    custom_checks: []
+    custom_checks:
+      - name: "Security Check"
+        mode: "warning"
+        instructions: |
+          Verify no hardcoded secrets, API keys, or credentials.
+          Check for common security issues (XSS, injection, etc.).
+      - name: "R3F Performance Check"
+        mode: "warning"
+        instructions: |
+          For R3F components, verify no object creation in render loops.
+          Check for proper memoization and useCallback usage.
+          Ensure textures/geometries are properly disposed.
   tools:
     ast-grep:
       rule_dirs: []
@@ -168,9 +225,14 @@ knowledge_base:
     enabled: true
   code_guidelines:
     enabled: true
-    filePatterns: []
+    filePatterns:
+      - "CLAUDE.md"
+      - "docs/ARCHITECTURE.md"
+      - "docs/STYLE_GUIDE.md"
+      - "docs/VISION.md"
+      - "docs/TESTING_ENHANCEMENTS.md"
   learnings:
-    scope: auto
+    scope: global  # Share learnings across organization
   issues:
     scope: auto
   jira:
@@ -187,9 +249,15 @@ knowledge_base:
 code_generation:
   docstrings:
     language: en-US
-    path_instructions: []
+    path_instructions:
+      - path: "client/src/**"
+        instructions: "Use JSDoc format with @param, @returns, and @example where helpful"
   unit_tests:
-    path_instructions: []
+    path_instructions:
+      - path: "client/src/components/**"
+        instructions: "Use Vitest with React Testing Library. Mock R3F components appropriately."
+      - path: "client/src/game/**"
+        instructions: "Use Vitest. Test pure functions with edge cases."
 issue_enrichment:
   auto_enrich:
     enabled: true
@@ -197,7 +265,20 @@ issue_enrichment:
     enabled: true
     auto_planning:
       enabled: true
-      labels: []
+      labels:
+        - "synthesis"  # Auto-plan synthesis issues
   labeling:
-    labeling_instructions: []
+    labeling_instructions:
+      - label: "bug"
+        instructions: "Apply when issue describes unexpected behavior or errors"
+      - label: "game/rendering"
+        instructions: "Apply when issue relates to 3D graphics, WebGL, or visual effects"
+      - label: "game/gameplay"
+        instructions: "Apply when issue relates to game mechanics or player experience"
+      - label: "game/maze"
+        instructions: "Apply when issue relates to maze generation or navigation"
+      - label: "synthesis"
+        instructions: "Apply when issue needs AI-assisted planning or implementation"
+      - label: "queue-review"
+        instructions: "Apply when issue needs human review before proceeding"
     auto_apply_labels: true
