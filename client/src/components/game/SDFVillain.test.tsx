@@ -53,10 +53,7 @@ describe('SDFVillain', () => {
 
 
   describe('Villain Visibility', () => {
-    it('renders when visible', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('renders when visible', () => {      useGameStore.mockImplementation(() => ({
         fear: 50,
         despair: 0,
         maxSanity: 100,
@@ -65,10 +62,7 @@ describe('SDFVillain', () => {
       expect(() => render(<SDFVillain position={[0, 1, -5]} isVisible={true} />)).not.toThrow();
     });
 
-    it('hides when not visible', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('hides when not visible', () => {      useGameStore.mockImplementation(() => ({
         fear: 0,
         despair: 0,
         maxSanity: 100,
@@ -78,10 +72,7 @@ describe('SDFVillain', () => {
       expect(container.firstChild).toBeNull();
     });
 
-    it('toggles visibility', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('toggles visibility', () => {      useGameStore.mockImplementation(() => ({
         fear: 30,
         despair: 0,
         maxSanity: 100,
@@ -96,16 +87,7 @@ describe('SDFVillain', () => {
   
 
   describe('Fear Integration', () => {
-    it('reacts to fear level changes', () => {
-      const { useGameStore } = require('../../game/store');
-      let fear = 10;
-      
-      useGameStore.mockImplementation(() => ({
-        fear,
-        despair: 0,
-        maxSanity: 100,
-      }));
-
+    it('reacts to fear level changes', () => {      let fear = 10;
       const { rerender } = render(<SDFVillain position={[0, 0, 0]} isVisible={true} />);
       
       fear = 80;
@@ -114,10 +96,7 @@ describe('SDFVillain', () => {
       expect(() => rerender(<SDFVillain position={[0, 0, 0]} isVisible={true} />)).not.toThrow();
     });
 
-    it('handles maximum fear level', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('handles maximum fear level', () => {      useGameStore.mockImplementation(() => ({
         fear: 100,
         despair: 0,
         maxSanity: 100,
@@ -128,10 +107,7 @@ describe('SDFVillain', () => {
   
 
   describe('Position Variations', () => {
-    it('renders at different positions', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('renders at different positions', () => {      useGameStore.mockImplementation(() => ({
         fear: 50,
         despair: 0,
         maxSanity: 100,
@@ -150,10 +126,7 @@ describe('SDFVillain', () => {
   
 
   describe('Edge Cases', () => {
-    it('handles zero fear level', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('handles zero fear level', () => {      useGameStore.mockImplementation(() => ({
         fear: 0,
         despair: 0,
         maxSanity: 100,
@@ -162,10 +135,7 @@ describe('SDFVillain', () => {
       expect(() => render(<SDFVillain position={[0, 0, 0]} isVisible={true} />)).not.toThrow();
     });
 
-    it('handles rapid visibility toggles', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('handles rapid visibility toggles', () => {      useGameStore.mockImplementation(() => ({
         fear: 40,
         despair: 0,
         maxSanity: 100,
@@ -184,10 +154,7 @@ describe('SDFVillain', () => {
 
 // Additional tests: SDFVillain behavior
 describe('SDFVillain - behavior', () => {
-  it('mounts across multiple sanity levels', () => {
-    const { useGameStore } = require('../../game/store');
-    for (const v of [0, 25, 50, 75, 100]) {
-      useGameStore.mockImplementation(() => ({ fear: v, despair: v, maxSanity: 100 }));
+  it('mounts across multiple sanity levels', () => {    for (const v of [0, 25, 50, 75, 100]) {
       const { unmount } = render(<SDFVillain />);
       unmount();
     }

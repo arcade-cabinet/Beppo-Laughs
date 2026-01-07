@@ -47,10 +47,7 @@ describe('HorrorEffects', () => {
 
 
   describe('Effect Intensity', () => {
-    it('increases vignette darkness with despair', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation((selector) => {
+    it('increases vignette darkness with despair', () => {      useGameStore.mockImplementation((selector) => {
         const mockState = { fear: 0, despair: 80, maxSanity: 100 };
         return selector ? selector(mockState) : mockState;
       });
@@ -58,10 +55,7 @@ describe('HorrorEffects', () => {
       expect(() => render(<HorrorEffects />)).not.toThrow();
     });
 
-    it('increases chromatic aberration with fear', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation((selector) => {
+    it('increases chromatic aberration with fear', () => {      useGameStore.mockImplementation((selector) => {
         const mockState = { fear: 90, despair: 0, maxSanity: 100 };
         return selector ? selector(mockState) : mockState;
       });
@@ -69,10 +63,7 @@ describe('HorrorEffects', () => {
       expect(() => render(<HorrorEffects />)).not.toThrow();
     });
 
-    it('increases noise with overall insanity', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation((selector) => {
+    it('increases noise with overall insanity', () => {      useGameStore.mockImplementation((selector) => {
         const mockState = { fear: 70, despair: 70, maxSanity: 100 };
         return selector ? selector(mockState) : mockState;
       });
@@ -80,10 +71,7 @@ describe('HorrorEffects', () => {
       expect(() => render(<HorrorEffects />)).not.toThrow();
     });
 
-    it('minimal effects at low sanity loss', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation((selector) => {
+    it('minimal effects at low sanity loss', () => {      useGameStore.mockImplementation((selector) => {
         const mockState = { fear: 5, despair: 5, maxSanity: 100 };
         return selector ? selector(mockState) : mockState;
       });
@@ -93,9 +81,7 @@ describe('HorrorEffects', () => {
   
 
   describe('Dynamic Updates', () => {
-    it('updates effects when fear changes', () => {
-      const { useGameStore } = require('../../game/store');
-      let fear = 10;
+    it('updates effects when fear changes', () => {      let fear = 10;
       
       useGameStore.mockImplementation((selector) => {
         const mockState = { fear, despair: 0, maxSanity: 100 };
@@ -110,9 +96,7 @@ describe('HorrorEffects', () => {
       expect(() => rerender(<HorrorEffects />)).not.toThrow();
     });
 
-    it('updates effects when despair changes', () => {
-      const { useGameStore } = require('../../game/store');
-      let despair = 10;
+    it('updates effects when despair changes', () => {      let despair = 10;
       
       useGameStore.mockImplementation((selector) => {
         const mockState = { fear: 0, despair, maxSanity: 100 };
@@ -129,10 +113,7 @@ describe('HorrorEffects', () => {
   
 
   describe('Edge Cases', () => {
-    it('handles zero sanity loss', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation((selector) => {
+    it('handles zero sanity loss', () => {      useGameStore.mockImplementation((selector) => {
         const mockState = { fear: 0, despair: 0, maxSanity: 100 };
         return selector ? selector(mockState) : mockState;
       });
@@ -140,10 +121,7 @@ describe('HorrorEffects', () => {
       expect(() => render(<HorrorEffects />)).not.toThrow();
     });
 
-    it('handles maximum sanity loss', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation((selector) => {
+    it('handles maximum sanity loss', () => {      useGameStore.mockImplementation((selector) => {
         const mockState = { fear: 100, despair: 100, maxSanity: 100 };
         return selector ? selector(mockState) : mockState;
       });

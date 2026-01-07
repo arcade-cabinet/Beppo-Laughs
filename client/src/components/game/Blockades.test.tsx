@@ -102,10 +102,7 @@ describe('Blockades', () => {
 
 
   describe('Blockade Visibility', () => {
-    it('shows blockades only when they are in blocked cells', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('shows blockades only when they are in blocked cells', () => {      useGameStore.mockImplementation(() => ({
         blockades: new Set(['node1']),
       }));
 
@@ -130,10 +127,7 @@ describe('Blockades', () => {
       expect(container).toBeTruthy();
     });
 
-    it('hides blockades when not in blocked cells', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('hides blockades when not in blocked cells', () => {      useGameStore.mockImplementation(() => ({
         blockades: new Set(),
       }));
 
@@ -158,14 +152,7 @@ describe('Blockades', () => {
       expect(container).toBeTruthy();
     });
 
-    it('updates visibility when blockades set changes', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      let blockedSet = new Set<string>();
-      useGameStore.mockImplementation(() => ({
-        blockades: blockedSet,
-      }));
-
+    it('updates visibility when blockades set changes', () => {      let blockedSet = new Set<string>();
       const blockades: BlockadePlan[] = [
         {
           id: 'blockade1',
@@ -196,10 +183,7 @@ describe('Blockades', () => {
   
 
   describe('Blockade Properties', () => {
-    it('displays required item name for each blockade', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('displays required item name for each blockade', () => {      useGameStore.mockImplementation(() => ({
         blockades: new Set(['node1']),
       }));
 
@@ -225,10 +209,7 @@ describe('Blockades', () => {
       expect(() => render(<Suspense fallback={null}><Blockades blockades={blockades} /></Suspense>)).not.toThrow();
     });
 
-    it('handles blockades at different world positions', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('handles blockades at different world positions', () => {      useGameStore.mockImplementation(() => ({
         blockades: new Set(['node1', 'node2', 'node3']),
       }));
 
@@ -273,14 +254,7 @@ describe('Blockades', () => {
   
 
   describe('Texture Loading', () => {
-    it('handles missing textures gracefully', () => {
-      const { useGameStore } = require('../../game/store');
-      const { useTexture } = require('@react-three/drei');
-      
-      useGameStore.mockImplementation(() => ({
-        blockades: new Set(['node1']),
-      }));
-
+    it('handles missing textures gracefully', () => {      const { useTexture } = require('@react-three/drei');
       useTexture.mockReturnValue(undefined);
 
       const blockades: BlockadePlan[] = [
@@ -304,14 +278,7 @@ describe('Blockades', () => {
       ).not.toThrow();
     });
 
-    it('loads multiple unique textures', () => {
-      const { useGameStore } = require('../../game/store');
-      const { useTexture } = require('@react-three/drei');
-      
-      useGameStore.mockImplementation(() => ({
-        blockades: new Set(['node1', 'node2', 'node3']),
-      }));
-
+    it('loads multiple unique textures', () => {      const { useTexture } = require('@react-three/drei');
       const mockTextures = [{}, {}, {}];
       useTexture.mockReturnValue(mockTextures);
 
@@ -356,10 +323,7 @@ describe('Blockades', () => {
   
 
   describe('Edge Cases', () => {
-    it('handles empty blockades gracefully', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('handles empty blockades gracefully', () => {      useGameStore.mockImplementation(() => ({
         blockades: new Set(),
       }));
 
@@ -372,10 +336,7 @@ describe('Blockades', () => {
       ).not.toThrow();
     });
 
-    it('handles duplicate node IDs', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('handles duplicate node IDs', () => {      useGameStore.mockImplementation(() => ({
         blockades: new Set(['node1']),
       }));
 
@@ -409,10 +370,7 @@ describe('Blockades', () => {
       ).not.toThrow();
     });
 
-    it('handles very long item names', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('handles very long item names', () => {      useGameStore.mockImplementation(() => ({
         blockades: new Set(['node1']),
       }));
 

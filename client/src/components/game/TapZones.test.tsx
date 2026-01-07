@@ -78,10 +78,7 @@ describe('TapZones', () => {
 
 
   describe('Villain Visibility', () => {
-    it('renders when visible', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('renders when visible', () => {      useGameStore.mockImplementation(() => ({
         fear: 50,
         despair: 0,
         maxSanity: 100,
@@ -90,10 +87,7 @@ describe('TapZones', () => {
       expect(() => render(<SDFVillain position={[0, 1, -5]} isVisible={true} />)).not.toThrow();
     });
 
-    it('hides when not visible', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('hides when not visible', () => {      useGameStore.mockImplementation(() => ({
         fear: 0,
         despair: 0,
         maxSanity: 100,
@@ -103,10 +97,7 @@ describe('TapZones', () => {
       expect(container.firstChild).toBeNull();
     });
 
-    it('toggles visibility', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('toggles visibility', () => {      useGameStore.mockImplementation(() => ({
         fear: 30,
         despair: 0,
         maxSanity: 100,
@@ -121,16 +112,7 @@ describe('TapZones', () => {
   
 
   describe('Fear Integration', () => {
-    it('reacts to fear level changes', () => {
-      const { useGameStore } = require('../../game/store');
-      let fear = 10;
-      
-      useGameStore.mockImplementation(() => ({
-        fear,
-        despair: 0,
-        maxSanity: 100,
-      }));
-
+    it('reacts to fear level changes', () => {      let fear = 10;
       const { rerender } = render(<SDFVillain position={[0, 0, 0]} isVisible={true} />);
       
       fear = 80;
@@ -139,10 +121,7 @@ describe('TapZones', () => {
       expect(() => rerender(<SDFVillain position={[0, 0, 0]} isVisible={true} />)).not.toThrow();
     });
 
-    it('handles maximum fear level', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('handles maximum fear level', () => {      useGameStore.mockImplementation(() => ({
         fear: 100,
         despair: 0,
         maxSanity: 100,
@@ -153,10 +132,7 @@ describe('TapZones', () => {
   
 
   describe('Position Variations', () => {
-    it('renders at different positions', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('renders at different positions', () => {      useGameStore.mockImplementation(() => ({
         fear: 50,
         despair: 0,
         maxSanity: 100,
@@ -175,10 +151,7 @@ describe('TapZones', () => {
   
 
   describe('Edge Cases', () => {
-    it('handles zero fear level', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('handles zero fear level', () => {      useGameStore.mockImplementation(() => ({
         fear: 0,
         despair: 0,
         maxSanity: 100,
@@ -187,10 +160,7 @@ describe('TapZones', () => {
       expect(() => render(<SDFVillain position={[0, 0, 0]} isVisible={true} />)).not.toThrow();
     });
 
-    it('handles rapid visibility toggles', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('handles rapid visibility toggles', () => {      useGameStore.mockImplementation(() => ({
         fear: 40,
         despair: 0,
         maxSanity: 100,
@@ -209,11 +179,7 @@ describe('TapZones', () => {
  -4, worldZ: 0, connections: ['center'], isCenter: false, isExit: false }],
         ]),
         exitNodeIds: [],
-      };
-
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+      };      useGameStore.mockImplementation(() => ({
         currentNode: 'center',
         isMoving: false,
         startMoveTo: vi.fn(),
@@ -247,11 +213,7 @@ describe('TapZones', () => {
           ],
         ]),
         exitNodeIds: [],
-      };
-
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+      };      useGameStore.mockImplementation(() => ({
         currentNode: 'center',
         isMoving: false,
         startMoveTo: vi.fn(),
@@ -262,10 +224,7 @@ describe('TapZones', () => {
       expect(() => render(<TapZones geometry={deadEndGeometry} />)).not.toThrow();
     });
 
-    it('handles invalid current node', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('handles invalid current node', () => {      useGameStore.mockImplementation(() => ({
         currentNode: 'nonexistent',
         isMoving: false,
         startMoveTo: vi.fn(),
@@ -276,10 +235,7 @@ describe('TapZones', () => {
       expect(() => render(<TapZones geometry={mockGeometry} />)).not.toThrow();
     });
 
-    it('handles all nodes blocked', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('handles all nodes blocked', () => {      useGameStore.mockImplementation(() => ({
         currentNode: 'center',
         isMoving: false,
         startMoveTo: vi.fn(),
@@ -294,9 +250,7 @@ describe('TapZones', () => {
 
 // Additional tests: TapZones interactions
 describe('TapZones - interactions and a11y', () => {
-  it('hides zones when moving', () => {
-    const { useGameStore } = require('../../game/store');
-    useGameStore.mockImplementation(() => ({
+  it('hides zones when moving', () => {    useGameStore.mockImplementation(() => ({
       availableMoves: [{ direction: 'north', nodeId: 'n1', isExit: false }],
       isMoving: true,
       startMoveTo: vi.fn(),
@@ -305,9 +259,7 @@ describe('TapZones - interactions and a11y', () => {
     expect(container.querySelector('[data-testid^="tap-zone-"]')).toBeNull();
   });
 
-  it('renders buttons with roles for available moves', () => {
-    const { useGameStore } = require('../../game/store');
-    useGameStore.mockImplementation(() => ({
+  it('renders buttons with roles for available moves', () => {    useGameStore.mockImplementation(() => ({
       availableMoves: [{ direction: 'north', nodeId: 'n1', isExit: false }],
       isMoving: false,
       startMoveTo: vi.fn(),

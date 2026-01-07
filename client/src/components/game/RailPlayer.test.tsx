@@ -90,9 +90,7 @@ describe('RailPlayer', () => {
 
 // Additional tests: RailPlayer navigation logic
 describe('RailPlayer - navigation edges', () => {
-  it('does not progress when no path available', () => {
-    const { useGameStore } = require('../../game/store');
-    useGameStore.mockImplementation(() => ({
+  it('does not progress when no path available', () => {    useGameStore.mockImplementation(() => ({
       currentNode: 'n0',
       isMoving: false,
       moveProgress: 0,
@@ -105,9 +103,7 @@ describe('RailPlayer - navigation edges', () => {
   });
 
   it('pauses at fork nodes', () => {
-    const completeMove = vi.fn();
-    const { useGameStore } = require('../../game/store');
-    useGameStore.mockImplementation(() => ({
+    const completeMove = vi.fn();    useGameStore.mockImplementation(() => ({
       currentNode: 'n0',
       isMoving: true,
       moveProgress: 0.5,

@@ -58,10 +58,7 @@ describe('GestureControls', () => {
   
 
   describe('Store Integration', () => {
-    it('uses available moves from store', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('uses available moves from store', () => {      useGameStore.mockImplementation(() => ({
         availableMoves: [
           { direction: 'north', nodeId: 'node1', isExit: false },
           { direction: 'east', nodeId: 'node2', isExit: false },
@@ -76,10 +73,7 @@ describe('GestureControls', () => {
     });
 
     it('respects isMoving state', () => {
-      const startMoveTo = vi.fn();
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+      const startMoveTo = vi.fn();      useGameStore.mockImplementation(() => ({
         availableMoves: [{ direction: 'north', nodeId: 'node1', isExit: false }],
         isMoving: true,
         startMoveTo,
@@ -94,10 +88,7 @@ describe('GestureControls', () => {
     });
 
     it('updates camera rotation', () => {
-      const setCameraRotation = vi.fn();
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+      const setCameraRotation = vi.fn();      useGameStore.mockImplementation(() => ({
         availableMoves: [],
         isMoving: false,
         startMoveTo: vi.fn(),
@@ -111,10 +102,7 @@ describe('GestureControls', () => {
   
 
   describe('Edge Cases', () => {
-    it('handles no available moves', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('handles no available moves', () => {      useGameStore.mockImplementation(() => ({
         availableMoves: [],
         isMoving: false,
         startMoveTo: vi.fn(),
@@ -125,9 +113,7 @@ describe('GestureControls', () => {
       expect(() => render(<GestureControls />)).not.toThrow();
     });
 
-    it('handles rapid camera rotation changes', () => {
-      const { useGameStore } = require('../../game/store');
-      let rotation = 0;
+    it('handles rapid camera rotation changes', () => {      let rotation = 0;
       
       useGameStore.mockImplementation(() => ({
         availableMoves: [],
@@ -172,9 +158,7 @@ describe('GestureControls', () => {
 // Additional tests: GestureControls gestures
 describe('GestureControls - gestures', () => {
   it('does not start move when move not permitted', () => {
-    const startMoveTo = vi.fn();
-    const { useGameStore } = require('../../game/store');
-    useGameStore.mockImplementation(() => ({
+    const startMoveTo = vi.fn();    useGameStore.mockImplementation(() => ({
       availableMoves: [],
       isMoving: false,
       startMoveTo,
@@ -186,9 +170,7 @@ describe('GestureControls - gestures', () => {
   });
 
   it('keeps rotation within sane bounds', () => {
-    let rotation = 0;
-    const { useGameStore } = require('../../game/store');
-    useGameStore.mockImplementation(() => ({
+    let rotation = 0;    useGameStore.mockImplementation(() => ({
       availableMoves: [],
       isMoving: false,
       startMoveTo: vi.fn(),

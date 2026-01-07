@@ -51,10 +51,7 @@ describe('BrainMeter', () => {
 
 
   describe('Sanity Meter Display', () => {
-    it('displays fear percentage correctly', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('displays fear percentage correctly', () => {      useGameStore.mockImplementation(() => ({
         fear: 45,
         despair: 20,
         maxSanity: 100,
@@ -64,10 +61,7 @@ describe('BrainMeter', () => {
       expect(container.textContent).toContain('45%');
     });
 
-    it('displays despair percentage correctly', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('displays despair percentage correctly', () => {      useGameStore.mockImplementation(() => ({
         fear: 20,
         despair: 65,
         maxSanity: 100,
@@ -77,16 +71,7 @@ describe('BrainMeter', () => {
       expect(container.textContent).toContain('65%');
     });
 
-    it('updates when fear changes', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      let currentFear = 10;
-      useGameStore.mockImplementation(() => ({
-        fear: currentFear,
-        despair: 0,
-        maxSanity: 100,
-      }));
-
+    it('updates when fear changes', () => {      let currentFear = 10;
       const { container, rerender } = render(<BrainMeter />);
       expect(container.textContent).toContain('10%');
       
@@ -95,16 +80,7 @@ describe('BrainMeter', () => {
       expect(container.textContent).toContain('50%');
     });
 
-    it('updates when despair changes', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      let currentDespair = 15;
-      useGameStore.mockImplementation(() => ({
-        fear: 0,
-        despair: currentDespair,
-        maxSanity: 100,
-      }));
-
+    it('updates when despair changes', () => {      let currentDespair = 15;
       const { container, rerender } = render(<BrainMeter />);
       expect(container.textContent).toContain('15%');
       
@@ -115,10 +91,7 @@ describe('BrainMeter', () => {
   
 
   describe('Visual Effects', () => {
-    it('applies blur effect at high insanity levels', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('applies blur effect at high insanity levels', () => {      useGameStore.mockImplementation(() => ({
         fear: 80,
         despair: 80,
         maxSanity: 100,
@@ -130,10 +103,7 @@ describe('BrainMeter', () => {
       expect(element).toHaveStyle({ filter: expect.stringContaining('blur') });
     });
 
-    it('has no blur effect at low insanity levels', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('has no blur effect at low insanity levels', () => {      useGameStore.mockImplementation(() => ({
         fear: 10,
         despair: 10,
         maxSanity: 100,
@@ -145,10 +115,7 @@ describe('BrainMeter', () => {
       expect(element).toHaveStyle({ filter: 'none' });
     });
 
-    it('renders 3D brain visualization', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('renders 3D brain visualization', () => {      useGameStore.mockImplementation(() => ({
         fear: 50,
         despair: 50,
         maxSanity: 100,
@@ -161,10 +128,7 @@ describe('BrainMeter', () => {
   
 
   describe('Extreme Values', () => {
-    it('handles zero fear and despair', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('handles zero fear and despair', () => {      useGameStore.mockImplementation(() => ({
         fear: 0,
         despair: 0,
         maxSanity: 100,
@@ -174,10 +138,7 @@ describe('BrainMeter', () => {
       expect(container.textContent).toContain('0%');
     });
 
-    it('handles maximum fear', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('handles maximum fear', () => {      useGameStore.mockImplementation(() => ({
         fear: 100,
         despair: 0,
         maxSanity: 100,
@@ -187,10 +148,7 @@ describe('BrainMeter', () => {
       expect(container.textContent).toContain('100%');
     });
 
-    it('handles maximum despair', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('handles maximum despair', () => {      useGameStore.mockImplementation(() => ({
         fear: 0,
         despair: 100,
         maxSanity: 100,
@@ -200,10 +158,7 @@ describe('BrainMeter', () => {
       expect(container.textContent).toContain('100%');
     });
 
-    it('handles both meters at maximum', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('handles both meters at maximum', () => {      useGameStore.mockImplementation(() => ({
         fear: 100,
         despair: 100,
         maxSanity: 100,
@@ -223,10 +178,7 @@ describe('BrainMeter', () => {
       expect(container.textContent).toContain('SANITY');
     });
 
-    it('displays percentages in accessible format', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('displays percentages in accessible format', () => {      useGameStore.mockImplementation(() => ({
         fear: 42,
         despair: 58,
         maxSanity: 100,
@@ -241,17 +193,8 @@ describe('BrainMeter', () => {
   
 
   describe('Edge Cases', () => {
-    it('handles rapid state changes', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      let fear = 0;
+    it('handles rapid state changes', () => {      let fear = 0;
       let despair = 0;
-      useGameStore.mockImplementation(() => ({
-        fear,
-        despair,
-        maxSanity: 100,
-      }));
-
       const { rerender } = render(<BrainMeter />);
       
       for (let i = 0; i < 10; i++) {
@@ -263,10 +206,7 @@ describe('BrainMeter', () => {
       expect(() => rerender(<BrainMeter />)).not.toThrow();
     });
 
-    it('handles fractional percentages', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('handles fractional percentages', () => {      useGameStore.mockImplementation(() => ({
         fear: 33.7,
         despair: 66.3,
         maxSanity: 100,
@@ -276,10 +216,7 @@ describe('BrainMeter', () => {
       expect(container.textContent).toMatch(/\d+%/);
     });
 
-    it('maintains consistent layout structure', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
+    it('maintains consistent layout structure', () => {      useGameStore.mockImplementation(() => ({
         fear: 50,
         despair: 50,
         maxSanity: 100,
@@ -295,16 +232,12 @@ describe('BrainMeter', () => {
 
 // Additional tests: BrainMeter edge calculations
 describe('BrainMeter - edge calculations', () => {
-  it('clamps negative values to 0%', () => {
-    const { useGameStore } = require('../../game/store');
-    useGameStore.mockImplementation(() => ({ fear: -10, despair: -5, maxSanity: 100 }));
+  it('clamps negative values to 0%', () => {    useGameStore.mockImplementation(() => ({ fear: -10, despair: -5, maxSanity: 100 }));
     const { container } = render(<BrainMeter />);
     expect(container.textContent).toMatch(/0%/);
   });
 
-  it('handles non-100 maxSanity', () => {
-    const { useGameStore } = require('../../game/store');
-    useGameStore.mockImplementation(() => ({ fear: 25, despair: 25, maxSanity: 50 }));
+  it('handles non-100 maxSanity', () => {    useGameStore.mockImplementation(() => ({ fear: 25, despair: 25, maxSanity: 50 }));
     const { container } = render(<BrainMeter />);
     // 25/50 => 50%
     expect(container.textContent).toContain('50%');
