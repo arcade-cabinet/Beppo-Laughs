@@ -1,0 +1,194 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# CodeRabbit Configuration - Maximum Automation
+# Docs: https://docs.coderabbit.ai/reference/configuration
+
+language: "en-US"
+tone_instructions: "Be concise and actionable. Focus on code quality, security, and performance."
+early_access: true  # Enable early access features
+enable_free_tier: true
+
+# Reviews Configuration - Maximum Automation
+reviews:
+  profile: "assertive"  # Thorough reviews
+  request_changes_workflow: true  # Use request changes for important issues
+  high_level_summary: true
+  high_level_summary_placeholder: "@coderabbitai summary"
+  high_level_summary_in_walkthrough: true
+  auto_title_placeholder: "@coderabbitai"
+  review_status: true
+  commit_status: true
+  fail_commit_status: false  # Don't block on CodeRabbit issues
+  collapse_walkthrough: false
+  changed_files_summary: true
+  sequence_diagrams: true
+  estimate_code_review_effort: true
+
+  # Issue Integration - Full Automation
+  assess_linked_issues: true  # Evaluate PR effectiveness against linked issues
+  related_issues: true  # Suggest related issues
+  related_prs: true  # Suggest related PRs
+
+  # Label Automation
+  suggested_labels: true
+  auto_apply_labels: true  # Automatically apply suggested labels
+  labeling_instructions:
+    - label: "bug"
+      instructions: "Apply when the PR fixes a bug or addresses an error"
+    - label: "game/rendering"
+      instructions: "Apply when changes affect 3D rendering, Three.js, or R3F components"
+    - label: "game/gameplay"
+      instructions: "Apply when changes affect game mechanics, player movement, or controls"
+    - label: "game/maze"
+      instructions: "Apply when changes affect maze generation or navigation"
+    - label: "game/audio"
+      instructions: "Apply when changes affect audio systems or sound effects"
+    - label: "game/horror"
+      instructions: "Apply when changes affect horror effects, sanity, or atmosphere"
+    - label: "ci/cd"
+      instructions: "Apply when changes affect GitHub Actions, deployment, or build scripts"
+    - label: "synthesis"
+      instructions: "Apply when changes affect documentation, tests, or code quality"
+
+  # Reviewer Automation
+  suggested_reviewers: true
+  auto_assign_reviewers: true  # Automatically assign suggested reviewers
+
+  # Fun Features
+  in_progress_fortune: true
+  poem: true
+
+  # AI Agent Support
+  enable_prompt_for_ai_agents: true  # Include instructions for AI coding agents
+
+  # Auto Review - Enable for all PRs
+  auto_review:
+    enabled: true
+  auto_incremental_review: true
+  drafts: true  # Review draft PRs too
+  base_branches:
+    - main
+  ignore_title_keywords:
+    - "WIP"
+    - "[skip ci]"
+    - "[skip review]"
+
+  # Path-specific instructions for this codebase
+  path_instructions:
+    - path: "client/src/components/game/**"
+      instructions: |
+        This is a React Three Fiber game component. Check for:
+        - Performance issues (avoid creating new objects in render loop)
+        - Proper use of useFrame for animations
+        - Memory leaks (dispose textures/geometries)
+        - Correct use of refs vs state for animation values
+        - Suspense boundaries for async resources
+    - path: "client/src/game/**"
+      instructions: |
+        Game logic and state management. Check for:
+        - Zustand store best practices
+        - Pure functions where possible
+        - Deterministic behavior for seeded randomness
+    - path: "e2e/**"
+      instructions: |
+        Playwright E2E tests. Check for:
+        - Use of role-based selectors over test IDs
+        - Avoid waitForTimeout, prefer condition-based waits
+        - Proper test isolation
+    - path: ".github/workflows/**"
+      instructions: |
+        GitHub Actions workflows. Check for:
+        - Pinned action versions (SHA preferred)
+        - Proper secret handling
+        - Efficient caching strategies
+
+  # Finishing Touches - Auto-generate improvements
+  finishing_touches:
+    docstrings:
+      enabled: true
+    unit_tests:
+      enabled: true
+
+  # Pre-Merge Quality Gates
+  pre_merge_checks:
+    docstrings:
+      mode: "warning"
+      threshold: 60
+    title:
+      mode: "warning"
+      requirements: "Use conventional commit format (feat:, fix:, docs:, etc.)"
+    description:
+      mode: "warning"
+    issue_assessment:
+      mode: "warning"
+    custom_checks:
+      - name: "Security Check"
+        mode: "warning"
+        instructions: |
+          Verify no hardcoded secrets, API keys, or credentials.
+          Check for common security issues (XSS, injection, etc.).
+      - name: "Performance Check"
+        mode: "warning"
+        instructions: |
+          For R3F components, verify no object creation in render loops.
+          Check for proper memoization and useCallback usage.
+
+  # Tools Integration
+  tools:
+    shellcheck:
+      enabled: true
+    ruff:
+      enabled: true
+    markdownlint:
+      enabled: true
+    biome:
+      enabled: true
+    github-checks:
+      enabled: true
+      timeout_ms: 90000
+    ast-grep:
+      essential_rules: true
+
+# Chat Configuration
+chat:
+  art: true
+  auto_reply: true
+  integrations:
+    jira:
+      usage: "auto"
+    linear:
+      usage: "auto"
+
+# Knowledge Base - Maximum Learning
+knowledge_base:
+  opt_out: false
+  web_search:
+    enabled: true  # Enable web search for context
+  code_guidelines:
+    enabled: true
+    file_patterns:
+      - "CLAUDE.md"
+      - "docs/ARCHITECTURE.md"
+      - "docs/STYLE_GUIDE.md"
+      - "docs/VISION.md"
+  learnings:
+    scope: "global"  # Share learnings across organization
+  issues:
+    scope: "auto"  # Auto-detect issue tracker
+  pull_requests:
+    scope: "auto"  # Learn from all PRs
+  mcp:
+    usage: "auto"
+
+# Code Generation Configuration
+code_generation:
+  docstrings:
+    language: "en-US"
+    path_instructions:
+      - path: "client/src/**"
+        instructions: "Use JSDoc format with @param, @returns, and @example where helpful"
+  unit_tests:
+    path_instructions:
+      - path: "client/src/components/**"
+        instructions: "Use Vitest with React Testing Library. Mock R3F components appropriately."
+      - path: "client/src/game/**"
+        instructions: "Use Vitest. Test pure functions with edge cases."
