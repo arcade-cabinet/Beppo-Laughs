@@ -17,4 +17,7 @@ pnpm-debug.log*
 coverage/
 
 # Build artifacts
-*.tsbuildinfo
+*.tsbuildinfo# Test outputs
+test-results/
+playwright-report/
+**/screenshots/
