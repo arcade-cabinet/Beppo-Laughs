@@ -97,23 +97,6 @@ pnpm run lint:fix
 
 ## 📁 Project Structure
 
-```
-Beppo-Laughs/
-├── client/                 # Frontend application
-│   ├── src/
-│   │   ├── components/    # React components
-│   │   │   └── game/      # Game-specific components
-│   │   ├── game/          # Game logic and state
-│   │   ├── pages/         # Route pages
-│   │   ├── shaders/       # GLSL shaders
-│   │   └── lib/           # Utilities
-│   ├── public/            # Static assets
-│   └── index.html         # Entry HTML
-├── e2e/                   # Playwright E2E tests
-├── docs/                  # Documentation
-├── .github/workflows/     # CI/CD pipelines
-└── vite.config.ts         # Vite configuration
-```
 
 ## 🚢 Deployment
 
