@@ -8,7 +8,9 @@ test.describe('Beppo Laughs - Full Gameplay Flow', () => {
 
   test('complete gameplay sequence: menu to first junction with screenshots', async ({ page }) => {
     // 1. Capture main menu
-    await expect(page.getByRole('heading', { name: 'BEPPO LAUGHS' })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('heading', { name: 'BEPPO LAUGHS' })).toBeVisible({
+      timeout: 10000,
+    });
     await page.screenshot({ path: 'test-results/screenshots/01-main-menu.png', fullPage: true });
 
     // 2. Enter custom seed for reproducibility
@@ -49,7 +51,7 @@ test.describe('Beppo Laughs - Full Gameplay Flow', () => {
 
     if (forkCount > 0) {
       await page.screenshot({ path: 'test-results/screenshots/08-fork-appeared.png' });
-      
+
       // 10. Select first option
       const firstFork = forkButtons.first();
       await firstFork.click();
@@ -66,7 +68,7 @@ test.describe('Beppo Laughs - Full Gameplay Flow', () => {
     // Start game with fixed seed
     const startBtn = page.getByTestId('button-start-game');
     await expect(startBtn).toBeVisible({ timeout: 10000 });
-    
+
     const seedInput = page.getByTestId('input-seed');
     await seedInput.fill('multi room test');
     await startBtn.click();
@@ -82,40 +84,40 @@ test.describe('Beppo Laughs - Full Gameplay Flow', () => {
       // Pull and hold lever
       await leverControl.dispatchEvent('mousedown');
       await page.waitForTimeout(3000);
-      await page.screenshot({ 
-        path: `test-results/screenshots/multi-${String(room).padStart(2, '0')}-moving.png` 
+      await page.screenshot({
+        path: `test-results/screenshots/multi-${String(room).padStart(2, '0')}-moving.png`,
       });
       await leverControl.dispatchEvent('mouseup');
 
       // Wait a bit for the move to complete
       await page.waitForTimeout(1500);
-      await page.screenshot({ 
-        path: `test-results/screenshots/multi-${String(room).padStart(2, '0')}-stopped.png` 
+      await page.screenshot({
+        path: `test-results/screenshots/multi-${String(room).padStart(2, '0')}-stopped.png`,
       });
 
       // Check for fork
       const forkButtons = page.locator('[data-testid^="button-fork-"]');
       const forkCount = await forkButtons.count();
-      
+
       if (forkCount > 0) {
-        await page.screenshot({ 
-          path: `test-results/screenshots/multi-${String(room).padStart(2, '0')}-fork.png` 
+        await page.screenshot({
+          path: `test-results/screenshots/multi-${String(room).padStart(2, '0')}-fork.png`,
         });
-        
+
         // Select first available direction
         await forkButtons.first().click();
         await page.waitForTimeout(500);
       }
 
       // Check for nearby items or exits
-      const interactionPrompt = page.locator('[data-testid^="button-collect-"]').or(
-        page.locator('[data-testid="button-exit-maze"]')
-      );
-      const hasInteraction = await interactionPrompt.count() > 0;
-      
+      const interactionPrompt = page
+        .locator('[data-testid^="button-collect-"]')
+        .or(page.locator('[data-testid="button-exit-maze"]'));
+      const hasInteraction = (await interactionPrompt.count()) > 0;
+
       if (hasInteraction) {
-        await page.screenshot({ 
-          path: `test-results/screenshots/multi-${String(room).padStart(2, '0')}-interaction.png` 
+        await page.screenshot({
+          path: `test-results/screenshots/multi-${String(room).padStart(2, '0')}-interaction.png`,
         });
       }
     }
@@ -127,7 +129,7 @@ test.describe('Beppo Laughs - Full Gameplay Flow', () => {
   test('test sanity meters decrease during gameplay', async ({ page }) => {
     const startBtn = page.getByTestId('button-start-game');
     await expect(startBtn).toBeVisible({ timeout: 10000 });
-    
+
     const seedInput = page.getByTestId('input-seed');
     await seedInput.fill('sanity test seed');
     await startBtn.click();
@@ -142,13 +144,13 @@ test.describe('Beppo Laughs - Full Gameplay Flow', () => {
 
     // Move around to trigger sanity changes
     const leverControl = page.getByTestId('lever-control');
-    
+
     for (let i = 0; i < 5; i++) {
       await leverControl.dispatchEvent('mousedown');
       await page.waitForTimeout(2000);
       await leverControl.dispatchEvent('mouseup');
       await page.waitForTimeout(1000);
-      
+
       // Handle forks if they appear
       const forkButtons = page.locator('[data-testid^="button-fork-"]');
       const forkCount = await forkButtons.count();
@@ -158,8 +160,8 @@ test.describe('Beppo Laughs - Full Gameplay Flow', () => {
       }
 
       // Screenshot after each move
-      await page.screenshot({ 
-        path: `test-results/screenshots/sanity-${String(i + 2).padStart(2, '0')}-move${i + 1}.png` 
+      await page.screenshot({
+        path: `test-results/screenshots/sanity-${String(i + 2).padStart(2, '0')}-move${i + 1}.png`,
       });
     }
   });
@@ -167,7 +169,7 @@ test.describe('Beppo Laughs - Full Gameplay Flow', () => {
   test('test item collection flow', async ({ page }) => {
     const startBtn = page.getByTestId('button-start-game');
     await expect(startBtn).toBeVisible({ timeout: 10000 });
-    
+
     const seedInput = page.getByTestId('input-seed');
     await seedInput.fill('item collection test');
     await startBtn.click();
@@ -195,25 +197,25 @@ test.describe('Beppo Laughs - Full Gameplay Flow', () => {
 
       // Check for collectible items
       const collectButton = page.locator('[data-testid^="button-collect-"]');
-      const hasCollectible = await collectButton.count() > 0;
+      const hasCollectible = (await collectButton.count()) > 0;
 
       if (hasCollectible) {
-        await page.screenshot({ 
-          path: `test-results/screenshots/items-found-${attempt}.png` 
+        await page.screenshot({
+          path: `test-results/screenshots/items-found-${attempt}.png`,
         });
-        
+
         // Collect the item
         await collectButton.click();
         await page.waitForTimeout(1000);
-        
-        await page.screenshot({ 
-          path: `test-results/screenshots/items-collected-${attempt}.png` 
+
+        await page.screenshot({
+          path: `test-results/screenshots/items-collected-${attempt}.png`,
         });
-        
+
         // Check if inventory counter updated
         const inventoryText = await page.getByText(/items?:/i).textContent();
         console.log('Inventory:', inventoryText);
-        
+
         break; // Found and collected an item, done
       }
     }
@@ -222,7 +224,7 @@ test.describe('Beppo Laughs - Full Gameplay Flow', () => {
   test('test exit discovery and game completion', async ({ page }) => {
     const startBtn = page.getByTestId('button-start-game');
     await expect(startBtn).toBeVisible({ timeout: 10000 });
-    
+
     const seedInput = page.getByTestId('input-seed');
     await seedInput.fill('exit test seed');
     await startBtn.click();
@@ -258,17 +260,17 @@ test.describe('Beppo Laughs - Full Gameplay Flow', () => {
 
       if (hasExit) {
         await page.screenshot({ path: 'test-results/screenshots/exit-found.png' });
-        
+
         // Take the exit
         await exitButton.click();
         await page.waitForTimeout(2000);
-        
+
         await page.screenshot({ path: 'test-results/screenshots/exit-taken.png' });
-        
+
         // Should see victory screen or return to menu
         const victoryIndicator = page.getByText(/WIN|VICTORY|ESCAPED|TRY AGAIN/i);
         await expect(victoryIndicator).toBeVisible({ timeout: 5000 });
-        
+
         await page.screenshot({ path: 'test-results/screenshots/game-completed.png' });
         break;
       }
