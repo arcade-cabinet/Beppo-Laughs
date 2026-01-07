@@ -48,14 +48,14 @@ export async function waitForSanityChange(
 ): Promise<{ fear: number; despair: number }> {
   // Use Playwright's waitForFunction for proper condition-based waiting
   await page.waitForFunction(
-    ({ prevFear, prevDespair }) => {
+    ({ previousFear, previousDespair }) => {
       const hudElement = document.querySelector('[data-fear][data-despair]');
       if (!hudElement) return false;
 
       const currentFear = parseFloat(hudElement.getAttribute('data-fear') || '0');
       const currentDespair = parseFloat(hudElement.getAttribute('data-despair') || '0');
 
-      return currentFear !== prevFear || currentDespair !== prevDespair;
+      return currentFear !== previousFear || currentDespair !== previousDespair;
     },
     { previousFear, previousDespair },
     { timeout },
