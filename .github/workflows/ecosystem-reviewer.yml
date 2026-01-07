@@ -1,9 +1,9 @@
 name: Ecosystem Reviewer
 
 # Tiered AI Review Pipeline:
-# 1. Ollama (fast, cheap) → quick review
-# 2. Claude (escalation) → complex PRs or many issues
-# 3. Jules (refactor) → when code changes needed
+# 1. Ollama (fast, cheap) 9quick review
+# 2. Claude (escalation) 9complex PRs or many issues
+# 3. Jules (refactor) 9when code changes needed
 
 on:
   pull_request:
@@ -150,7 +150,7 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.CI_GITHUB_TOKEN }}
-          allowed_bots: "google-labs-jules[bot],copilot-swe-agent[bot],dependabot[bot],renovate[bot],github-actions[bot]"
+          allowed_bots: "*"
           allowed_tools: "Read,Glob,Grep,LS,Bash(git diff),Bash(gh pr view),Bash(gh pr list),Bash(gh issue view)"
           direct_prompt: |
             Review this PR thoroughly in ${{ env.TARGET_REPO }}. Focus on:
@@ -219,9 +219,9 @@ jobs:
           SESSION_ID=$(echo "$RESPONSE" | jq -r '.name // empty' | sed 's|sessions/||')
 
           if [[ -n "$SESSION_ID" ]]; then
-            gh pr comment "$TARGET_PR" --repo "$TARGET_REPO" --body "🔧 **Jules refactoring session started**: https://jules.google.com/session/${SESSION_ID}"
+            gh pr comment "$TARGET_PR" --repo "$TARGET_REPO" --body "81 Jules refactoring session started8: https://jules.google.com/session/${SESSION_ID}"
           else
-            gh pr comment "$TARGET_PR" --repo "$TARGET_REPO" --body "❌ **Error creating Jules refactoring session.**"
+            gh pr comment "$TARGET_PR" --repo "$TARGET_REPO" --body "01 Error creating Jules refactoring session.8"
             echo "Failed to create Jules session. Response: $RESPONSE"
             exit 1
           fi
@@ -248,5 +248,5 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.CI_GITHUB_TOKEN }}
-          allowed_bots: "google-labs-jules[bot],copilot-swe-agent[bot],dependabot[bot],renovate[bot],github-actions[bot]"
+          allowed_bots: "*"
           allowed_tools: "Edit,Write,Read,Glob,Grep,LS,Bash(git status),Bash(git diff),Bash(git add),Bash(git commit),Bash(git push),Bash(gh pr view),Bash(gh pr list),Bash(node:*),Bash(npm:*)"
