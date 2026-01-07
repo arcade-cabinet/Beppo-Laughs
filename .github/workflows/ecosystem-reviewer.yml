@@ -77,41 +77,20 @@ jobs:
       (github.event_name == 'workflow_dispatch' && (inputs.model_tier == 'ollama' || inputs.model_tier == 'all'))
     runs-on: ubuntu-latest
     outputs:
-      suggestion_count: ${{ steps.review.outputs.suggestion_count || steps.gate.outputs.suggestion_count }}
-      needs_escalation: ${{ steps.check.outputs.needs_escalation || steps.gate.outputs.needs_escalation }}
+      suggestion_count: ${{ steps.review.outputs.suggestion_count }}
+      needs_escalation: ${{ steps.check.outputs.needs_escalation }}
     steps:
-      - name: Gate review when credentials are unavailable
-        id: gate
-        run: |
-          if [ "${{ github.actor }}" = "dependabot[bot]" ] || [ "${{ github.actor }}" = "app/dependabot" ]; then
-            echo "skip=true" >> $GITHUB_OUTPUT
-            echo "suggestion_count=0" >> $GITHUB_OUTPUT
-            echo "needs_escalation=false" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          if [ -z "${{ secrets.OLLAMA_API_KEY }}" ]; then
-            echo "skip=true" >> $GITHUB_OUTPUT
-            echo "suggestion_count=0" >> $GITHUB_OUTPUT
-            echo "needs_escalation=false" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          echo "skip=false" >> $GITHUB_OUTPUT
-
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-        if: steps.gate.outputs.skip != 'true'
         with:
           repository: ${{ env.TARGET_REPO }}
           fetch-depth: 0
-          token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.CI_GITHUB_TOKEN }}
 
       - name: Review PR
         id: review
-        if: steps.gate.outputs.skip != 'true'
         uses: jbcom/control-center/.github/actions/agentic-pr-review@main
         with:
-          github_token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.CI_GITHUB_TOKEN }}
           model: ${{ env.OLLAMA_MODEL }}
           ollama_api_key: ${{ secrets.OLLAMA_API_KEY }}
           ollama_host: ${{ env.OLLAMA_HOST }}
@@ -119,9 +98,8 @@ jobs:
 
       - name: Check if escalation needed
         id: check
-        if: steps.gate.outputs.skip != 'true'
         env:
-          GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
         run: |
           SUGGESTIONS="${{ steps.review.outputs.suggestion_count }}"
           ADDITIONS=$(gh pr view ${{ env.TARGET_PR }} --repo ${{ env.TARGET_REPO }} --json additions --jq '.additions')
@@ -168,7 +146,7 @@ jobs:
       - name: Claude Code Review
         if: steps.check-key.outputs.available == 'true'
         id: claude
-        uses: anthropics/claude-code-action@c9ec2b02b40ac0444c6716e51d5e19ef2e0b8d00 # main
+        uses: anthropics/claude-code-action@154d0de144ff82240e1c3deedff56280381fd122 # main
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.CI_GITHUB_TOKEN }}
@@ -266,7 +244,7 @@ jobs:
           token: ${{ secrets.CI_GITHUB_TOKEN }}
 
       - name: Run Claude
-        uses: anthropics/claude-code-action@c9ec2b02b40ac0444c6716e51d5e19ef2e0b8d00 # main
+        uses: anthropics/claude-code-action@154d0de144ff82240e1c3deedff56280381fd122 # main
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.CI_GITHUB_TOKEN }}
