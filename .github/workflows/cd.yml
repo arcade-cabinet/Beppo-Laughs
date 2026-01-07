@@ -45,10 +45,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build with Vite
+      - name: Build with Astro
         env:
-          VITE_BASE_PATH: /Beppo-Laughs
-        run: pnpm run build:client
+          ASTRO_BASE_PATH: /Beppo-Laughs
+        run: pnpm run build
 
       - name: Setup Pages
         # actions/configure-pages v5.0.0
@@ -58,7 +58,7 @@ jobs:
         # actions/upload-pages-artifact v4.0.0
         uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b
         with:
-          path: dist/public
+          path: dist
 
   deploy:
     name: Deploy
