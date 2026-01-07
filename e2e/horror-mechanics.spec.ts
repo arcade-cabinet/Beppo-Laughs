@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { performLeverPull, waitForGameState } from './utils/test-helpers';
+import { performLeverPull, waitForGameState, waitForMovement } from './utils/test-helpers';
 
 test.describe('Beppo Laughs - Horror Mechanics', () => {
   test.beforeEach(async ({ page }) => {
@@ -247,8 +247,8 @@ test.describe('Beppo Laughs - Horror Mechanics', () => {
     await page.screenshot({ path: 'test-results/screenshots/horror-audio-lever-pull.png' });
     await leverControl.dispatchEvent('mouseup');
 
-    // 3. Moving through maze - wait a bit for movement state
-    await page.waitForTimeout(1000);
+    // 3. Moving through maze - wait for movement to start then stop
+    await waitForMovement(page, true, 3000).catch(() => {});
     await page.screenshot({ path: 'test-results/screenshots/horror-audio-movement.png' });
 
     // 4. Fork selection

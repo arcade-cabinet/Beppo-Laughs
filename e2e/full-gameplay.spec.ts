@@ -205,8 +205,8 @@ test.describe('Beppo Laughs - Full Gameplay Flow', () => {
 
         // Collect the item
         await collectButton.click();
-        // Wait for collection animation/state to complete
-        await page.waitForTimeout(500);
+        // Wait for button to disappear after collection
+        await collectButton.waitFor({ state: 'detached', timeout: 2000 }).catch(() => {});
 
         await page.screenshot({
           path: `test-results/screenshots/items-collected-${attempt}.png`,
