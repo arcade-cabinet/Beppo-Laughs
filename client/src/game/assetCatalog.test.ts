@@ -2,10 +2,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   ASSET_CATALOG_PATH,
   ASSET_IMAGE_BASE,
-  loadAssetCatalog,
-  pickSeededAsset,
   type AssetCatalog,
   type CatalogImageAsset,
+  loadAssetCatalog,
+  pickSeededAsset,
 } from './assetCatalog';
 
 // Mock fetch globally
@@ -67,7 +67,7 @@ describe('assetCatalog', () => {
       it('can be used to construct image URLs', () => {
         const testFilename = 'test.png';
         const fullUrl = ASSET_IMAGE_BASE + testFilename;
-        
+
         expect(fullUrl).toContain('test.png');
         expect(fullUrl).toContain('assets/generated_images/');
       });
@@ -77,7 +77,7 @@ describe('assetCatalog', () => {
       it('both paths use same base URL structure', () => {
         const catalogBasePath = ASSET_CATALOG_PATH.split('/assets/')[0];
         const imageBasePath = ASSET_IMAGE_BASE.split('/assets/')[0];
-        
+
         expect(catalogBasePath).toBe(imageBasePath);
       });
 
@@ -124,11 +124,11 @@ describe('assetCatalog', () => {
       });
 
       await loadAssetCatalog();
-      
+
       expect(mockFetch).toHaveBeenCalledTimes(1);
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('asset-catalog.json'),
-        expect.any(Object)
+        expect.any(Object),
       );
     });
 
@@ -168,7 +168,7 @@ describe('assetCatalog', () => {
       });
 
       await loadAssetCatalog();
-      
+
       const fetchCall = mockFetch.mock.calls[0];
       expect(fetchCall[1]).toEqual({ cache: 'no-store' });
     });
@@ -230,7 +230,7 @@ describe('assetCatalog', () => {
 
     it('handles HTTP error codes gracefully', async () => {
       const errorCodes = [400, 403, 404, 500, 502, 503];
-      
+
       for (const code of errorCodes) {
         mockFetch.mockResolvedValue({
           ok: false,
@@ -286,14 +286,14 @@ describe('assetCatalog', () => {
     it('returns the same asset for same seed and salt', () => {
       const result1 = pickSeededAsset(assets, 'test-seed', 'wall');
       const result2 = pickSeededAsset(assets, 'test-seed', 'wall');
-      
+
       expect(result1).toBe(result2);
     });
 
     it('returns different assets for different seeds', () => {
       const result1 = pickSeededAsset(assets, 'seed-1', 'wall');
       const result2 = pickSeededAsset(assets, 'seed-2', 'wall');
-      
+
       // With 3 assets, different seeds should likely pick different ones
       // (not guaranteed but highly probable with good RNG)
       expect([result1, result2]).toContain(result1);
@@ -303,7 +303,7 @@ describe('assetCatalog', () => {
     it('returns different assets for different salts with same seed', () => {
       const result1 = pickSeededAsset(assets, 'test-seed', 'wall');
       const result2 = pickSeededAsset(assets, 'test-seed', 'floor');
-      
+
       // Different salts should produce different selections
       expect(result1).toBeDefined();
       expect(result2).toBeDefined();
@@ -317,28 +317,28 @@ describe('assetCatalog', () => {
     it('handles single-element array', () => {
       const singleAsset = [assets[0]];
       const result = pickSeededAsset(singleAsset, 'test-seed', 'wall');
-      
+
       expect(result).toBe(singleAsset[0]);
     });
 
     it('is deterministic - same inputs always give same output', () => {
       const results = Array.from({ length: 10 }, () =>
-        pickSeededAsset(assets, 'deterministic-seed', 'test-salt')
+        pickSeededAsset(assets, 'deterministic-seed', 'test-salt'),
       );
-      
+
       const first = results[0];
-      expect(results.every(r => r === first)).toBe(true);
+      expect(results.every((r) => r === first)).toBe(true);
     });
 
     it('distributes selections across array (statistical test)', () => {
       const selections = new Set();
-      
+
       // Test with different seeds to see distribution
       for (let i = 0; i < 100; i++) {
         const result = pickSeededAsset(assets, `seed-${i}`, 'wall');
         selections.add(result?.id);
       }
-      
+
       // With 100 different seeds and 3 assets, should hit all assets
       expect(selections.size).toBeGreaterThan(1);
     });
@@ -349,9 +349,9 @@ describe('assetCatalog', () => {
         { ...assets[0], id: 'dup-2' },
         { ...assets[0], id: 'dup-3' },
       ];
-      
+
       const result = pickSeededAsset(duplicateAssets, 'test', 'salt');
-      expect(duplicateAssets.map(a => a.id)).toContain(result?.id);
+      expect(duplicateAssets.map((a) => a.id)).toContain(result?.id);
     });
 
     it('returns non-null for valid inputs', () => {
@@ -398,7 +398,7 @@ describe('assetCatalog', () => {
 
     it('result has valid structure', () => {
       const result = pickSeededAsset(assets, 'test', 'wall');
-      
+
       expect(result).toHaveProperty('id');
       expect(result).toHaveProperty('fileName');
       expect(result).toHaveProperty('prompt');
@@ -456,7 +456,7 @@ describe('assetCatalog', () => {
         const selectedWall = pickSeededAsset(
           loadedCatalog.images.wallTextures,
           'test-seed',
-          'wall'
+          'wall',
         );
         expect(selectedWall).not.toBeNull();
         expect(loadedCatalog.images.wallTextures).toContain(selectedWall);
@@ -511,12 +511,8 @@ describe('assetCatalog', () => {
 
       const loadedCatalog = await loadAssetCatalog();
       if (loadedCatalog) {
-        const selectedWall = pickSeededAsset(
-          loadedCatalog.images.wallTextures,
-          'test',
-          'wall'
-        );
-        
+        const selectedWall = pickSeededAsset(loadedCatalog.images.wallTextures, 'test', 'wall');
+
         if (selectedWall) {
           const fullUrl = `${ASSET_IMAGE_BASE}${selectedWall.fileName}`;
           expect(fullUrl).toContain('assets/generated_images/');
@@ -528,7 +524,7 @@ describe('assetCatalog', () => {
 });
 describe('assetCatalog - edge cases (extended)', () => {
   it('returns undefined or fallback for unknown asset id', () => {
-    const unknown = 'does-not-exist';
+    const _unknown = 'does-not-exist';
     expect(true).toBe(true);
   });
 

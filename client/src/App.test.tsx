@@ -35,7 +35,11 @@ vi.mock('wouter', () => ({
   Switch: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   Router: ({ base, children }: { base?: string; children: React.ReactNode }) => {
     mockBasePath = base || '/';
-    return <div data-testid="router" data-base={base}>{children}</div>;
+    return (
+      <div data-testid="router" data-base={base}>
+        {children}
+      </div>
+    );
   },
 }));
 
@@ -74,12 +78,12 @@ describe('App', () => {
     it('Router component receives base path from import.meta.env.BASE_URL', () => {
       render(<App />);
       const router = screen.getByTestId('router');
-      
+
       // The base path is set at build time from import.meta.env.BASE_URL
       // In test environment, it defaults to '/' or whatever is configured
       expect(router).toHaveAttribute('data-base');
       const basePath = router.getAttribute('data-base');
-      
+
       // Should be a valid path (starts with /)
       expect(basePath).toMatch(/^\//);
     });
@@ -87,7 +91,7 @@ describe('App', () => {
     it('base path defaults to "/" when BASE_URL is not explicitly set', () => {
       render(<App />);
       const router = screen.getByTestId('router');
-      
+
       // In test environment without explicit BASE_URL, should default to '/'
       const basePath = router.getAttribute('data-base');
       expect(typeof basePath).toBe('string');
@@ -98,7 +102,7 @@ describe('App', () => {
       render(<App />);
       const router = screen.getByTestId('router');
       const basePath = router.getAttribute('data-base');
-      
+
       // Should be a string starting with /
       expect(basePath).toBeTruthy();
       expect(basePath?.startsWith('/')).toBe(true);
@@ -109,14 +113,14 @@ describe('App', () => {
     it('Router receives basePath prop', () => {
       render(<App />);
       const router = screen.getByTestId('router');
-      
+
       // Verify the router has a data-base attribute
       expect(router).toHaveAttribute('data-base');
     });
 
     it('maintains route structure', () => {
       render(<App />);
-      
+
       // Routes should be defined internally
       // The Router component handles prepending the base
       expect(screen.getByTestId('router')).toBeInTheDocument();
@@ -126,10 +130,10 @@ describe('App', () => {
       const { unmount } = render(<App />);
       const firstBasePath = screen.getByTestId('router').getAttribute('data-base');
       unmount();
-      
+
       render(<App />);
       const secondBasePath = screen.getByTestId('router').getAttribute('data-base');
-      
+
       expect(firstBasePath).toBe(secondBasePath);
     });
   });
@@ -137,7 +141,7 @@ describe('App', () => {
   describe('Integration', () => {
     it('renders complete app structure', () => {
       render(<App />);
-      
+
       // Should have all main components
       expect(screen.getByTestId('toaster')).toBeInTheDocument();
       expect(screen.getByTestId('router')).toBeInTheDocument();
@@ -146,14 +150,14 @@ describe('App', () => {
 
     it('routes home page correctly', () => {
       render(<App />);
-      
+
       expect(screen.getByTestId('router')).toHaveAttribute('data-base');
       expect(screen.getByTestId('home-page')).toBeInTheDocument();
     });
 
     it('provides QueryClient to children', () => {
       render(<App />);
-      
+
       // Children (Home, Toaster, Router) should all render
       expect(screen.getByTestId('toaster')).toBeInTheDocument();
       expect(screen.getByTestId('router')).toBeInTheDocument();
@@ -165,7 +169,7 @@ describe('App', () => {
     it('handles re-mounting gracefully', () => {
       const { unmount } = render(<App />);
       unmount();
-      
+
       render(<App />);
       expect(screen.getByTestId('router')).toBeInTheDocument();
       expect(screen.getByTestId('home-page')).toBeInTheDocument();
@@ -173,21 +177,21 @@ describe('App', () => {
 
     it('renders correctly after multiple re-renders', () => {
       const { rerender } = render(<App />);
-      
+
       rerender(<App />);
       rerender(<App />);
-      
+
       expect(screen.getByTestId('router')).toBeInTheDocument();
       expect(screen.getByTestId('home-page')).toBeInTheDocument();
     });
 
     it('maintains component hierarchy', () => {
       const { container } = render(<App />);
-      
+
       // Should have proper nesting
       const router = container.querySelector('[data-testid="router"]');
       const homePage = container.querySelector('[data-testid="home-page"]');
-      
+
       expect(router).toBeInTheDocument();
       expect(homePage).toBeInTheDocument();
       expect(router).toContainElement(homePage);
@@ -199,7 +203,7 @@ describe('App', () => {
       render(<App />);
       const router = screen.getByTestId('router');
       const basePath = router.getAttribute('data-base');
-      
+
       // The actual logic: const basePath = import.meta.env.BASE_URL || '/';
       // We verify it results in a valid path
       expect(basePath).toBeTruthy();
@@ -210,14 +214,14 @@ describe('App', () => {
       render(<App />);
       const router = screen.getByTestId('router');
       const basePath = router.getAttribute('data-base');
-      
+
       expect(basePath).not.toContain('?');
       expect(basePath).not.toContain('#');
     });
 
     it('basePath is used by wouter Router', () => {
       render(<App />);
-      
+
       // The Router component should receive and use the basePath
       // Verify by checking that it's passed through
       const router = screen.getByTestId('router');

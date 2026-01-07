@@ -8,11 +8,7 @@ const WALL_THICKNESS = 0.2;
 // Helper to get cell key
 const cellKey = (gridX: number, gridZ: number) => `${gridX},${gridZ}`;
 
-export function checkCollision(
-  position: Vector3,
-  maze: Maze,
-  blockades?: Set<string>,
-): boolean {
+export function checkCollision(position: Vector3, maze: Maze, blockades?: Set<string>): boolean {
   // Convert world position to grid coordinates
   const gridX = Math.floor((position.x + CELL_SIZE / 2) / CELL_SIZE);
   const gridZ = Math.floor((position.z + CELL_SIZE / 2) / CELL_SIZE);
