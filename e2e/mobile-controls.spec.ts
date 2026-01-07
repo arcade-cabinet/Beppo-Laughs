@@ -1,4 +1,4 @@
-import { expect, test, devices } from '@playwright/test';
+import { devices, expect, test } from '@playwright/test';
 
 test.describe('Beppo Laughs - Mobile Controls', () => {
   test.use({
@@ -12,20 +12,22 @@ test.describe('Beppo Laughs - Mobile Controls', () => {
 
   test('mobile: start game and verify touch controls', async ({ page }) => {
     // Should show main menu
-    await expect(page.getByRole('heading', { name: 'BEPPO LAUGHS' })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('heading', { name: 'BEPPO LAUGHS' })).toBeVisible({
+      timeout: 10000,
+    });
     await page.screenshot({ path: 'test-results/screenshots/mobile-01-menu.png' });
 
     // Enter seed and start
     const seedInput = page.getByTestId('input-seed');
     await seedInput.fill('mobile test seed');
-    
+
     const startBtn = page.getByTestId('button-start-game');
     await startBtn.click();
 
     // Should prompt to rotate if in portrait
     const rotatePrompt = page.getByText(/ROTATE YOUR DEVICE/i);
     const hasRotatePrompt = await rotatePrompt.isVisible().catch(() => false);
-    
+
     if (hasRotatePrompt) {
       await page.screenshot({ path: 'test-results/screenshots/mobile-02-rotate-prompt.png' });
     }
@@ -42,12 +44,12 @@ test.describe('Beppo Laughs - Mobile Controls', () => {
     // Test lever control with touch
     const leverControl = page.getByTestId('lever-control');
     await expect(leverControl).toBeVisible();
-    
+
     // Simulate touch on lever
     await leverControl.dispatchEvent('touchstart');
     await page.waitForTimeout(2000);
     await page.screenshot({ path: 'test-results/screenshots/mobile-05-lever-pulled.png' });
-    
+
     await leverControl.dispatchEvent('touchend');
     await page.waitForTimeout(1000);
     await page.screenshot({ path: 'test-results/screenshots/mobile-06-lever-released.png' });
@@ -56,7 +58,7 @@ test.describe('Beppo Laughs - Mobile Controls', () => {
   test('mobile: test tap zones for movement', async ({ page }) => {
     const startBtn = page.getByTestId('button-start-game');
     await expect(startBtn).toBeVisible({ timeout: 10000 });
-    
+
     const seedInput = page.getByTestId('input-seed');
     await seedInput.fill('tap zone test');
     await startBtn.click();
@@ -69,7 +71,7 @@ test.describe('Beppo Laughs - Mobile Controls', () => {
 
     if (tapZoneCount > 0) {
       await page.screenshot({ path: 'test-results/screenshots/mobile-tap-zones.png' });
-      
+
       // Test tapping a zone
       await tapZones.first().tap();
       await page.waitForTimeout(500);
@@ -80,7 +82,7 @@ test.describe('Beppo Laughs - Mobile Controls', () => {
   test('mobile: test gesture controls if available', async ({ page }) => {
     const startBtn = page.getByTestId('button-start-game');
     await expect(startBtn).toBeVisible({ timeout: 10000 });
-    
+
     const seedInput = page.getByTestId('input-seed');
     await seedInput.fill('gesture test');
     await startBtn.click();
@@ -112,7 +114,7 @@ test.describe('Beppo Laughs - Mobile Controls', () => {
   test('mobile: verify fork selection on touch devices', async ({ page }) => {
     const startBtn = page.getByTestId('button-start-game');
     await expect(startBtn).toBeVisible({ timeout: 10000 });
-    
+
     const seedInput = page.getByTestId('input-seed');
     await seedInput.fill('fork selection mobile');
     await startBtn.click();
@@ -131,17 +133,17 @@ test.describe('Beppo Laughs - Mobile Controls', () => {
       // Check for fork
       const forkButtons = page.locator('[data-testid^="button-fork-"]');
       const forkCount = await forkButtons.count();
-      
+
       if (forkCount > 0) {
-        await page.screenshot({ 
-          path: 'test-results/screenshots/mobile-fork-appeared.png' 
+        await page.screenshot({
+          path: 'test-results/screenshots/mobile-fork-appeared.png',
         });
-        
+
         // Test tapping a fork button
         await forkButtons.first().tap();
         await page.waitForTimeout(500);
-        await page.screenshot({ 
-          path: 'test-results/screenshots/mobile-fork-selected.png' 
+        await page.screenshot({
+          path: 'test-results/screenshots/mobile-fork-selected.png',
         });
         break;
       }
@@ -151,7 +153,7 @@ test.describe('Beppo Laughs - Mobile Controls', () => {
   test('mobile: test exit functionality', async ({ page }) => {
     const startBtn = page.getByTestId('button-start-game');
     await expect(startBtn).toBeVisible({ timeout: 10000 });
-    
+
     const seedInput = page.getByTestId('input-seed');
     await seedInput.fill('mobile exit test');
     await startBtn.click();
@@ -162,12 +164,14 @@ test.describe('Beppo Laughs - Mobile Controls', () => {
     const mobileExitBtn = page.getByTestId('button-exit-mobile');
     await expect(mobileExitBtn).toBeVisible();
     await page.screenshot({ path: 'test-results/screenshots/mobile-before-exit.png' });
-    
+
     await mobileExitBtn.tap();
     await page.waitForTimeout(1000);
 
     // Should return to main menu
-    await expect(page.getByRole('heading', { name: 'BEPPO LAUGHS' })).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('heading', { name: 'BEPPO LAUGHS' })).toBeVisible({
+      timeout: 5000,
+    });
     await page.screenshot({ path: 'test-results/screenshots/mobile-after-exit.png' });
   });
 });
@@ -181,12 +185,14 @@ test.describe('Beppo Laughs - Tablet Controls', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    await expect(page.getByRole('heading', { name: 'BEPPO LAUGHS' })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('heading', { name: 'BEPPO LAUGHS' })).toBeVisible({
+      timeout: 10000,
+    });
     await page.screenshot({ path: 'test-results/screenshots/tablet-menu.png' });
 
     const seedInput = page.getByTestId('input-seed');
     await seedInput.fill('tablet test');
-    
+
     const startBtn = page.getByTestId('button-start-game');
     await startBtn.click();
 

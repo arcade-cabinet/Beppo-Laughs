@@ -9,7 +9,7 @@ test.describe('Beppo Laughs - Horror Mechanics', () => {
   test('verify dual sanity system (fear and despair)', async ({ page }) => {
     const startBtn = page.getByTestId('button-start-game');
     await expect(startBtn).toBeVisible({ timeout: 10000 });
-    
+
     const seedInput = page.getByTestId('input-seed');
     await seedInput.fill('sanity system test');
     await startBtn.click();
@@ -20,7 +20,7 @@ test.describe('Beppo Laughs - Horror Mechanics', () => {
     // Both meters should be visible in the HUD
     const fearMeter = page.locator('text=/FEAR/i');
     const despairMeter = page.locator('text=/DESPAIR/i');
-    
+
     await expect(fearMeter).toBeVisible();
     await expect(despairMeter).toBeVisible();
 
@@ -40,8 +40,8 @@ test.describe('Beppo Laughs - Horror Mechanics', () => {
         await page.waitForTimeout(500);
       }
 
-      await page.screenshot({ 
-        path: `test-results/screenshots/horror-sanity-move-${i + 1}.png` 
+      await page.screenshot({
+        path: `test-results/screenshots/horror-sanity-move-${i + 1}.png`,
       });
     }
 
@@ -52,13 +52,13 @@ test.describe('Beppo Laughs - Horror Mechanics', () => {
   test('verify horror visual effects', async ({ page }) => {
     const startBtn = page.getByTestId('button-start-game');
     await expect(startBtn).toBeVisible({ timeout: 10000 });
-    
+
     const seedInput = page.getByTestId('input-seed');
     await seedInput.fill('visual effects test');
     await startBtn.click();
 
     await expect(page.getByText(/CELLS:/)).toBeVisible({ timeout: 15000 });
-    
+
     // Take screenshot to capture initial state
     await page.screenshot({ path: 'test-results/screenshots/horror-effects-01.png' });
 
@@ -79,8 +79,8 @@ test.describe('Beppo Laughs - Horror Mechanics', () => {
       }
 
       // Capture screenshots to show progressive horror effects
-      await page.screenshot({ 
-        path: `test-results/screenshots/horror-effects-${String(i + 2).padStart(2, '0')}.png` 
+      await page.screenshot({
+        path: `test-results/screenshots/horror-effects-${String(i + 2).padStart(2, '0')}.png`,
       });
     }
   });
@@ -88,7 +88,7 @@ test.describe('Beppo Laughs - Horror Mechanics', () => {
   test('verify villain encounters', async ({ page }) => {
     const startBtn = page.getByTestId('button-start-game');
     await expect(startBtn).toBeVisible({ timeout: 10000 });
-    
+
     const seedInput = page.getByTestId('input-seed');
     await seedInput.fill('villain encounter test');
     await startBtn.click();
@@ -114,16 +114,16 @@ test.describe('Beppo Laughs - Horror Mechanics', () => {
       // Check for blockades (villain-created obstacles)
       const hudText = await page.textContent('body');
       if (hudText?.includes('BLOCKED') || hudText?.includes('BLOCKADE')) {
-        await page.screenshot({ 
-          path: `test-results/screenshots/horror-blockade-${i}.png` 
+        await page.screenshot({
+          path: `test-results/screenshots/horror-blockade-${i}.png`,
         });
         console.log(`Blockade encountered at move ${i}`);
       }
 
       // Take periodic screenshots
       if (i % 2 === 0) {
-        await page.screenshot({ 
-          path: `test-results/screenshots/horror-villain-search-${i}.png` 
+        await page.screenshot({
+          path: `test-results/screenshots/horror-villain-search-${i}.png`,
         });
       }
     }
@@ -132,7 +132,7 @@ test.describe('Beppo Laughs - Horror Mechanics', () => {
   test('verify game over conditions', async ({ page }) => {
     const startBtn = page.getByTestId('button-start-game');
     await expect(startBtn).toBeVisible({ timeout: 10000 });
-    
+
     const seedInput = page.getByTestId('input-seed');
     await seedInput.fill('game over test');
     await startBtn.click();
@@ -146,17 +146,17 @@ test.describe('Beppo Laughs - Horror Mechanics', () => {
       // Check if game over occurred
       const restartBtn = page.getByTestId('button-restart');
       const hasGameOver = await restartBtn.isVisible().catch(() => false);
-      
+
       if (hasGameOver) {
         await page.screenshot({ path: 'test-results/screenshots/horror-game-over.png' });
-        
+
         // Verify restart button works
         await restartBtn.click();
         await page.waitForTimeout(1000);
-        
+
         // Should return to main menu
-        await expect(page.getByRole('heading', { name: 'BEPPO LAUGHS' })).toBeVisible({ 
-          timeout: 5000 
+        await expect(page.getByRole('heading', { name: 'BEPPO LAUGHS' })).toBeVisible({
+          timeout: 5000,
         });
         await page.screenshot({ path: 'test-results/screenshots/horror-after-restart.png' });
         break;
@@ -184,8 +184,8 @@ test.describe('Beppo Laughs - Horror Mechanics', () => {
 
       // Periodic screenshots
       if (i % 5 === 0) {
-        await page.screenshot({ 
-          path: `test-results/screenshots/horror-gameover-attempt-${i}.png` 
+        await page.screenshot({
+          path: `test-results/screenshots/horror-gameover-attempt-${i}.png`,
         });
       }
     }
@@ -194,7 +194,7 @@ test.describe('Beppo Laughs - Horror Mechanics', () => {
   test('verify brain meter visualization', async ({ page }) => {
     const startBtn = page.getByTestId('button-start-game');
     await expect(startBtn).toBeVisible({ timeout: 10000 });
-    
+
     const seedInput = page.getByTestId('input-seed');
     await seedInput.fill('brain meter test');
     await startBtn.click();
@@ -219,8 +219,8 @@ test.describe('Beppo Laughs - Horror Mechanics', () => {
       }
 
       // Capture brain meter state
-      await page.screenshot({ 
-        path: `test-results/screenshots/horror-brain-meter-${String(i + 1).padStart(2, '0')}.png` 
+      await page.screenshot({
+        path: `test-results/screenshots/horror-brain-meter-${String(i + 1).padStart(2, '0')}.png`,
       });
     }
   });
@@ -228,7 +228,7 @@ test.describe('Beppo Laughs - Horror Mechanics', () => {
   test('verify audio triggers (visual confirmation)', async ({ page }) => {
     const startBtn = page.getByTestId('button-start-game');
     await expect(startBtn).toBeVisible({ timeout: 10000 });
-    
+
     const seedInput = page.getByTestId('input-seed');
     await seedInput.fill('audio test');
     await startBtn.click();
