@@ -190,11 +190,17 @@ export function Scene({ seed }: SceneProps) {
     <>
       <AudioManager />
 
-      <Canvas shadows camera={{ position: [0, 1.4, 0], fov: 70, near: 0.1, far: 100 }}>
+      <div className="w-full h-full">
+        <Canvas
+          shadows
+          camera={{ position: [0, 1.4, 0], fov: 70, near: 0.1, far: 100 }}
+        >
         <color attach="background" args={[bgColor]} />
-        <fog attach="fog" args={[fogColor, fogNear, fogFar]} />
+        {/* Fog temporarily disabled - was obscuring 3D geometry */}
+        {/* <fog attach="fog" args={[fogColor, fogNear, fogFar]} /> */}
 
-        <ambientLight intensity={0.15 + (1 - avgInsanity) * 0.15} color="#ffd4a0" />
+        {/* Increased ambient light to make maze visible */}
+        <ambientLight intensity={0.8} color="#ffffff" />
 
         <FlickeringLight
           position={[centerWorld.x, 4, centerWorld.z]}
@@ -268,6 +274,7 @@ export function Scene({ seed }: SceneProps) {
         {/* GPU post-processing effects for horror atmosphere */}
         <HorrorEffects />
       </Canvas>
+      </div>
 
       <DriveControls />
       <ForkPrompt />

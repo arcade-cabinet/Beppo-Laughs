@@ -18,7 +18,9 @@ export function Maze({ geometry }: MazeProps) {
   useEffect(() => {
     let mounted = true;
     loadAssetCatalog().then((data) => {
-      if (mounted) setCatalog(data);
+      if (mounted) {
+        setCatalog(data);
+      }
     });
     return () => {
       mounted = false;
