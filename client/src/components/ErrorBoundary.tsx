@@ -44,7 +44,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   resetError = (): void => {
     // Clear error state
     this.setState({ hasError: false, error: null });
-    
+
     // Call optional onReset callback
     if (this.props.onReset) {
       this.props.onReset();

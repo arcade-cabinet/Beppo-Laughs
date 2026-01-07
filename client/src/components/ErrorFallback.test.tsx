@@ -48,11 +48,7 @@ describe('ErrorFallback', () => {
   describe('Custom Props', () => {
     it('renders custom title when provided', () => {
       render(
-        <ErrorFallback
-          error={mockError}
-          resetError={mockResetError}
-          title="Custom Error Title"
-        />,
+        <ErrorFallback error={mockError} resetError={mockResetError} title="Custom Error Title" />,
       );
 
       expect(screen.getByText('Custom Error Title')).toBeInTheDocument();

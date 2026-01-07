@@ -85,7 +85,7 @@ describe('ErrorBoundary', () => {
 
     it('passes error object to fallback component', () => {
       const errorMessage = 'Specific error message';
-      
+
       render(
         <ErrorBoundary
           fallback={({ error }) => (
@@ -115,7 +115,9 @@ describe('ErrorBoundary', () => {
       expect(consoleErrorSpy).toHaveBeenCalled();
       // Check that the error was logged
       const errorCalls = consoleErrorSpy.mock.calls.filter((call) =>
-        call.some((arg) => typeof arg === 'string' && arg.includes('ErrorBoundary caught an error')),
+        call.some(
+          (arg) => typeof arg === 'string' && arg.includes('ErrorBoundary caught an error'),
+        ),
       );
       expect(errorCalls.length).toBeGreaterThan(0);
     });
@@ -182,7 +184,7 @@ describe('ErrorBoundary', () => {
       screen.getByTestId('reset-button').click();
 
       expect(mockOnReset).toHaveBeenCalledTimes(1);
-      
+
       // After reset, re-render with no error
       rerender(
         <ErrorBoundary
