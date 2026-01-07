@@ -669,3 +669,13 @@ describe('Home', () => {
     });
   });
 });
+describe('Home page (extended)', () => {
+  it('renders CTA and key UI elements', async () => {
+    const { findByText } = render(<Home />);
+    expect(await findByText(/Start|Play|Begin/i)).toBeTruthy();
+  });
+
+  it('is resilient to missing optional data', () => {
+    expect(() => render(<Home />)).not.toThrow();
+  });
+});
