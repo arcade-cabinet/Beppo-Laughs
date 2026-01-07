@@ -5,7 +5,12 @@ import Home from '@/pages/Home';
 import NotFound from '@/pages/not-found';
 import { queryClient } from './lib/queryClient';
 
-// Get base path from environment variable (set during build)
+/**
+ * Get base path for router from Vite's BASE_URL.
+ * - Development: BASE_URL = '/' (default)
+ * - GitHub Pages: BASE_URL = '/Beppo-Laughs/' (from VITE_BASE_PATH env var in build)
+ * This allows the router to correctly handle subpath deployments.
+ */
 const basePath = import.meta.env.BASE_URL || '/';
 
 function Router() {
