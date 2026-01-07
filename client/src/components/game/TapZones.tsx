@@ -72,7 +72,6 @@ export function TapZones({ geometry }: TapZonesProps) {
 
     const current = geometry.railNodes.get(currentNode);
     if (!current) {
-      console.log('TapZones: No current node found for:', currentNode);
       return [];
     }
 
@@ -82,8 +81,6 @@ export function TapZones({ geometry }: TapZonesProps) {
       direction: 'north' | 'south' | 'east' | 'west';
     }[] = [];
 
-    console.log('TapZones: Current node', currentNode, 'has connections:', current.connections);
-
     for (const connId of current.connections) {
       const node = geometry.railNodes.get(connId);
       if (!node) continue;
@@ -92,8 +89,6 @@ export function TapZones({ geometry }: TapZonesProps) {
       const direction = getDirection(current, node);
       moves.push({ targetNode: node, currentNode: current, direction });
     }
-
-    console.log('TapZones: Available moves:', moves.length);
 
     const movesForStore = moves.map((m) => ({
       direction: m.direction,
@@ -106,7 +101,6 @@ export function TapZones({ geometry }: TapZonesProps) {
   }, [currentNode, isMoving, geometry, blockades, setAvailableMoves]);
 
   const handleTap = (nodeId: string) => {
-    console.log('TapZones: Tapped to move to', nodeId);
     startMoveTo(nodeId, 1.0);
   };
 

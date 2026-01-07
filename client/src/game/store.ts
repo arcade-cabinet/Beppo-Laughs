@@ -321,7 +321,6 @@ export const useGameStore = create<GameState>((set, get) => ({
         if (otherMoves.length > 0) {
           const randomMove = otherMoves[Math.floor(rng() * otherMoves.length)];
           actualTarget = randomMove.nodeId;
-          console.log('FEAR confusion! Intended:', targetNodeId, 'Actual:', actualTarget);
         }
       }
     }

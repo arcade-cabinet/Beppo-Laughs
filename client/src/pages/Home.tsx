@@ -64,11 +64,9 @@ export default function Home() {
           await screenOrientation.lock('landscape');
         } catch (_e) {
           // Orientation lock may not be supported
-          console.log('Orientation lock not supported');
         }
       }
     } catch (_e) {
-      console.log('Fullscreen not supported or denied');
     }
   }, []);
 

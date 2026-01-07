@@ -109,10 +109,6 @@ export function Scene({ seed }: SceneProps) {
     const layout = generateMaze(13, 13, seed);
     const geometry = buildGeometry(layout, DEFAULT_CONFIG);
     setMazeData({ layout, geometry });
-    console.log('Generated 2D maze:', layout.width, 'x', layout.height);
-    console.log('Center:', layout.center, 'Exits:', layout.exits);
-    console.log('Rail nodes:', geometry.railNodes.size);
-
     const store = useGameStore.getState();
     store.setCurrentNode(geometry.centerNodeId);
 
@@ -138,7 +134,6 @@ export function Scene({ seed }: SceneProps) {
         moves.push({ direction, nodeId: node.id, isExit: node.isExit });
       }
       store.setAvailableMoves(moves);
-      console.log('Initial available moves:', moves);
     }
   }, [seed]);
 

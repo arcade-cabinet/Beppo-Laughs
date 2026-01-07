@@ -44,7 +44,6 @@ export function GestureControls() {
       const move = availableMoves.find((m) => m.direction === intendedDirection);
 
       if (move) {
-        console.log('Swipe detected:', intendedDirection, '-> moving to', move.nodeId);
         startMoveTo(move.nodeId, 1.0);
       } else {
         const sortedMoves = [...availableMoves].sort((a, b) => {
@@ -68,7 +67,6 @@ export function GestureControls() {
         });
 
         if (sortedMoves.length > 0) {
-          console.log('Swipe fallback to closest direction:', sortedMoves[0].direction);
           startMoveTo(sortedMoves[0].nodeId, 1.0);
         }
       }
