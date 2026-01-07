@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { useGameStore } from '../../game/store';
 
 export function DriveControls() {
-  const { setAccelerating, setBraking, accelerating, carSpeed, pendingFork, isGameOver, hasWon } =
+  const { setAccelerating, setBraking, accelerating, carSpeed, pendingFork, isGameOver, hasWon, braking } =
     useGameStore();
   const [showLeverHint, setShowLeverHint] = useState(true);
 
@@ -22,6 +22,7 @@ export function DriveControls() {
   if (isGameOver || hasWon) return null;
 
   const speedPercent = (Math.abs(carSpeed) / 5) * 100;
+  const isMoving = carSpeed > 0.05;
 
   return (
     <div className="absolute inset-0 pointer-events-none z-30">
@@ -35,6 +36,10 @@ export function DriveControls() {
         <button
           type="button"
           data-testid="lever-control"
+          data-accelerating={accelerating.toString()}
+          data-braking={braking.toString()}
+          data-car-speed={carSpeed.toFixed(1)}
+          data-moving={isMoving.toString()}
           disabled={!!leverDisabled}
           aria-label="Drive lever - hold to accelerate"
           aria-pressed={accelerating}

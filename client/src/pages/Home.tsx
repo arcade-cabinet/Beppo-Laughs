@@ -34,6 +34,7 @@ export default function Home() {
   const setSeedStore = useGameStore((state) => state.setSeed);
   const resetGame = useGameStore((state) => state.resetGame);
   const isGameOver = useGameStore((state) => state.isGameOver);
+  const hasWon = useGameStore((state) => state.hasWon);
 
   // Request fullscreen and lock orientation
   const enterFullscreen = useCallback(async () => {
@@ -154,8 +155,20 @@ export default function Home() {
     );
   }
 
+  // Compute game state for testing
+  const getGameState = () => {
+    if (!isPlaying) return 'menu';
+    if (hasWon) return 'game-over-win';
+    if (isGameOver) return 'game-over-lose';
+    return 'playing';
+  };
+
   return (
-    <div className="relative w-full h-screen bg-black overflow-hidden">
+    <div 
+      className="relative w-full h-screen bg-black overflow-hidden"
+      data-game-state={getGameState()}
+      data-seed={seed}
+    >
       {!isPlaying && <MainMenu onStart={handleStart} />}
 
       {isPlaying && (
