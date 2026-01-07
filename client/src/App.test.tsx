@@ -28,7 +28,7 @@ let mockLocation = '/';
 let mockBasePath = '/';
 
 vi.mock('wouter', () => ({
-  Route: ({ path, component: Component }: { path: string; component: () => JSX.Element }) => {
+  Route: ({ path, component: Component }: { path: string; component: () => React.ReactNode }) => {
     const matches = mockLocation === path || (path === '/' && mockLocation === mockBasePath);
     return matches ? <Component /> : null;
   },

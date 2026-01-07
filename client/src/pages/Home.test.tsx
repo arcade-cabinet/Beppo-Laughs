@@ -26,15 +26,12 @@ vi.mock('@/game/store', () => ({
   useGameStore: vi.fn(),
 }));
 
-type StoreState = {
-  seed: string;
-  setSeed: (seed: string) => void;
-  resetGame: () => void;
-  isGameOver: boolean;
-};
-type Selector<T> = (state: StoreState) => T;
-const applySelector = <T,>(state: StoreState, selector?: Selector<T>) =>
-  selector ? selector(state) : (state as unknown as T);
+// biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible typing
+type MockState = Record<string, any>;
+// biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible typing
+type MockSelector = ((state: MockState) => any) | undefined;
+const applySelector = (state: MockState, selector?: MockSelector) =>
+  selector ? selector(state) : state;
 
 describe('Home', () => {
   let mockResetGame: ReturnType<typeof vi.fn>;
@@ -44,16 +41,9 @@ describe('Home', () => {
     mockResetGame = vi.fn();
     mockSetSeed = vi.fn();
 
-    // Mock useGameStore
-    type StoreState = {
-      seed: string;
-      setSeed: typeof mockSetSeed;
-      resetGame: typeof mockResetGame;
-      isGameOver: boolean;
-    };
-    type Selector<T> = (state: StoreState) => T;
-
-    vi.mocked(useGameStore).mockImplementation(<T,>(selector?: Selector<T>) =>
+    // Mock useGameStore with flexible typing
+    // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible typing
+    vi.mocked(useGameStore).mockImplementation((selector?: any) =>
       applySelector(
         {
           seed: '',
@@ -74,7 +64,7 @@ describe('Home', () => {
     // Mock WebGL support
     const mockCanvas = {
       getContext: vi.fn(() => ({})),
-    } as HTMLCanvasElement;
+    } as unknown as HTMLCanvasElement;
     document.createElement = vi.fn((tag: string) => {
       if (tag === 'canvas') return mockCanvas;
       return document.createElementNS('http://www.w3.org/1999/xhtml', tag);
@@ -158,7 +148,8 @@ describe('Home', () => {
     });
 
     it('passes seed to Scene component', async () => {
-      vi.mocked(useGameStore).mockImplementation((selector?: Selector<unknown>) => {
+      // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible typing
+      vi.mocked(useGameStore).mockImplementation((selector?: any) => {
         const state = {
           seed: 'test seed',
           setSeed: mockSetSeed,
@@ -284,7 +275,8 @@ describe('Home', () => {
 
   describe('Game Over State', () => {
     beforeEach(() => {
-      vi.mocked(useGameStore).mockImplementation((selector?: Selector<unknown>) => {
+      // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible typing
+      vi.mocked(useGameStore).mockImplementation((selector?: any) => {
         const state = {
           seed: 'test seed',
           setSeed: mockSetSeed,

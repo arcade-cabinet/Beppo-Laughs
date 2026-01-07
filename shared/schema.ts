@@ -1,7 +1,6 @@
 import { sql } from 'drizzle-orm';
 import { pgTable, text, varchar } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
-import type { z } from 'zod';
 
 export const users = pgTable('users', {
   id: varchar('id').primaryKey().default(sql`gen_random_uuid()`),
@@ -14,5 +13,6 @@ export const insertUserSchema = createInsertSchema(users).pick({
   password: true,
 });
 
-export type InsertUser = z.infer<typeof insertUserSchema>;
+// Use schema's output type directly instead of z.infer for compatibility
+export type InsertUser = typeof insertUserSchema._output;
 export type User = typeof users.$inferSelect;
