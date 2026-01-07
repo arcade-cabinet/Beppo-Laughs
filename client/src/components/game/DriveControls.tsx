@@ -2,8 +2,16 @@ import { useCallback, useState } from 'react';
 import { useGameStore } from '../../game/store';
 
 export function DriveControls() {
-  const { setAccelerating, setBraking, accelerating, carSpeed, pendingFork, isGameOver, hasWon, braking } =
-    useGameStore();
+  const {
+    setAccelerating,
+    setBraking,
+    accelerating,
+    carSpeed,
+    pendingFork,
+    isGameOver,
+    hasWon,
+    braking,
+  } = useGameStore();
   const [showLeverHint, setShowLeverHint] = useState(true);
 
   const leverDisabled = pendingFork;

@@ -1,9 +1,5 @@
 import { expect, test } from '@playwright/test';
-import {
-  performLeverPull,
-  waitForFork,
-  waitForGameState,
-} from './utils/test-helpers';
+import { performLeverPull, waitForGameState } from './utils/test-helpers';
 
 test.describe('Beppo Laughs - Full Gameplay Flow', () => {
   test.beforeEach(async ({ page }) => {
@@ -57,7 +53,10 @@ test.describe('Beppo Laughs - Full Gameplay Flow', () => {
       const firstFork = forkButtons.first();
       await firstFork.click();
       // Wait for fork to be dismissed
-      await page.locator('[data-has-fork="true"]').waitFor({ state: 'detached', timeout: 2000 }).catch(() => {});
+      await page
+        .locator('[data-has-fork="true"]')
+        .waitFor({ state: 'detached', timeout: 2000 })
+        .catch(() => {});
       await page.screenshot({ path: 'test-results/screenshots/09-fork-selected.png' });
     }
 
@@ -105,7 +104,10 @@ test.describe('Beppo Laughs - Full Gameplay Flow', () => {
         // Select first available direction
         await forkButtons.first().click();
         // Wait for fork to be dismissed
-        await page.locator('[data-has-fork="true"]').waitFor({ state: 'detached', timeout: 2000 }).catch(() => {});
+        await page
+          .locator('[data-has-fork="true"]')
+          .waitFor({ state: 'detached', timeout: 2000 })
+          .catch(() => {});
       }
 
       // Check for nearby items or exits
@@ -151,7 +153,10 @@ test.describe('Beppo Laughs - Full Gameplay Flow', () => {
       const forkCount = await forkButtons.count();
       if (forkCount > 0) {
         await forkButtons.first().click();
-        await page.locator('[data-has-fork="true"]').waitFor({ state: 'detached', timeout: 2000 }).catch(() => {});
+        await page
+          .locator('[data-has-fork="true"]')
+          .waitFor({ state: 'detached', timeout: 2000 })
+          .catch(() => {});
       }
 
       // Screenshot after each move
@@ -183,7 +188,10 @@ test.describe('Beppo Laughs - Full Gameplay Flow', () => {
       const forkCount = await forkButtons.count();
       if (forkCount > 0) {
         await forkButtons.first().click();
-        await page.locator('[data-has-fork="true"]').waitFor({ state: 'detached', timeout: 2000 }).catch(() => {});
+        await page
+          .locator('[data-has-fork="true"]')
+          .waitFor({ state: 'detached', timeout: 2000 })
+          .catch(() => {});
       }
 
       // Check for collectible items
@@ -239,7 +247,10 @@ test.describe('Beppo Laughs - Full Gameplay Flow', () => {
         } else {
           await forkButtons.last().click();
         }
-        await page.locator('[data-has-fork="true"]').waitFor({ state: 'detached', timeout: 2000 }).catch(() => {});
+        await page
+          .locator('[data-has-fork="true"]')
+          .waitFor({ state: 'detached', timeout: 2000 })
+          .catch(() => {});
       }
 
       // Check for exit
@@ -251,10 +262,10 @@ test.describe('Beppo Laughs - Full Gameplay Flow', () => {
 
         // Take the exit
         await exitButton.click();
-        
+
         // Wait for game over state
-        await waitForGameState(page, 'game-over-win', 5000).catch(() => 
-          waitForGameState(page, 'game-over-lose', 5000)
+        await waitForGameState(page, 'game-over-win', 5000).catch(() =>
+          waitForGameState(page, 'game-over-lose', 5000),
         );
 
         await page.screenshot({ path: 'test-results/screenshots/exit-taken.png' });

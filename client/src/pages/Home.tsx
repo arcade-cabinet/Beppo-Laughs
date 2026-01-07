@@ -137,7 +137,7 @@ export default function Home() {
   };
 
   return (
-    <div 
+    <div
       className="relative w-full h-screen bg-black overflow-hidden"
       data-game-state={getGameState()}
       data-seed={seed}
