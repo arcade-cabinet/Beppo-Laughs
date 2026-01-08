@@ -7,17 +7,17 @@ describe('test-setup.tsx configuration', () => {
     });
 
     it('ResizeObserver has observe method', () => {
-      const observer = new ResizeObserver(() => {});
+      const observer = new ResizeObserver();
       expect(typeof observer.observe).toBe('function');
     });
 
     it('ResizeObserver has unobserve method', () => {
-      const observer = new ResizeObserver(() => {});
+      const observer = new ResizeObserver();
       expect(typeof observer.unobserve).toBe('function');
     });
 
     it('ResizeObserver has disconnect method', () => {
-      const observer = new ResizeObserver(() => {});
+      const observer = new ResizeObserver();
       expect(typeof observer.disconnect).toBe('function');
     });
 
@@ -84,8 +84,8 @@ describe('test-setup.tsx configuration', () => {
   describe('mock stability', () => {
     it('mocks persist across test runs', () => {
       expect(global.ResizeObserver).toBeDefined();
-      const observer1 = new ResizeObserver(() => {});
-      const observer2 = new ResizeObserver(() => {});
+      const observer1 = new ResizeObserver();
+      const observer2 = new ResizeObserver();
 
       expect(observer1).toBeDefined();
       expect(observer2).toBeDefined();
