@@ -1,6 +1,6 @@
 import { Text } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-import { useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '../../game/store';
 
@@ -14,6 +14,29 @@ const DOT_COLORS = [
   '#66ff00',
   '#00ffaa',
   '#aa00ff',
+];
+
+const DOT_POSITIONS = [
+  [-0.4, 0.09, 0.1],
+  [0.4, 0.09, 0.1],
+  [-0.2, 0.09, 0.35],
+  [0.2, 0.09, 0.35],
+  [0, 0.09, -0.15],
+  [-0.5, 0.09, -0.2],
+  [0.5, 0.09, -0.2],
+  [-0.25, 0.09, -0.35],
+  [0.25, 0.09, -0.35],
+];
+
+const RIVET_POSITIONS = [
+  [-0.65, 0.08, -0.3],
+  [0.65, 0.08, -0.3],
+  [-0.55, 0.08, 0.25],
+  [0.55, 0.08, 0.25],
+  [-0.3, 0.08, -0.4],
+  [0.3, 0.08, -0.4],
+  [-0.7, 0.08, 0],
+  [0.7, 0.08, 0],
 ];
 
 function DashboardPanel({
@@ -168,10 +191,45 @@ export function ClownCarCockpit() {
   const leverRef = useRef<THREE.Group>(null);
   const fearFillRef = useRef<THREE.Mesh>(null);
   const despairFillRef = useRef<THREE.Mesh>(null);
+  const cockpitRef = useRef<THREE.Group>(null);
 
-  useFrame(() => {
-    const state = useGameStore.getState();
-    const { accelerating, braking, fear, despair, maxSanity } = state;
+  // InstancedMesh refs
+  const dotsRef = useRef<THREE.InstancedMesh>(null);
+  const rivetsRef = useRef<THREE.InstancedMesh>(null);
+
+  // Setup instanced meshes
+  useLayoutEffect(() => {
+    // Setup dots
+    if (dotsRef.current && typeof dotsRef.current.setMatrixAt === 'function') {
+      const tempObj = new THREE.Object3D();
+      DOT_POSITIONS.forEach((pos, i) => {
+        tempObj.position.set(pos[0], pos[1], pos[2]);
+        tempObj.updateMatrix();
+        dotsRef.current?.setMatrixAt(i, tempObj.matrix);
+
+        const dotColor = new THREE.Color(DOT_COLORS[i % DOT_COLORS.length]);
+        dotsRef.current?.setColorAt(i, dotColor);
+      });
+      dotsRef.current.instanceMatrix.needsUpdate = true;
+      if (dotsRef.current.instanceColor) dotsRef.current.instanceColor.needsUpdate = true;
+    }
+
+    // Setup rivets
+    if (rivetsRef.current && typeof rivetsRef.current.setMatrixAt === 'function') {
+      const tempObj = new THREE.Object3D();
+      RIVET_POSITIONS.forEach((pos, i) => {
+        tempObj.position.set(pos[0], pos[1], pos[2]);
+        tempObj.rotation.set(0, 0, 0); // Rivets are simple cylinders
+        tempObj.updateMatrix();
+        rivetsRef.current?.setMatrixAt(i, tempObj.matrix);
+      });
+      rivetsRef.current.instanceMatrix.needsUpdate = true;
+    }
+  }, []);
+
+  useFrame((_state) => {
+    const gameState = useGameStore.getState();
+    const { accelerating, braking, fear, despair, maxSanity } = gameState;
 
     if (leverRef.current) {
       const targetRotation = accelerating ? -0.5 : braking ? 0.2 : -0.1;
@@ -201,7 +259,7 @@ export function ClownCarCockpit() {
 
   // Position relative to camera: Y=-0.6 (below), Z=-0.5 (in front, camera looks -Z)
   return (
-    <group position={[0, -0.6, -0.5]} scale={[scale, scale, scale]}>
+    <group ref={cockpitRef} position={[0, -0.6, -0.5]} scale={[scale, scale, scale]}>
       {/* === 3D DASHBOARD PANELS === */}
       <group position={[0, 0.45, -0.35]}>
         {/* Left Panel - FEAR Meter */}
@@ -270,48 +328,22 @@ export function ClownCarCockpit() {
           <meshStandardMaterial color="#ff0000" emissive="#ff0000" emissiveIntensity={0.5} />
         </mesh>
 
-        {/* Polka dots on hood - larger and more visible */}
-        {[
-          [-0.4, 0.09, 0.1],
-          [0.4, 0.09, 0.1],
-          [-0.2, 0.09, 0.35],
-          [0.2, 0.09, 0.35],
-          [0, 0.09, -0.15],
-          [-0.5, 0.09, -0.2],
-          [0.5, 0.09, -0.2],
-          [-0.25, 0.09, -0.35],
-          [0.25, 0.09, -0.35],
-        ].map((pos, index) => {
-          const dotColor = DOT_COLORS[index % DOT_COLORS.length];
-          return (
-            <mesh key={`dot-${pos.join('-')}`} position={pos as [number, number, number]}>
-              <sphereGeometry args={[0.06, 8, 8]} />
-              <meshStandardMaterial
-                color={dotColor}
-                roughness={0.3}
-                emissive={dotColor}
-                emissiveIntensity={0.1}
-              />
-            </mesh>
-          );
-        })}
+        {/* Polka dots on hood - Instanced */}
+        <instancedMesh ref={dotsRef} args={[undefined, undefined, DOT_POSITIONS.length]}>
+          <sphereGeometry args={[0.06, 8, 8]} />
+          <meshStandardMaterial
+            color="#ffffff" // Base color, overridden by instanceColor
+            roughness={0.3}
+            emissive="#ffffff"
+            emissiveIntensity={0.1}
+          />
+        </instancedMesh>
 
-        {/* Metal blemishes/rivets - larger */}
-        {[
-          [-0.65, 0.08, -0.3],
-          [0.65, 0.08, -0.3],
-          [-0.55, 0.08, 0.25],
-          [0.55, 0.08, 0.25],
-          [-0.3, 0.08, -0.4],
-          [0.3, 0.08, -0.4],
-          [-0.7, 0.08, 0],
-          [0.7, 0.08, 0],
-        ].map((pos) => (
-          <mesh key={`rivet-${pos.join('-')}`} position={pos as [number, number, number]}>
-            <cylinderGeometry args={[0.025, 0.025, 0.03, 8]} />
-            <meshStandardMaterial color="#888866" roughness={0.8} metalness={0.6} />
-          </mesh>
-        ))}
+        {/* Metal blemishes/rivets - Instanced */}
+        <instancedMesh ref={rivetsRef} args={[undefined, undefined, RIVET_POSITIONS.length]}>
+          <cylinderGeometry args={[0.025, 0.025, 0.03, 8]} />
+          <meshStandardMaterial color="#888866" roughness={0.8} metalness={0.6} />
+        </instancedMesh>
       </group>
 
       {/* Dashboard behind hood - larger */}
