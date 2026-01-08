@@ -168,7 +168,6 @@ export function ClownCarCockpit() {
   const leverRef = useRef<THREE.Group>(null);
   const fearFillRef = useRef<THREE.Mesh>(null);
   const despairFillRef = useRef<THREE.Mesh>(null);
-  const cockpitRef = useRef<THREE.Group>(null);
   const chassisRef = useRef<THREE.Group>(null);
 
   useFrame((_state) => {
