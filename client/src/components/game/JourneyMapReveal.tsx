@@ -139,7 +139,7 @@ export function JourneyMapReveal() {
       ctx.arc(point.x, point.y, dotSize, 0, Math.PI * 2);
       ctx.fill();
     }
-  }, [pathHistory, visitedCells, shouldShow, hasWon, fear, despair]);
+  }, [pathHistory, visitedCells, shouldShow, hasWon]);
 
   if (!shouldShow) return null;
 
