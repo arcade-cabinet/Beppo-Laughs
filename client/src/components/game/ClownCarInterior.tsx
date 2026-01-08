@@ -40,6 +40,10 @@ function GPSDisplay({ position }: { position: [number, number, number] }) {
       (meshRef.current.material as THREE.MeshStandardMaterial).map = texture;
       (meshRef.current.material as THREE.MeshStandardMaterial).needsUpdate = true;
     }
+
+    return () => {
+      texture.dispose();
+    };
   }, []);
 
   useFrame(() => {
