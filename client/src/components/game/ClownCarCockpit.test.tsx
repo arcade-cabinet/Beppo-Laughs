@@ -1,5 +1,5 @@
 import ReactThreeTestRenderer from '@react-three/test-renderer';
-import * as THREE from 'three';
+import type * as THREE from 'three';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ClownCarCockpit } from './ClownCarCockpit';
 
@@ -35,10 +35,7 @@ vi.mock('../../game/store', () => ({
 }));
 
 // Helper to traverse scene graph
-function traverseScene(
-  children: SceneNode[],
-  callback: (node: SceneNode) => void,
-): void {
+function traverseScene(children: SceneNode[], callback: (node: SceneNode) => void): void {
   for (const child of children) {
     callback(child);
     if (child.children && child.children.length > 0) {
@@ -47,12 +44,33 @@ function traverseScene(
   }
 }
 
+/**
+ * Retrieves a named scene object and throws if not found.
+ *
+ * @template T - The expected type of the scene object (e.g., THREE.Mesh, THREE.Group)
+ * @param scene - The Three.js scene to search
+ * @param name - The name of the object to find
+ * @returns The scene object cast to type T
+ * @throws Assertion error if the object is not found in the scene
+ */
 function getObjectByName<T extends THREE.Object3D>(scene: THREE.Scene, name: string): T {
   const object = scene.getObjectByName(name);
   expect(object, `Expected scene object named "${name}"`).toBeTruthy();
   return object as T;
 }
 
+/**
+ * Simulates multiple linear interpolation (lerp) iterations to predict animated values in tests.
+ *
+ * This helper function emulates the cumulative effect of applying lerp multiple times per frame,
+ * allowing tests to verify that animated properties converge toward expected values.
+ *
+ * @param start - The initial value before any lerp iterations
+ * @param target - The target value to interpolate toward
+ * @param alpha - The interpolation factor (0-1) applied each iteration
+ * @param iterations - The number of lerp iterations to simulate
+ * @returns The predicted value after the specified number of iterations
+ */
 function lerpValue(start: number, target: number, alpha: number, iterations: number): number {
   let value = start;
   for (let i = 0; i < iterations; i += 1) {
