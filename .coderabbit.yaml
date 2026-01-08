@@ -65,10 +65,24 @@ reviews:
         - Deterministic behavior for seeded randomness
     - path: "e2e/**"
       instructions: |
-        Playwright E2E tests. Check for:
-        - Use of role-based selectors over test IDs
-        - Avoid waitForTimeout, prefer condition-based waits
+        Playwright E2E tests. ENFORCE docs/TESTING_STANDARDS.md:
+        - REJECT any use of waitForTimeout - use condition-based waits
+        - Use role-based selectors over test IDs
+        - Tests must have meaningful assertions, not just screenshots
         - Proper test isolation
+    - path: "**/*.test.tsx"
+      instructions: |
+        Unit tests. ENFORCE docs/TESTING_STANDARDS.md:
+        - REJECT "renders without crashing" as the only test
+        - R3F components MUST use @react-three/test-renderer
+        - Tests must verify actual behavior, not just existence
+        - Coverage requirements: Pure functions 90%, Components 80%, Store 95%
+    - path: "**/*.test.ts"
+      instructions: |
+        Unit tests. ENFORCE docs/TESTING_STANDARDS.md:
+        - Pure functions must have 90%+ coverage
+        - Test edge cases and boundary conditions
+        - Store actions must test state transitions
     - path: ".github/workflows/**"
       instructions: |
         GitHub Actions workflows. Check for:
@@ -230,6 +244,7 @@ knowledge_base:
       - "docs/ARCHITECTURE.md"
       - "docs/STYLE_GUIDE.md"
       - "docs/VISION.md"
+      - "docs/TESTING_STANDARDS.md"
       - "docs/TESTING_ENHANCEMENTS.md"
   learnings:
     scope: global  # Share learnings across organization
@@ -254,10 +269,26 @@ code_generation:
         instructions: "Use JSDoc format with @param, @returns, and @example where helpful"
   unit_tests:
     path_instructions:
+      - path: "client/src/components/game/**"
+        instructions: |
+          MANDATORY: Follow docs/TESTING_STANDARDS.md
+          - Use @react-three/test-renderer for R3F components
+          - Test mesh props, events, and scene graph
+          - NO "renders without crashing" padding tests
+          - Minimum 70% coverage for R3F components
       - path: "client/src/components/**"
-        instructions: "Use Vitest with React Testing Library. Mock R3F components appropriately."
+        instructions: |
+          MANDATORY: Follow docs/TESTING_STANDARDS.md
+          - Use Vitest + React Testing Library
+          - Test actual behavior, not just rendering
+          - Minimum 80% coverage
       - path: "client/src/game/**"
-        instructions: "Use Vitest. Test pure functions with edge cases."
+        instructions: |
+          MANDATORY: Follow docs/TESTING_STANDARDS.md
+          - Test pure functions with 90%+ coverage
+          - Test all edge cases and boundary conditions
+          - Store actions must test state transitions
+          - Minimum 95% coverage for store
 issue_enrichment:
   auto_enrich:
     enabled: true
@@ -266,7 +297,12 @@ issue_enrichment:
     auto_planning:
       enabled: true
       labels:
-        - "synthesis"  # Auto-plan synthesis issues
+        - "synthesis"     # Auto-plan synthesis issues
+        - "bug"           # Auto-plan bug fixes
+        - "critical"      # Auto-plan critical issues
+        - "game/gameplay" # Auto-plan gameplay issues
+        - "game/rendering" # Auto-plan rendering issues
+        - "game/maze"     # Auto-plan maze issues
   labeling:
     labeling_instructions:
       - label: "bug"
