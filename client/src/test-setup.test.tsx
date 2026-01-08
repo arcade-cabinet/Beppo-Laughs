@@ -22,7 +22,7 @@ describe('test-setup.tsx configuration', () => {
     });
 
     it('ResizeObserver methods do not throw', () => {
-      const observer = new ResizeObserver(() => {});
+      const observer = new ResizeObserver();
       const element = document.createElement('div');
 
       expect(() => observer.observe(element)).not.toThrow();
