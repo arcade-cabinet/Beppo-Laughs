@@ -82,8 +82,7 @@ export function GPSMinimap({ size = 150 }: MinimapProps) {
     }
 
     // Draw visited nodes as dots
-    for (const entry of visitedCells.entries()) {
-      const [nodeId, cell] = entry;
+    for (const [, cell] of visitedCells.entries()) {
       const point = toCanvas(cell.x, cell.z);
 
       // Dot size based on visit count
