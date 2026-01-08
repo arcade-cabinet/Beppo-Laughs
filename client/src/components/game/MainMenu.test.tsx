@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { MainMenu, SEED_WORDS } from '@/components/game/MainMenu';
+import { MainMenu } from '@/components/game/MainMenu';
 
 // Mock Lucide icons
 vi.mock('lucide-react', () => ({
