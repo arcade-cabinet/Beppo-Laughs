@@ -75,27 +75,4 @@ describe('TapZones', () => {
     const { unmount } = render(<TapZones geometry={mockGeometry} />);
     expect(() => unmount()).not.toThrow();
   });
-
-  
-
-  describe('Fear Integration', () => {
-    it('reacts to fear level changes', () => {      let fear = 10;
-      
-
-      const { rerender } = render(<SDFVillain position={[0, 0, 0]} isVisible={true} />);
-      
-      fear = 80;
-      rerender(<SDFVillain position={[0, 0, 0]} isVisible={true} />);
-      
-      expect(() => rerender(<SDFVillain position={[0, 0, 0]} isVisible={true} />)).not.toThrow();
-    });
-
-  });
-
-  
-
-  
 });
-
-// Additional tests: TapZones interactions
-

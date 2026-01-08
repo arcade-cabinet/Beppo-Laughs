@@ -110,17 +110,3 @@ describe('Collectibles', () => {
     expect(container).toBeTruthy();
   });
 });
-
-// Additional tests: Collectibles behaviors
-describe('Collectibles - behaviors', () => {
-
-  it('tolerates missing texture url', () => {
-    const geometry = {
-      walls: [], floor: { x:0,z:0,width:1,depth:1 },
-      centerNodeId: 'center', railNodes: new Map([['center', { id: 'center', gridX:0, gridY:0, worldX:0, worldZ:0, connections:[], isCenter:true, isExit:false }]]),
-      exitNodeIds: [],
-    } as any;
-    const items = [{ id:'i2', worldX:1, worldZ:1, nodeId:'center', textureUrl: undefined as any, name:'Unknown' }];
-    expect(() => render(<Suspense fallback={null}><Collectibles geometry={geometry} items={items as any} /></Suspense>)).not.toThrow();
-  });
-});

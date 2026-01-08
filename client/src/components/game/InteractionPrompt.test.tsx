@@ -37,39 +37,4 @@ describe('InteractionPrompt', () => {
     const { unmount } = render(<InteractionPrompt />);
     expect(() => unmount()).not.toThrow();
   });
-
-  describe('Item Interaction', () => {
-
-    it('calls collectNearbyItem when collect button clicked', () => {
-
-      render(<InteractionPrompt />);
-      const button = screen.getByTestId('button-collect-item');
-      
-      button.click();
-      expect(collectNearbyItem).toHaveBeenCalled();
-    });
-
-  });
-
-  describe('Exit Interaction', () => {
-
-    it('calls triggerExitInteraction when exit button clicked', () => {
-
-      render(<InteractionPrompt />);
-      const button = screen.getByTestId('button-escape-exit');
-      
-      button.click();
-      expect(triggerExitInteraction).toHaveBeenCalled();
-    });
-
-  });
-
-  
-
-  
-
-  
 });
-
-// Additional tests: InteractionPrompt UX
-

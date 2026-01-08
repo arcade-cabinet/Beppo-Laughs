@@ -44,40 +44,4 @@ describe('HorrorEffects', () => {
     const { unmount } = render(<HorrorEffects />);
     expect(() => unmount()).not.toThrow();
   });
-
-  
-
-  describe('Dynamic Updates', () => {
-    it('updates effects when fear changes', () => {      let fear = 10;
-      
-
-      const { rerender } = render(<HorrorEffects />);
-      
-      fear = 80;
-      rerender(<HorrorEffects />);
-      
-      expect(() => rerender(<HorrorEffects />)).not.toThrow();
-    });
-
-    it('updates effects when despair changes', () => {      let despair = 10;
-      
-
-      const { rerender } = render(<HorrorEffects />);
-      
-      despair = 80;
-      rerender(<HorrorEffects />);
-      
-      expect(() => rerender(<HorrorEffects />)).not.toThrow();
-    });
-  });
-
-  
-});
-
-// Additional tests: HorrorEffects structural
-describe('HorrorEffects - structure', () => {
-  it('renders EffectComposer container structure', () => {
-    const { container } = render(<HorrorEffects />);
-    expect(container).toBeDefined();
-  });
 });

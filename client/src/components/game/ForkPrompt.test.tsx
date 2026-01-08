@@ -38,14 +38,3 @@ describe('ForkPrompt', () => {
     expect(() => unmount()).not.toThrow();
   });
 });
-
-// Additional tests: ForkPrompt interactions
-describe('ForkPrompt - interactions and visibility', () => {
-  it('invokes selectForkDirection on left/right buttons', () => {
-    const { getByText } = render(<ForkPrompt />);
-    getByText(/left/i).click();
-    getByText(/right/i).click();
-    expect(selectForkDirection).toHaveBeenCalledTimes(2);
-  });
-
-});

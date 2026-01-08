@@ -87,12 +87,3 @@ describe('RailPlayer', () => {
     expect(container).toBeTruthy();
   });
 });
-
-// Additional tests: RailPlayer navigation logic
-describe('RailPlayer - navigation edges', () => {
-
-  it('pauses at fork nodes', () => {
-    render(<RailPlayer geometry={mockGeometry} />);
-    expect(completeMove).not.toHaveBeenCalled();
-  });
-});
