@@ -156,10 +156,10 @@ export function Scene({ seed }: SceneProps) {
 
   // Fog calculations for atmosphere and depth perception
   // Restored to production values for horror atmosphere
-  const fogNear = Math.max(2, 12 - avgInsanity * 8);
+  const fogNear = Math.max(2, 12 - avgInsanity * 10);
   const fogFar = Math.max(15, 35 - avgInsanity * 20);
   const fogHue = 30 + avgInsanity * 60;
-  const fogColor = `hsl(${fogHue}, ${30 - avgInsanity * 15}%, ${20 - avgInsanity * 10}%)`;
+  const fogColor = `hsl(${fogHue}, ${40 - avgInsanity * 15}%, ${20 - avgInsanity * 10}%)`;
 
   const bgBrightness = Math.max(8, 25 - avgInsanity * 17);
   const bgColor = `hsl(30, 40%, ${bgBrightness}%)`;
