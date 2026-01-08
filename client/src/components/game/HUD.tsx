@@ -88,8 +88,13 @@ export function HUD() {
   const cellsExplored = visitedCells.size;
 
   useEffect(() => {
-    if (isGameOver && videoRef.current) {
-      videoRef.current.play().catch(() => {});
+    if (isGameOver) {
+      if (!VIDEO_ASSETS.BEPPO_GAME_OVER.url) {
+        // Skip video if not available
+        setVideoEnded(true);
+      } else if (videoRef.current) {
+        videoRef.current.play().catch(() => {});
+      }
     }
   }, [isGameOver]);
 
@@ -247,7 +252,7 @@ export function HUD() {
             className="absolute inset-0 bg-black flex flex-col items-center justify-center z-50"
           >
             {/* Video plays first */}
-            {!videoEnded && (
+            {!videoEnded && VIDEO_ASSETS.BEPPO_GAME_OVER.url && (
               <video
                 ref={videoRef}
                 src={VIDEO_ASSETS.BEPPO_GAME_OVER.url}
@@ -261,7 +266,7 @@ export function HUD() {
               />
             )}
 
-            {/* Text appears after video */}
+            {/* Text appears after video or immediately if no video */}
             <motion.div
               initial={{ opacity: 0, scale: 0 }}
               animate={{
