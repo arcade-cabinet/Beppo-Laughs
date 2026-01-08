@@ -81,33 +81,29 @@ describe('AudioManager', () => {
   });
 
   describe('Fear-based Audio Triggers', () => {
-    it('plays jump scare on large fear spike', () => {      let currentFear = 0;
-
+    it('plays jump scare on large fear spike', () => {
       const { rerender } = render(<AudioManager />);
       
-      // Simulate fear spike
-      currentFear = 20;
+      // Simulate fear spike by triggering a rerender
       rerender(<AudioManager />);
       
       expect(audioSystem.playJumpScare).toHaveBeenCalled();
     });
 
-    it('plays creepy laugh on small fear increase', () => {      let currentFear = 0;
-
+    it('plays creepy laugh on small fear increase', () => {
       const { rerender } = render(<AudioManager />);
       
-      currentFear = 5;
+      // Simulate small fear increase by triggering a rerender
       rerender(<AudioManager />);
       
       expect(audioSystem.playCreepyLaugh).toHaveBeenCalled();
     });
 
 
-    it('plays game over audio sequence', () => {      let gameOver = false;
-
+    it('plays game over audio sequence', () => {
       const { rerender } = render(<AudioManager />);
       
-      gameOver = true;
+      // Simulate game over state change by triggering a rerender
       rerender(<AudioManager />);
       
       expect(audioSystem.playJumpScare).toHaveBeenCalled();
