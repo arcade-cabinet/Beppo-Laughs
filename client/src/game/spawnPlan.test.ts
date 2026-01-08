@@ -62,9 +62,7 @@ describe('buildSpawnPlan', () => {
     const mockGeometry = {
       centerNodeId: 'center',
       exitNodeIds: [],
-      railNodes: new Map([
-        ['node1', { id: 'node1', worldX: 0, worldZ: 0, connections: [] }],
-      ]),
+      railNodes: new Map([['node1', { id: 'node1', worldX: 0, worldZ: 0, connections: [] }]]),
     } as unknown as MazeGeometry;
 
     const result = buildSpawnPlan({
@@ -89,9 +87,7 @@ describe('buildSpawnPlan', () => {
     const mockGeometry = {
       centerNodeId: 'center',
       exitNodeIds: [],
-      railNodes: new Map([
-        ['node1', { id: 'node1', worldX: 0, worldZ: 0, connections: [] }],
-      ]),
+      railNodes: new Map([['node1', { id: 'node1', worldX: 0, worldZ: 0, connections: [] }]]),
     } as unknown as MazeGeometry;
 
     const result = buildSpawnPlan({
@@ -116,9 +112,7 @@ describe('buildSpawnPlan', () => {
     const mockGeometry = {
       centerNodeId: 'center',
       exitNodeIds: [],
-      railNodes: new Map([
-        ['node1', { id: 'node1', worldX: 0, worldZ: 0, connections: [] }],
-      ]),
+      railNodes: new Map([['node1', { id: 'node1', worldX: 0, worldZ: 0, connections: [] }]]),
     } as unknown as MazeGeometry;
 
     const result = buildSpawnPlan({
@@ -143,9 +137,7 @@ describe('buildSpawnPlan', () => {
     const mockGeometry = {
       centerNodeId: 'center',
       exitNodeIds: ['exit1'],
-      railNodes: new Map([
-        ['center', { id: 'center', worldX: 0, worldZ: 0, connections: [] }],
-      ]),
+      railNodes: new Map([['center', { id: 'center', worldX: 0, worldZ: 0, connections: [] }]]),
     } as unknown as MazeGeometry;
 
     const result = buildSpawnPlan({
