@@ -134,9 +134,7 @@ describe('Blockades', () => {
     });
   });
 
-  describe('Blockade Properties', () => {
-
-  });
+  
 
   describe('Texture Loading', () => {
     it('handles missing textures gracefully', () => {
@@ -213,10 +211,7 @@ describe('Blockades', () => {
     });
   });
 
-  describe('Edge Cases', () => {
-
-
-  });
+  
 });
 
 // Additional tests: Blockades extended coverage

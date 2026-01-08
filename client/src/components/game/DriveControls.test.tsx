@@ -105,9 +105,7 @@ describe('DriveControls', () => {
     });
   });
 
-  describe('Game State', () => {
-
-  });
+  
 
   describe('Edge Cases', () => {
     it('handles mouse leave during lever pull', () => {

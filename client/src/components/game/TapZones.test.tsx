@@ -76,10 +76,7 @@ describe('TapZones', () => {
     expect(() => unmount()).not.toThrow();
   });
 
-  describe('Villain Visibility', () => {
-
-
-  });
+  
 
   describe('Fear Integration', () => {
     it('reacts to fear level changes', () => {      let fear = 10;
@@ -95,15 +92,10 @@ describe('TapZones', () => {
 
   });
 
-  describe('Position Variations', () => {
-  });
+  
 
-  describe('Edge Cases', () => {
-
-  });
+  
 });
 
 // Additional tests: TapZones interactions
-describe('TapZones - interactions and a11y', () => {
 
-});

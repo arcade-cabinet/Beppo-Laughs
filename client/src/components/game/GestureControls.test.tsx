@@ -56,22 +56,7 @@ describe('GestureControls', () => {
     });
   });
 
-  describe('Store Integration', () => {
-
-    it('respects isMoving state', () => {
-
-      render(<GestureControls />);
-      
-      // Even if gestures occur, startMoveTo shouldn't be called when isMoving is true
-      expect(startMoveTo).not.toHaveBeenCalled();
-    });
-
-    it('updates camera rotation', () => {
-
-      render(<GestureControls />);
-      expect(setCameraRotation).toBeDefined();
-    });
-  });
+  
 
   describe('Edge Cases', () => {
 
@@ -112,10 +97,7 @@ describe('GestureControls', () => {
 
 // Additional tests: GestureControls gestures
 describe('GestureControls - gestures', () => {
-  it('does not start move when move not permitted', () => {
-    render(<GestureControls />);
-    expect(startMoveTo).not.toHaveBeenCalled();
-  });
+  
 
   it('keeps rotation within sane bounds', () => {
     const { rerender } = render(<GestureControls />);

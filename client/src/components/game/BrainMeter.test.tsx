@@ -73,16 +73,9 @@ describe('BrainMeter', () => {
     });
   });
 
-  describe('Visual Effects', () => {
+  
 
-
-  });
-
-  describe('Extreme Values', () => {
-
-
-
-  });
+  
 
   describe('Accessibility', () => {
     it('contains readable text labels', () => {
@@ -115,6 +108,4 @@ describe('BrainMeter', () => {
 });
 
 // Additional tests: BrainMeter edge calculations
-describe('BrainMeter - edge calculations', () => {
 
-});

@@ -45,11 +45,7 @@ describe('HorrorEffects', () => {
     expect(() => unmount()).not.toThrow();
   });
 
-  describe('Effect Intensity', () => {
-
-
-
-  });
+  
 
   describe('Dynamic Updates', () => {
     it('updates effects when fear changes', () => {      let fear = 10;
@@ -75,9 +71,7 @@ describe('HorrorEffects', () => {
     });
   });
 
-  describe('Edge Cases', () => {
-
-  });
+  
 });
 
 // Additional tests: HorrorEffects structural

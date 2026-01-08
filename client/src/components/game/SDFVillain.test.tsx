@@ -51,10 +51,7 @@ describe('SDFVillain', () => {
     expect(() => unmount()).not.toThrow();
   });
 
-  describe('Villain Visibility', () => {
-
-
-  });
+  
 
   describe('Fear Integration', () => {
     it('reacts to fear level changes', () => {      let fear = 10;
@@ -70,11 +67,8 @@ describe('SDFVillain', () => {
 
   });
 
-  describe('Position Variations', () => {
-  });
+  
 
-  describe('Edge Cases', () => {
-
-  });
+  
 });
 

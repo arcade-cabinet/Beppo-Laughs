@@ -1,6 +1,7 @@
 import { render } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { AudioManager } from './AudioManager';
+import { audioSystem } from '../../game/audio';
 
 // Mock audioSystem
 vi.mock('../../game/audio', () => ({

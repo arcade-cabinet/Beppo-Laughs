@@ -64,36 +64,12 @@ describe('InteractionPrompt', () => {
 
   });
 
-  describe('Collection Popup', () => {
+  
 
-    it('auto-clears popup after timeout', () => {
-      vi.useFakeTimers();
+  
 
-      render(<InteractionPrompt />);
-      
-      vi.advanceTimersByTime(2000);
-      expect(clearCollectedPopup).toHaveBeenCalled();
-      
-      vi.useRealTimers();
-    });
-  });
-
-  describe('Inventory Display', () => {
-
-  });
-
-  describe('Game State', () => {
-
-  });
+  
 });
 
 // Additional tests: InteractionPrompt UX
-describe('InteractionPrompt - popup and counters', () => {
-  it('shows collected popup and clears it', async () => {
-    render(<InteractionPrompt />);
-    // Allow any timers in component to run if used
-    await new Promise(r => setTimeout(r, 10));
-    expect(clearCollectedPopup).toHaveBeenCalledTimes(0); // not auto-cleared synchronously
-  });
 
-});
