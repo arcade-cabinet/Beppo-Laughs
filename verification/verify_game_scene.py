@@ -1,4 +1,4 @@
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, Error as PlaywrightError, TimeoutError
 import time
 
 def run():
@@ -27,9 +27,15 @@ def run():
             page.screenshot(path="verification/game_scene_fixed.png")
             print("Screenshot taken at verification/game_scene_fixed.png")
 
+        except TimeoutError as e:
+            print(f"Timeout Error: {e}")
+            page.screenshot(path="verification/timeout_error.png")
+        except PlaywrightError as e:
+            print(f"Playwright Error: {e}")
+            page.screenshot(path="verification/playwright_error.png")
         except Exception as e:
-            print(f"Error: {e}")
-            page.screenshot(path="verification/error.png")
+            print(f"Unexpected Error: {e}")
+            page.screenshot(path="verification/unexpected_error.png")
         finally:
             browser.close()
 

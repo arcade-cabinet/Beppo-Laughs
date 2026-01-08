@@ -43,3 +43,33 @@
 06:51:18 [watch] client/src/test-setup.tsx
 06:51:18 [watch] client/src/test-setup.tsx
 06:52:14 [200] / 888ms
+06:58:44 [watch] /client/src/components/game/ClownCarCockpit.tsx, /client/src/index.css
+06:58:44 [watch] client/src/components/game/ClownCarCockpit.tsx
+06:59:01 [watch] verification/verify_game_scene.py
+06:59:01 [watch] verification/verify_game_scene.py
+07:00:17 [watch] /client/src/components/game/ClownCarCockpit.tsx, /client/src/index.css
+07:00:17 [watch] client/src/components/game/ClownCarCockpit.tsx
+07:01:04 [200] / 582ms
+07:01:15 [404] /fonts/Creepster-Regular.ttf 4ms
+07:02:43 [watch] client/src/components/game/ClownCarCockpit.test.tsx
+07:02:43 [watch] client/src/components/game/ClownCarCockpit.test.tsx
+07:02:50 [watch] client/src/components/game/Maze.test.tsx
+07:02:50 [watch] client/src/components/game/Maze.test.tsx
+07:03:23 [watch] client/src/components/game/RailPlayer.test.tsx
+07:03:23 [watch] client/src/components/game/RailPlayer.test.tsx
+07:05:01 [watch] client/src/test-setup.tsx
+07:05:01 [watch] client/src/test-setup.tsx
+07:05:19 [watch] client/src/components/game/Maze.test.tsx
+07:05:19 [watch] client/src/components/game/Maze.test.tsx
+07:06:38 [watch] client/src/components/game/ClownCarCockpit.test.tsx
+07:06:38 [watch] client/src/components/game/ClownCarCockpit.test.tsx
+07:07:22 [watch] client/src/components/game/RailPlayer.test.tsx
+07:07:22 [watch] client/src/components/game/RailPlayer.test.tsx
+07:08:29 [watch] client/src/components/game/ClownCarCockpit.test.tsx
+07:08:29 [watch] client/src/components/game/ClownCarCockpit.test.tsx
+07:15:55 [200] / 391ms
+07:16:06 [404] /fonts/Creepster-Regular.ttf 5ms
+07:26:29 [watch] /client/src/components/game/RailPlayer.tsx, /client/src/index.css
+07:26:29 [watch] client/src/components/game/RailPlayer.tsx
+07:28:03 [200] / 1020ms
+07:28:13 [404] /fonts/Creepster-Regular.ttf 5ms

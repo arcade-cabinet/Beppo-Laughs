@@ -141,7 +141,7 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
 
     // Physics-based speed update
     // Acceleration: 5m/s^2, Braking: 8m/s^2, Drag: 0.5/s
-    let targetSpeed;
+    let targetSpeed: number = carSpeed;
     if (accelerating) {
       targetSpeed = Math.min(5, carSpeed + delta * 5);
     } else if (braking) {

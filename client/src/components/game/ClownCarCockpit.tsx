@@ -1,6 +1,6 @@
 import { Text } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-import { useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '../../game/store';
 
@@ -14,6 +14,29 @@ const DOT_COLORS = [
   '#66ff00',
   '#00ffaa',
   '#aa00ff',
+];
+
+const DOT_POSITIONS = [
+  [-0.4, 0.09, 0.1],
+  [0.4, 0.09, 0.1],
+  [-0.2, 0.09, 0.35],
+  [0.2, 0.09, 0.35],
+  [0, 0.09, -0.15],
+  [-0.5, 0.09, -0.2],
+  [0.5, 0.09, -0.2],
+  [-0.25, 0.09, -0.35],
+  [0.25, 0.09, -0.35],
+];
+
+const RIVET_POSITIONS = [
+  [-0.65, 0.08, -0.3],
+  [0.65, 0.08, -0.3],
+  [-0.55, 0.08, 0.25],
+  [0.55, 0.08, 0.25],
+  [-0.3, 0.08, -0.4],
+  [0.3, 0.08, -0.4],
+  [-0.7, 0.08, 0],
+  [0.7, 0.08, 0],
 ];
 
 function DashboardPanel({
@@ -168,7 +191,41 @@ export function ClownCarCockpit() {
   const leverRef = useRef<THREE.Group>(null);
   const fearFillRef = useRef<THREE.Mesh>(null);
   const despairFillRef = useRef<THREE.Mesh>(null);
-  const chassisRef = useRef<THREE.Group>(null);
+  const cockpitRef = useRef<THREE.Group>(null);
+
+  // InstancedMesh refs
+  const dotsRef = useRef<THREE.InstancedMesh>(null);
+  const rivetsRef = useRef<THREE.InstancedMesh>(null);
+
+  // Setup instanced meshes
+  useLayoutEffect(() => {
+    // Setup dots
+    if (dotsRef.current && typeof dotsRef.current.setMatrixAt === 'function') {
+      const tempObj = new THREE.Object3D();
+      DOT_POSITIONS.forEach((pos, i) => {
+        tempObj.position.set(pos[0], pos[1], pos[2]);
+        tempObj.updateMatrix();
+        dotsRef.current?.setMatrixAt(i, tempObj.matrix);
+
+        const dotColor = new THREE.Color(DOT_COLORS[i % DOT_COLORS.length]);
+        dotsRef.current?.setColorAt(i, dotColor);
+      });
+      dotsRef.current.instanceMatrix.needsUpdate = true;
+      if (dotsRef.current.instanceColor) dotsRef.current.instanceColor.needsUpdate = true;
+    }
+
+    // Setup rivets
+    if (rivetsRef.current && typeof rivetsRef.current.setMatrixAt === 'function') {
+      const tempObj = new THREE.Object3D();
+      RIVET_POSITIONS.forEach((pos, i) => {
+        tempObj.position.set(pos[0], pos[1], pos[2]);
+        tempObj.rotation.set(0, 0, 0); // Rivets are simple cylinders
+        tempObj.updateMatrix();
+        rivetsRef.current?.setMatrixAt(i, tempObj.matrix);
+      });
+      rivetsRef.current.instanceMatrix.needsUpdate = true;
+    }
+  }, []);
 
   useFrame((_state) => {
     const gameState = useGameStore.getState();
@@ -196,7 +253,6 @@ export function ClownCarCockpit() {
       despairFillRef.current.scale.x = Math.max(0.01, despairPercent);
       despairFillRef.current.position.x = -0.14 * (1 - despairPercent);
     }
-    // useFrame continues with other logic...
   });
 
   const scale = 2.5;
@@ -204,166 +260,138 @@ export function ClownCarCockpit() {
   // Position relative to camera: Y=-0.6 (below), Z=-0.5 (in front, camera looks -Z)
   return (
     <group ref={cockpitRef} position={[0, -0.6, -0.5]} scale={[scale, scale, scale]}>
-      <group ref={chassisRef}>
-        {/* === 3D DASHBOARD PANELS === */}
-        <group position={[0, 0.45, -0.35]}>
-          {/* Left Panel - FEAR Meter */}
-          <DashboardPanel
-            position={[-0.42, 0, 0]}
-            color="#cc0000"
-            label="FEAR"
-            valueRef={fearFillRef}
+      {/* === 3D DASHBOARD PANELS === */}
+      <group position={[0, 0.45, -0.35]}>
+        {/* Left Panel - FEAR Meter */}
+        <DashboardPanel
+          position={[-0.42, 0, 0]}
+          color="#cc0000"
+          label="FEAR"
+          valueRef={fearFillRef}
+        />
+
+        {/* Center Panel - SPEEDOMETER */}
+        <SpeedometerPanel position={[0, 0.02, 0]} />
+
+        {/* Right Panel - DESPAIR Meter */}
+        <DashboardPanel
+          position={[0.42, 0, 0]}
+          color="#0000cc"
+          label="DESPAIR"
+          valueRef={despairFillRef}
+        />
+      </group>
+
+      {/* Clown Car Hood - Garish curved metal with blemishes */}
+      <group position={[0, 0.15, -0.9]}>
+        {/* Main hood body - curved and extended */}
+        <mesh rotation={[-0.12, 0, 0]}>
+          <boxGeometry args={[1.8, 0.12, 1.2]} />
+          <meshStandardMaterial color="#ff4400" roughness={0.6} metalness={0.4} />
+        </mesh>
+
+        {/* Hood curve front */}
+        <mesh position={[0, -0.06, 0.55]} rotation={[-0.35, 0, 0]}>
+          <boxGeometry args={[1.7, 0.1, 0.4]} />
+          <meshStandardMaterial color="#ff3300" roughness={0.7} metalness={0.3} />
+        </mesh>
+
+        {/* Hood curve back (near player) */}
+        <mesh position={[0, 0.06, -0.55]} rotation={[0.25, 0, 0]}>
+          <boxGeometry args={[1.75, 0.08, 0.3]} />
+          <meshStandardMaterial color="#ff5500" roughness={0.5} metalness={0.4} />
+        </mesh>
+
+        {/* Left fender - larger */}
+        <mesh position={[-0.8, 0.04, 0.2]} rotation={[0, 0, -0.12]}>
+          <boxGeometry args={[0.35, 0.15, 1.0]} />
+          <meshStandardMaterial color="#ffcc00" roughness={0.5} metalness={0.3} />
+        </mesh>
+
+        {/* Right fender - larger */}
+        <mesh position={[0.8, 0.04, 0.2]} rotation={[0, 0, 0.12]}>
+          <boxGeometry args={[0.35, 0.15, 1.0]} />
+          <meshStandardMaterial color="#ffcc00" roughness={0.5} metalness={0.3} />
+        </mesh>
+
+        {/* Hood ornament - Larger Clown face */}
+        <mesh position={[0, 0.12, 0.5]}>
+          <sphereGeometry args={[0.12, 16, 16]} />
+          <meshStandardMaterial color="#ffddcc" roughness={0.4} />
+        </mesh>
+        <mesh position={[0, 0.22, 0.5]}>
+          <coneGeometry args={[0.08, 0.15, 8]} />
+          <meshStandardMaterial color="#ff00ff" emissive="#ff00ff" emissiveIntensity={0.3} />
+        </mesh>
+        <mesh position={[0, 0.06, 0.58]}>
+          <sphereGeometry args={[0.04, 8, 8]} />
+          <meshStandardMaterial color="#ff0000" emissive="#ff0000" emissiveIntensity={0.5} />
+        </mesh>
+
+        {/* Polka dots on hood - Instanced */}
+        <instancedMesh ref={dotsRef} args={[undefined, undefined, DOT_POSITIONS.length]}>
+          <sphereGeometry args={[0.06, 8, 8]} />
+          <meshStandardMaterial
+            color="#ffffff" // Base color, overridden by instanceColor
+            roughness={0.3}
+            emissive="#ffffff"
+            emissiveIntensity={0.1}
           />
+        </instancedMesh>
 
-          {/* Center Panel - SPEEDOMETER */}
-          <SpeedometerPanel position={[0, 0.02, 0]} />
+        {/* Metal blemishes/rivets - Instanced */}
+        <instancedMesh ref={rivetsRef} args={[undefined, undefined, RIVET_POSITIONS.length]}>
+          <cylinderGeometry args={[0.025, 0.025, 0.03, 8]} />
+          <meshStandardMaterial color="#888866" roughness={0.8} metalness={0.6} />
+        </instancedMesh>
+      </group>
 
-          {/* Right Panel - DESPAIR Meter */}
-          <DashboardPanel
-            position={[0.42, 0, 0]}
-            color="#0000cc"
-            label="DESPAIR"
-            valueRef={despairFillRef}
-          />
-        </group>
+      {/* Dashboard behind hood - larger */}
+      <mesh position={[0, 0.35, -0.5]} rotation={[0.5, 0, 0]}>
+        <boxGeometry args={[1.6, 0.18, 0.25]} />
+        <meshStandardMaterial color="#2a1608" roughness={0.85} />
+      </mesh>
 
-        {/* Clown Car Hood - Garish curved metal with blemishes */}
-        <group position={[0, 0.15, -0.9]}>
-          {/* Main hood body - curved and extended */}
-          <mesh rotation={[-0.12, 0, 0]}>
-            <boxGeometry args={[1.8, 0.12, 1.2]} />
-            <meshStandardMaterial color="#ff4400" roughness={0.6} metalness={0.4} />
-          </mesh>
+      {/* Side panels - larger and more prominent */}
+      <mesh position={[-0.85, 0.15, -0.45]} rotation={[0, 0.15, 0]}>
+        <boxGeometry args={[0.18, 0.55, 0.7]} />
+        <meshStandardMaterial color="#ff6600" roughness={0.6} />
+      </mesh>
+      <mesh position={[0.85, 0.15, -0.45]} rotation={[0, -0.15, 0]}>
+        <boxGeometry args={[0.18, 0.55, 0.7]} />
+        <meshStandardMaterial color="#ff6600" roughness={0.6} />
+      </mesh>
 
-          {/* Hood curve front */}
-          <mesh position={[0, -0.06, 0.55]} rotation={[-0.35, 0, 0]}>
-            <boxGeometry args={[1.7, 0.1, 0.4]} />
-            <meshStandardMaterial color="#ff3300" roughness={0.7} metalness={0.3} />
-          </mesh>
+      {/* Floor / footwell - larger */}
+      <mesh position={[0, -0.2, -0.35]} rotation={[-0.1, 0, 0]}>
+        <boxGeometry args={[1.1, 0.06, 0.7]} />
+        <meshStandardMaterial color="#1a1510" roughness={0.9} />
+      </mesh>
 
-          {/* Hood curve back (near player) */}
-          <mesh position={[0, 0.06, -0.55]} rotation={[0.25, 0, 0]}>
-            <boxGeometry args={[1.75, 0.08, 0.3]} />
-            <meshStandardMaterial color="#ff5500" roughness={0.5} metalness={0.4} />
-          </mesh>
-
-          {/* Left fender - larger */}
-          <mesh position={[-0.8, 0.04, 0.2]} rotation={[0, 0, -0.12]}>
-            <boxGeometry args={[0.35, 0.15, 1.0]} />
-            <meshStandardMaterial color="#ffcc00" roughness={0.5} metalness={0.3} />
-          </mesh>
-
-          {/* Right fender - larger */}
-          <mesh position={[0.8, 0.04, 0.2]} rotation={[0, 0, 0.12]}>
-            <boxGeometry args={[0.35, 0.15, 1.0]} />
-            <meshStandardMaterial color="#ffcc00" roughness={0.5} metalness={0.3} />
-          </mesh>
-
-          {/* Hood ornament - Larger Clown face */}
-          <mesh position={[0, 0.12, 0.5]}>
-            <sphereGeometry args={[0.12, 16, 16]} />
-            <meshStandardMaterial color="#ffddcc" roughness={0.4} />
-          </mesh>
-          <mesh position={[0, 0.22, 0.5]}>
-            <coneGeometry args={[0.08, 0.15, 8]} />
-            <meshStandardMaterial color="#ff00ff" emissive="#ff00ff" emissiveIntensity={0.3} />
-          </mesh>
-          <mesh position={[0, 0.06, 0.58]}>
-            <sphereGeometry args={[0.04, 8, 8]} />
-            <meshStandardMaterial color="#ff0000" emissive="#ff0000" emissiveIntensity={0.5} />
-          </mesh>
-
-          {/* Polka dots on hood - larger and more visible */}
-          {[
-            [-0.4, 0.09, 0.1],
-            [0.4, 0.09, 0.1],
-            [-0.2, 0.09, 0.35],
-            [0.2, 0.09, 0.35],
-            [0, 0.09, -0.15],
-            [-0.5, 0.09, -0.2],
-            [0.5, 0.09, -0.2],
-            [-0.25, 0.09, -0.35],
-            [0.25, 0.09, -0.35],
-          ].map((pos, index) => {
-            const dotColor = DOT_COLORS[index % DOT_COLORS.length];
-            return (
-              <mesh key={`dot-${pos.join('-')}`} position={pos as [number, number, number]}>
-                <sphereGeometry args={[0.06, 8, 8]} />
-                <meshStandardMaterial
-                  color={dotColor}
-                  roughness={0.3}
-                  emissive={dotColor}
-                  emissiveIntensity={0.1}
-                />
-              </mesh>
-            );
-          })}
-
-          {/* Metal blemishes/rivets - larger */}
-          {[
-            [-0.65, 0.08, -0.3],
-            [0.65, 0.08, -0.3],
-            [-0.55, 0.08, 0.25],
-            [0.55, 0.08, 0.25],
-            [-0.3, 0.08, -0.4],
-            [0.3, 0.08, -0.4],
-            [-0.7, 0.08, 0],
-            [0.7, 0.08, 0],
-          ].map((pos) => (
-            <mesh key={`rivet-${pos.join('-')}`} position={pos as [number, number, number]}>
-              <cylinderGeometry args={[0.025, 0.025, 0.03, 8]} />
-              <meshStandardMaterial color="#888866" roughness={0.8} metalness={0.6} />
-            </mesh>
-          ))}
-        </group>
-
-        {/* Dashboard behind hood - larger */}
-        <mesh position={[0, 0.35, -0.5]} rotation={[0.5, 0, 0]}>
-          <boxGeometry args={[1.6, 0.18, 0.25]} />
-          <meshStandardMaterial color="#2a1608" roughness={0.85} />
+      {/* Central drive lever */}
+      <group ref={leverRef} position={[0, -0.05, -0.25]} rotation={[-0.1, 0, 0]}>
+        {/* Base plate */}
+        <mesh position={[0, -0.12, 0]}>
+          <cylinderGeometry args={[0.2, 0.2, 0.06, 24]} />
+          <meshStandardMaterial color="#3b1c0a" roughness={0.7} metalness={0.3} />
         </mesh>
-
-        {/* Side panels - larger and more prominent */}
-        <mesh position={[-0.85, 0.15, -0.45]} rotation={[0, 0.15, 0]}>
-          <boxGeometry args={[0.18, 0.55, 0.7]} />
-          <meshStandardMaterial color="#ff6600" roughness={0.6} />
+        {/* Lever shaft */}
+        <mesh position={[0, 0.05, 0]}>
+          <cylinderGeometry args={[0.04, 0.03, 0.35, 12]} />
+          <meshStandardMaterial color="#d45b00" roughness={0.4} metalness={0.6} />
         </mesh>
-        <mesh position={[0.85, 0.15, -0.45]} rotation={[0, -0.15, 0]}>
-          <boxGeometry args={[0.18, 0.55, 0.7]} />
-          <meshStandardMaterial color="#ff6600" roughness={0.6} />
+        {/* Accent rings */}
+        {[0.04, 0.12, 0.2].map((y) => (
+          <mesh key={`ring-${y}`} position={[0, y, 0]}>
+            <torusGeometry args={[0.05, 0.01, 8, 24]} />
+            <meshStandardMaterial color="#f5c400" emissive="#f5c400" emissiveIntensity={0.25} />
+          </mesh>
+        ))}
+        {/* Clown nose topper */}
+        <mesh position={[0, 0.24, 0]}>
+          <sphereGeometry args={[0.1, 16, 16]} />
+          <meshStandardMaterial color="#dd0000" emissive="#dd0000" emissiveIntensity={0.45} />
         </mesh>
-
-        {/* Floor / footwell - larger */}
-        <mesh position={[0, -0.2, -0.35]} rotation={[-0.1, 0, 0]}>
-          <boxGeometry args={[1.1, 0.06, 0.7]} />
-          <meshStandardMaterial color="#1a1510" roughness={0.9} />
-        </mesh>
-
-        {/* Central drive lever */}
-        <group ref={leverRef} position={[0, -0.05, -0.25]} rotation={[-0.1, 0, 0]}>
-          {/* Base plate */}
-          <mesh position={[0, -0.12, 0]}>
-            <cylinderGeometry args={[0.2, 0.2, 0.06, 24]} />
-            <meshStandardMaterial color="#3b1c0a" roughness={0.7} metalness={0.3} />
-          </mesh>
-          {/* Lever shaft */}
-          <mesh position={[0, 0.05, 0]}>
-            <cylinderGeometry args={[0.04, 0.03, 0.35, 12]} />
-            <meshStandardMaterial color="#d45b00" roughness={0.4} metalness={0.6} />
-          </mesh>
-          {/* Accent rings */}
-          {[0.04, 0.12, 0.2].map((y) => (
-            <mesh key={`ring-${y}`} position={[0, y, 0]}>
-              <torusGeometry args={[0.05, 0.01, 8, 24]} />
-              <meshStandardMaterial color="#f5c400" emissive="#f5c400" emissiveIntensity={0.25} />
-            </mesh>
-          ))}
-          {/* Clown nose topper */}
-          <mesh position={[0, 0.24, 0]}>
-            <sphereGeometry args={[0.1, 16, 16]} />
-            <meshStandardMaterial color="#dd0000" emissive="#dd0000" emissiveIntensity={0.45} />
-          </mesh>
-        </group>
       </group>
     </group>
   );

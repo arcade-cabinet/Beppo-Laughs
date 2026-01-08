@@ -68,6 +68,24 @@ global.ResizeObserver = class ResizeObserver {
   disconnect() {}
 };
 
+// Mock fetch for font loading
+global.fetch = vi.fn(() =>
+  Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve({}),
+    blob: () => Promise.resolve(new Blob()),
+    arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+  })
+) as any;
+
+// Mock InstancedMesh if not present in the environment (e.g. happy-dom)
+// We add it to the THREE namespace if it's missing or incomplete in tests
+import * as THREE from 'three';
+if (!THREE.InstancedMesh.prototype.setMatrixAt) {
+  THREE.InstancedMesh.prototype.setMatrixAt = vi.fn();
+  THREE.InstancedMesh.prototype.setColorAt = vi.fn();
+}
+
 // Mock Three.js/Canvas elements if needed,
 // though typically R3F tests use @react-three/test-renderer or
 // we just ignore the console warnings about <mesh> etc when using @testing-library/react
