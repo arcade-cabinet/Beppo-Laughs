@@ -30,13 +30,25 @@ export function GPSMinimap({ size = 150 }: MinimapProps) {
 
     if (pathHistory.length === 0) return;
 
-    // Calculate bounds to scale the map
-    const xs = pathHistory.map((p) => p.x);
-    const zs = pathHistory.map((p) => p.z);
-    const minX = Math.min(...xs);
-    const maxX = Math.max(...xs);
-    const minZ = Math.min(...zs);
-    const maxZ = Math.max(...zs);
+    // Calculate bounds in a single pass
+    if (pathHistory.length === 0) {
+      const minX = 0;
+      const maxX = 0;
+      const minZ = 0;
+      const maxZ = 0;
+    } else {
+      let minX = pathHistory[0].x;
+      let maxX = pathHistory[0].x;
+      let minZ = pathHistory[0].z;
+      let maxZ = pathHistory[0].z;
+      for (let i = 1; i < pathHistory.length; i++) {
+        const p = pathHistory[i];
+        if (p.x < minX) minX = p.x;
+        if (p.x > maxX) maxX = p.x;
+        if (p.z < minZ) minZ = p.z;
+        if (p.z > maxZ) maxZ = p.z;
+      }
+    }
 
     const rangeX = maxX - minX || 1;
     const rangeZ = maxZ - minZ || 1;

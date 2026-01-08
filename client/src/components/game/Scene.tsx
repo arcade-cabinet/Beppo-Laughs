@@ -1,6 +1,6 @@
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import type { PointLight } from 'three';
+import * as THREE from 'three';
 import { useGameStore } from '@/game/store';
 import { loadAssetCatalog } from '../../game/assetCatalog';
 import { generateMaze, type MazeLayout } from '../../game/maze/core';
@@ -183,7 +183,15 @@ export function Scene({ seed }: SceneProps) {
       <AudioManager />
 
       <div className="w-full h-full">
-        <Canvas shadows camera={{ position: [0, 1.2, 0], fov: 90, near: 0.1, far: 100 }}>
+        <Canvas
+          shadows
+          camera={{ position: [0, 0.15, -2.2], fov: 78, near: 0.1, far: 100 }}
+          gl={{ antialias: true, alpha: false }}
+          onCreated={({ gl }) => {
+            gl.toneMapping = THREE.ACESFilmicToneMapping;
+            gl.toneMappingExposure = 1.1;
+          }}
+        >
           <color attach="background" args={[bgColor]} />
 
           {/* Fog for depth perception - essential for 3D feel */}
