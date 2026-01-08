@@ -9,9 +9,9 @@ vi.mock('@/components/game/Scene', () => ({
 }));
 
 vi.mock('@/components/game/MainMenu', () => ({
-  MainMenu: ({ onStart }: { onStart: (seed: string) => void }) => (
+  MainMenu: ({ onStart }: { onStart: (seed: string, isNewGame: boolean) => void }) => (
     <div data-testid="main-menu">
-      <button type="button" onClick={() => onStart('test seed')} data-testid="mock-start">
+      <button type="button" onClick={() => onStart('test seed', true)} data-testid="mock-start">
         Start
       </button>
     </div>
@@ -85,10 +85,10 @@ describe('Home', () => {
       expect(screen.queryByTestId('hud')).not.toBeInTheDocument();
     });
 
-    it('resets game on mount', () => {
+    it('does not reset game on mount', () => {
       render(<Home />);
 
-      expect(mockResetGame).toHaveBeenCalled();
+      expect(mockResetGame).not.toHaveBeenCalled();
     });
 
     it('does not show exit button when not playing', () => {

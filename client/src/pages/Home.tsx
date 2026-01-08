@@ -83,9 +83,12 @@ export default function Home() {
     }
   }, []);
 
-  const handleStart = async (selectedSeed: string) => {
-    resetGame();
-    setSeedStore(selectedSeed);
+  const handleStart = async (selectedSeed: string, isNewGame: boolean) => {
+    if (isNewGame) {
+      resetGame();
+      setSeedStore(selectedSeed);
+    }
+    // If continuing, we assume state is already loaded from persist middleware
 
     // Enter fullscreen on mobile
     if (isMobile) {
@@ -106,8 +109,8 @@ export default function Home() {
     setWebglSupported(checkWebGLSupport());
     const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     setIsMobile(mobile);
-    resetGame();
-  }, [resetGame]);
+    // Don't auto-reset game on mount, let persistence load state
+  }, []);
 
   // Check orientation on mobile
   useEffect(() => {

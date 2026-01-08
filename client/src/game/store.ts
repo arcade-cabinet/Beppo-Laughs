@@ -1,5 +1,6 @@
 import seedrandom from 'seedrandom';
 import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
 
 interface VisitedCell {
   x: number;
@@ -123,167 +124,26 @@ interface GameState {
 
 const _cellKey = (nodeId: string) => nodeId;
 
-export const useGameStore = create<GameState>((set, get) => ({
-  fear: 0, // Start fully sane
-  despair: 0, // Start fully sane
-  maxSanity: 100,
+export const useGameStore = create<GameState>()(
+  persist(
+    (set, get) => ({
+      fear: 0, // Start fully sane
+      despair: 0, // Start fully sane
+      maxSanity: 100,
 
-  visitedCells: new Map(),
-  pathHistory: [],
-
-  seed: '',
-  isGameOver: false,
-  hasWon: false,
-  gameOverReason: null,
-
-  blockades: new Set(),
-  blockadeRequirements: new Map(),
-  collectedItems: new Set(),
-
-  // Rail navigation - initialized empty, set by maze
-  currentNode: '',
-  targetNode: null,
-  isMoving: false,
-  moveProgress: 0,
-  moveSpeed: 1,
-  cameraRotation: 0,
-  availableMoves: [],
-
-  // Clown car driving
-  carSpeed: 0,
-  accelerating: false,
-  braking: false,
-
-  // Fork choice
-  pendingFork: null,
-
-  // Interaction state
-  nearbyItem: null,
-  nearbyExit: null,
-  showCollectedPopup: null,
-  itemInventory: 0,
-
-  setSeed: (seed) => set({ seed }),
-
-  visitNode: (nodeId) => {
-    const state = get();
-    const now = Date.now();
-    const [xStr, zStr] = nodeId.split(',');
-    const x = parseInt(xStr, 10);
-    const z = parseInt(zStr, 10);
-
-    const existingCell = state.visitedCells.get(nodeId);
-
-    if (!existingCell) {
-      // NEW NODE - Exploring the unknown increases FEAR
-      const newVisited = new Map(state.visitedCells);
-      newVisited.set(nodeId, {
-        x,
-        z,
-        visitCount: 1,
-        firstVisitTime: now,
-      });
-
-      set({
-        visitedCells: newVisited,
-        pathHistory: [...state.pathHistory, { x, z, timestamp: now }],
-      });
-
-      // Increase fear for exploring unknown
-      get().increaseFear(1);
-    } else {
-      // REVISIT - Walking in circles increases DESPAIR
-      const newVisited = new Map(state.visitedCells);
-      const updatedCell = { ...existingCell, visitCount: existingCell.visitCount + 1 };
-      newVisited.set(nodeId, updatedCell);
-
-      set({
-        visitedCells: newVisited,
-        pathHistory: [...state.pathHistory, { x, z, timestamp: now }],
-      });
-
-      // Increase despair based on revisit count
-      const despairIncrease = Math.min(updatedCell.visitCount * 0.5, 3);
-      get().increaseDespair(despairIncrease);
-    }
-
-    get().checkGameOver();
-  },
-
-  increaseFear: (amount) =>
-    set((state) => ({
-      fear: Math.min(state.fear + amount, state.maxSanity),
-    })),
-
-  increaseDespair: (amount) =>
-    set((state) => ({
-      despair: Math.min(state.despair + amount, state.maxSanity),
-    })),
-
-  decreaseFear: (amount) =>
-    set((state) => ({
-      fear: Math.max(state.fear - amount, 0),
-    })),
-
-  decreaseDespair: (amount) =>
-    set((state) => ({
-      despair: Math.max(state.despair - amount, 0),
-    })),
-
-  addBlockade: (cellKey) =>
-    set((state) => {
-      const newBlockades = new Set(state.blockades);
-      newBlockades.add(cellKey);
-      return { blockades: newBlockades };
-    }),
-
-  removeBlockade: (cellKey) =>
-    set((state) => {
-      const newBlockades = new Set(state.blockades);
-      newBlockades.delete(cellKey);
-      return { blockades: newBlockades };
-    }),
-
-  setBlockades: (blockades) => set({ blockades }),
-
-  setBlockadeRequirements: (requirements) => set({ blockadeRequirements: requirements }),
-
-  collectItem: (itemId) =>
-    set((state) => {
-      const newItems = new Set(state.collectedItems);
-      newItems.add(itemId);
-      return {
-        collectedItems: newItems,
-        fear: Math.max(state.fear - 5, 0),
-        despair: Math.max(state.despair - 5, 0),
-      };
-    }),
-
-  checkGameOver: () => {
-    const state = get();
-    if (state.fear >= state.maxSanity && state.despair >= state.maxSanity) {
-      set({ isGameOver: true, gameOverReason: 'both' });
-    } else if (state.fear >= state.maxSanity) {
-      set({ isGameOver: true, gameOverReason: 'fear' });
-    } else if (state.despair >= state.maxSanity) {
-      set({ isGameOver: true, gameOverReason: 'despair' });
-    }
-  },
-
-  triggerWin: () => set({ hasWon: true }),
-
-  resetGame: () =>
-    set({
-      fear: 0,
-      despair: 0,
       visitedCells: new Map(),
       pathHistory: [],
+
+      seed: '',
       isGameOver: false,
       hasWon: false,
       gameOverReason: null,
+
       blockades: new Set(),
       blockadeRequirements: new Map(),
       collectedItems: new Set(),
+
+      // Rail navigation - initialized empty, set by maze
       currentNode: '',
       targetNode: null,
       isMoving: false,
@@ -292,167 +152,357 @@ export const useGameStore = create<GameState>((set, get) => ({
       cameraRotation: 0,
       availableMoves: [],
 
+      // Clown car driving
       carSpeed: 0,
       accelerating: false,
       braking: false,
+
+      // Fork choice
       pendingFork: null,
+
+      // Interaction state
       nearbyItem: null,
       nearbyExit: null,
       showCollectedPopup: null,
       itemInventory: 0,
-    }),
 
-  // Rail Navigation Actions
-  setCurrentNode: (nodeId) => set({ currentNode: nodeId }),
-  setTargetNode: (nodeId) => set({ targetNode: nodeId }),
+      setSeed: (seed) => set({ seed }),
 
-  startMoveTo: (targetNodeId, speed = 1) => {
-    const state = get();
-    const fearRatio = state.fear / state.maxSanity;
+      visitNode: (nodeId) => {
+        const state = get();
+        const now = Date.now();
+        const [xStr, zStr] = nodeId.split(',');
+        const x = parseInt(xStr, 10);
+        const z = parseInt(zStr, 10);
 
-    let actualTarget = targetNodeId;
+        const existingCell = state.visitedCells.get(nodeId);
 
-    if (fearRatio > 0.3 && state.availableMoves.length > 1) {
-      const rng = seedrandom(`fear-${Date.now()}`);
-      const confusionChance = (fearRatio - 0.3) * 0.8;
+        if (!existingCell) {
+          // NEW NODE - Exploring the unknown increases FEAR
+          const newVisited = new Map(state.visitedCells);
+          newVisited.set(nodeId, {
+            x,
+            z,
+            visitCount: 1,
+            firstVisitTime: now,
+          });
 
-      if (rng() < confusionChance) {
-        const otherMoves = state.availableMoves.filter((m) => m.nodeId !== targetNodeId);
-        if (otherMoves.length > 0) {
-          const randomMove = otherMoves[Math.floor(rng() * otherMoves.length)];
-          actualTarget = randomMove.nodeId;
-          console.log('FEAR confusion! Intended:', targetNodeId, 'Actual:', actualTarget);
+          set({
+            visitedCells: newVisited,
+            pathHistory: [...state.pathHistory, { x, z, timestamp: now }],
+          });
+
+          // Increase fear for exploring unknown
+          get().increaseFear(1);
+        } else {
+          // REVISIT - Walking in circles increases DESPAIR
+          const newVisited = new Map(state.visitedCells);
+          const updatedCell = { ...existingCell, visitCount: existingCell.visitCount + 1 };
+          newVisited.set(nodeId, updatedCell);
+
+          set({
+            visitedCells: newVisited,
+            pathHistory: [...state.pathHistory, { x, z, timestamp: now }],
+          });
+
+          // Increase despair based on revisit count
+          const despairIncrease = Math.min(updatedCell.visitCount * 0.5, 3);
+          get().increaseDespair(despairIncrease);
         }
-      }
-    }
 
-    set({
-      targetNode: actualTarget,
-      isMoving: true,
-      moveProgress: 0,
-      moveSpeed: speed,
-    });
-  },
+        get().checkGameOver();
+      },
 
-  updateMoveProgress: (progress) => set({ moveProgress: Math.min(1, progress) }),
+      increaseFear: (amount) =>
+        set((state) => ({
+          fear: Math.min(state.fear + amount, state.maxSanity),
+        })),
 
-  completeMove: () => {
-    const state = get();
-    const targetNode = state.targetNode;
+      increaseDespair: (amount) =>
+        set((state) => ({
+          despair: Math.min(state.despair + amount, state.maxSanity),
+        })),
 
-    if (targetNode) {
-      set({
-        currentNode: targetNode,
-        targetNode: null,
-        isMoving: false,
-        moveProgress: 0,
-      });
+      decreaseFear: (amount) =>
+        set((state) => ({
+          fear: Math.max(state.fear - amount, 0),
+        })),
 
-      // Record visit to new node
-      get().visitNode(targetNode);
-    }
-  },
+      decreaseDespair: (amount) =>
+        set((state) => ({
+          despair: Math.max(state.despair - amount, 0),
+        })),
 
-  setCameraRotation: (rotation) => set({ cameraRotation: rotation }),
+      addBlockade: (cellKey) =>
+        set((state) => {
+          const newBlockades = new Set(state.blockades);
+          newBlockades.add(cellKey);
+          return { blockades: newBlockades };
+        }),
 
-  setAvailableMoves: (moves) => set({ availableMoves: moves }),
+      removeBlockade: (cellKey) =>
+        set((state) => {
+          const newBlockades = new Set(state.blockades);
+          newBlockades.delete(cellKey);
+          return { blockades: newBlockades };
+        }),
 
-  // Clown car driving actions
-  setAccelerating: (value) => set({ accelerating: value }),
-  setBraking: (value) => set({ braking: value }),
-  setPendingFork: (fork) => set({ pendingFork: fork }),
+      setBlockades: (blockades) => set({ blockades }),
 
-  selectForkDirection: (targetNodeId) =>
-    set({
-      pendingFork: null,
-      targetNode: targetNodeId,
-    }),
-  setCarSpeed: (speed) => set({ carSpeed: Math.max(0, Math.min(5, speed)) }),
+      setBlockadeRequirements: (requirements) => set({ blockadeRequirements: requirements }),
 
-  updateDriving: (delta) => {
-    const state = get();
-    const { accelerating, braking, carSpeed } = state;
+      collectItem: (itemId) =>
+        set((state) => {
+          const newItems = new Set(state.collectedItems);
+          newItems.add(itemId);
+          return {
+            collectedItems: newItems,
+            fear: Math.max(state.fear - 5, 0),
+            despair: Math.max(state.despair - 5, 0),
+          };
+        }),
 
-    let newSpeed = carSpeed;
-
-    // Speed increments/decrements and HOLDS - no decay
-    if (accelerating) {
-      newSpeed = Math.min(5, carSpeed + delta * 2);
-    } else if (braking) {
-      newSpeed = Math.max(0, carSpeed - delta * 3);
-    }
-    // No decay - speed holds when neither pressed
-
-    if (newSpeed !== carSpeed) {
-      set({ carSpeed: newSpeed });
-    }
-  },
-
-  // Interaction Actions
-  setNearbyItem: (item) => set({ nearbyItem: item }),
-  setNearbyExit: (exit) => set({ nearbyExit: exit }),
-
-  collectNearbyItem: () => {
-    const state = get();
-    if (!state.nearbyItem) return;
-
-    const itemName = state.nearbyItem.name;
-    const itemId = state.nearbyItem.id;
-
-    // Add to collected items
-    const newItems = new Set(state.collectedItems);
-    newItems.add(itemId);
-
-    // Remove a blockade if any exist
-    let newBlockades = state.blockades;
-    let newRequirements = state.blockadeRequirements;
-
-    if (state.blockadeRequirements.size > 0) {
-      for (const [blockadeId, requirement] of state.blockadeRequirements.entries()) {
-        if (requirement.itemId === itemId) {
-          newBlockades = new Set(state.blockades);
-          newBlockades.delete(blockadeId);
-          newRequirements = new Map(state.blockadeRequirements);
-          newRequirements.delete(blockadeId);
-          break;
+      checkGameOver: () => {
+        const state = get();
+        if (state.fear >= state.maxSanity && state.despair >= state.maxSanity) {
+          set({ isGameOver: true, gameOverReason: 'both' });
+        } else if (state.fear >= state.maxSanity) {
+          set({ isGameOver: true, gameOverReason: 'fear' });
+        } else if (state.despair >= state.maxSanity) {
+          set({ isGameOver: true, gameOverReason: 'despair' });
         }
-      }
-    }
+      },
 
-    set({
-      collectedItems: newItems,
-      blockades: newBlockades,
-      blockadeRequirements: newRequirements,
-      nearbyItem: null,
-      showCollectedPopup: { name: itemName, timestamp: Date.now() },
-      itemInventory: state.itemInventory + 1,
-      fear: Math.max(state.fear - 5, 0),
-      despair: Math.max(state.despair - 5, 0),
-    });
+      triggerWin: () => set({ hasWon: true }),
 
-    // Haptic feedback
-    if (navigator.vibrate) {
-      navigator.vibrate([50, 30, 50, 30, 100]);
-    }
-  },
+      resetGame: () =>
+        set({
+          fear: 0,
+          despair: 0,
+          visitedCells: new Map(),
+          pathHistory: [],
+          isGameOver: false,
+          hasWon: false,
+          gameOverReason: null,
+          blockades: new Set(),
+          blockadeRequirements: new Map(),
+          collectedItems: new Set(),
+          currentNode: '',
+          targetNode: null,
+          isMoving: false,
+          moveProgress: 0,
+          moveSpeed: 1,
+          cameraRotation: 0,
+          availableMoves: [],
 
-  triggerExitInteraction: () => {
-    const state = get();
-    if (state.nearbyExit) {
-      set({ hasWon: true });
-    }
-  },
+          carSpeed: 0,
+          accelerating: false,
+          braking: false,
+          pendingFork: null,
+          nearbyItem: null,
+          nearbyExit: null,
+          showCollectedPopup: null,
+          itemInventory: 0,
+        }),
 
-  clearCollectedPopup: () => set({ showCollectedPopup: null }),
+      // Rail Navigation Actions
+      setCurrentNode: (nodeId) => set({ currentNode: nodeId }),
+      setTargetNode: (nodeId) => set({ targetNode: nodeId }),
 
-  getSanityLevel: () => {
-    const state = get();
-    const avgInsanity = (state.fear + state.despair) / 2;
-    return 100 - avgInsanity; // 100 = sane, 0 = insane
-  },
+      startMoveTo: (targetNodeId, speed = 1) => {
+        const state = get();
+        const fearRatio = state.fear / state.maxSanity;
 
-  isInverted: () => {
-    const state = get();
-    return state.fear + state.despair > 140;
-  },
-}));
+        let actualTarget = targetNodeId;
+
+        if (fearRatio > 0.3 && state.availableMoves.length > 1) {
+          const rng = seedrandom(`fear-${Date.now()}`);
+          const confusionChance = (fearRatio - 0.3) * 0.8;
+
+          if (rng() < confusionChance) {
+            const otherMoves = state.availableMoves.filter((m) => m.nodeId !== targetNodeId);
+            if (otherMoves.length > 0) {
+              const randomMove = otherMoves[Math.floor(rng() * otherMoves.length)];
+              actualTarget = randomMove.nodeId;
+              console.log('FEAR confusion! Intended:', targetNodeId, 'Actual:', actualTarget);
+            }
+          }
+        }
+
+        set({
+          targetNode: actualTarget,
+          isMoving: true,
+          moveProgress: 0,
+          moveSpeed: speed,
+        });
+      },
+
+      updateMoveProgress: (progress) => set({ moveProgress: Math.min(1, progress) }),
+
+      completeMove: () => {
+        const state = get();
+        const targetNode = state.targetNode;
+
+        if (targetNode) {
+          set({
+            currentNode: targetNode,
+            targetNode: null,
+            isMoving: false,
+            moveProgress: 0,
+          });
+
+          // Record visit to new node
+          get().visitNode(targetNode);
+        }
+      },
+
+      setCameraRotation: (rotation) => set({ cameraRotation: rotation }),
+
+      setAvailableMoves: (moves) => set({ availableMoves: moves }),
+
+      // Clown car driving actions
+      setAccelerating: (value) => set({ accelerating: value }),
+      setBraking: (value) => set({ braking: value }),
+      setPendingFork: (fork) => set({ pendingFork: fork }),
+
+      selectForkDirection: (targetNodeId) =>
+        set({
+          pendingFork: null,
+          targetNode: targetNodeId,
+        }),
+      setCarSpeed: (speed) => set({ carSpeed: Math.max(0, Math.min(5, speed)) }),
+
+      updateDriving: (delta) => {
+        const state = get();
+        const { accelerating, braking, carSpeed } = state;
+
+        let newSpeed = carSpeed;
+
+        // Speed increments/decrements and HOLDS - no decay
+        if (accelerating) {
+          newSpeed = Math.min(5, carSpeed + delta * 2);
+        } else if (braking) {
+          newSpeed = Math.max(0, carSpeed - delta * 3);
+        }
+        // No decay - speed holds when neither pressed
+
+        if (newSpeed !== carSpeed) {
+          set({ carSpeed: newSpeed });
+        }
+      },
+
+      // Interaction Actions
+      setNearbyItem: (item) => set({ nearbyItem: item }),
+      setNearbyExit: (exit) => set({ nearbyExit: exit }),
+
+      collectNearbyItem: () => {
+        const state = get();
+        if (!state.nearbyItem) return;
+
+        const itemName = state.nearbyItem.name;
+        const itemId = state.nearbyItem.id;
+
+        // Add to collected items
+        const newItems = new Set(state.collectedItems);
+        newItems.add(itemId);
+
+        // Remove a blockade if any exist
+        let newBlockades = state.blockades;
+        let newRequirements = state.blockadeRequirements;
+
+        if (state.blockadeRequirements.size > 0) {
+          for (const [blockadeId, requirement] of state.blockadeRequirements.entries()) {
+            if (requirement.itemId === itemId) {
+              newBlockades = new Set(state.blockades);
+              newBlockades.delete(blockadeId);
+              newRequirements = new Map(state.blockadeRequirements);
+              newRequirements.delete(blockadeId);
+              break;
+            }
+          }
+        }
+
+        set({
+          collectedItems: newItems,
+          blockades: newBlockades,
+          blockadeRequirements: newRequirements,
+          nearbyItem: null,
+          showCollectedPopup: { name: itemName, timestamp: Date.now() },
+          itemInventory: state.itemInventory + 1,
+          fear: Math.max(state.fear - 5, 0),
+          despair: Math.max(state.despair - 5, 0),
+        });
+
+        // Haptic feedback
+        if (navigator.vibrate) {
+          navigator.vibrate([50, 30, 50, 30, 100]);
+        }
+      },
+
+      triggerExitInteraction: () => {
+        const state = get();
+        if (state.nearbyExit) {
+          set({ hasWon: true });
+        }
+      },
+
+      clearCollectedPopup: () => set({ showCollectedPopup: null }),
+
+      getSanityLevel: () => {
+        const state = get();
+        const avgInsanity = (state.fear + state.despair) / 2;
+        return 100 - avgInsanity; // 100 = sane, 0 = insane
+      },
+
+      isInverted: () => {
+        const state = get();
+        return state.fear + state.despair > 140;
+      },
+    }),
+    {
+      name: 'beppo-laughs-storage',
+      storage: createJSONStorage(() => localStorage, {
+        reviver: (_key, value) => {
+          if (typeof value === 'object' && value !== null) {
+            // @ts-expect-error
+            if (value.__type === 'Map') {
+              // @ts-expect-error
+              return new Map(value.value);
+            }
+            // @ts-expect-error
+            if (value.__type === 'Set') {
+              // @ts-expect-error
+              return new Set(value.value);
+            }
+          }
+          return value;
+        },
+        replacer: (_key, value) => {
+          if (value instanceof Map) {
+            return { __type: 'Map', value: Array.from(value.entries()) };
+          }
+          if (value instanceof Set) {
+            return { __type: 'Set', value: Array.from(value.values()) };
+          }
+          return value;
+        },
+      }),
+      partialize: (state) => ({
+        fear: state.fear,
+        despair: state.despair,
+        maxSanity: state.maxSanity,
+        visitedCells: state.visitedCells,
+        pathHistory: state.pathHistory,
+        seed: state.seed,
+        isGameOver: state.isGameOver,
+        hasWon: state.hasWon,
+        gameOverReason: state.gameOverReason,
+        blockades: state.blockades,
+        blockadeRequirements: state.blockadeRequirements,
+        collectedItems: state.collectedItems,
+        currentNode: state.currentNode,
+        itemInventory: state.itemInventory,
+      }),
+    },
+  ),
+);
