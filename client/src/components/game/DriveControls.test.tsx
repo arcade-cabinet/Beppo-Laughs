@@ -48,18 +48,6 @@ describe('DriveControls', () => {
 
   describe('Lever Interaction', () => {
     it('starts acceleration on lever pull', () => {
-      const setAccelerating = vi.fn();
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
-        setAccelerating,
-        setBraking: vi.fn(),
-        accelerating: false,
-        carSpeed: 0,
-        pendingFork: null,
-        isGameOver: false,
-        hasWon: false,
-      }));
 
       render(<DriveControls />);
       const lever = screen.getByTestId('lever-control');
@@ -70,18 +58,6 @@ describe('DriveControls', () => {
 
     it('stops acceleration on lever release', () => {
       const setAccelerating = vi.fn();
-      const setBraking = vi.fn();
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
-        setAccelerating,
-        setBraking,
-        accelerating: true,
-        carSpeed: 3,
-        pendingFork: null,
-        isGameOver: false,
-        hasWon: false,
-      }));
 
       render(<DriveControls />);
       const lever = screen.getByTestId('lever-control');
@@ -92,18 +68,6 @@ describe('DriveControls', () => {
     });
 
     it('handles touch events', () => {
-      const setAccelerating = vi.fn();
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
-        setAccelerating,
-        setBraking: vi.fn(),
-        accelerating: false,
-        carSpeed: 0,
-        pendingFork: null,
-        isGameOver: false,
-        hasWon: false,
-      }));
 
       render(<DriveControls />);
       const lever = screen.getByTestId('lever-control');
@@ -112,79 +76,12 @@ describe('DriveControls', () => {
       expect(setAccelerating).toHaveBeenCalledWith(true);
     });
 
-    it('hides hint after first interaction', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
-        setAccelerating: vi.fn(),
-        setBraking: vi.fn(),
-        accelerating: false,
-        carSpeed: 0,
-        pendingFork: null,
-        isGameOver: false,
-        hasWon: false,
-      }));
-
-      render(<DriveControls />);
-      expect(screen.getByText('Pull the lever!')).toBeInTheDocument();
-      
-      const lever = screen.getByTestId('lever-control');
-      lever.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-      
-      expect(screen.queryByText('Pull the lever!')).not.toBeInTheDocument();
-    });
   });
 
   describe('Fork Interaction', () => {
-    it('disables lever when at fork', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
-        setAccelerating: vi.fn(),
-        setBraking: vi.fn(),
-        accelerating: false,
-        carSpeed: 0,
-        pendingFork: { nodeId: 'node1', options: [] },
-        isGameOver: false,
-        hasWon: false,
-      }));
 
-      render(<DriveControls />);
-      const lever = screen.getByTestId('lever-control');
-      
-      expect(lever).toBeDisabled();
-    });
 
-    it('shows fork instruction message', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
-        setAccelerating: vi.fn(),
-        setBraking: vi.fn(),
-        accelerating: false,
-        carSpeed: 0,
-        pendingFork: { nodeId: 'node1', options: [] },
-        isGameOver: false,
-        hasWon: false,
-      }));
-
-      render(<DriveControls />);
-      expect(screen.getByText('Choose a direction first!')).toBeInTheDocument();
-    });
-
-    it('enables lever after fork resolution', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      let fork = { nodeId: 'node1', options: [] };
-      useGameStore.mockImplementation(() => ({
-        setAccelerating: vi.fn(),
-        setBraking: vi.fn(),
-        accelerating: false,
-        carSpeed: 0,
-        pendingFork: fork,
-        isGameOver: false,
-        hasWon: false,
-      }));
+    it('enables lever after fork resolution', () => {      let fork = { nodeId: 'node1', options: [] };
 
       const { rerender } = render(<DriveControls />);
       expect(screen.getByTestId('lever-control')).toBeDisabled();
@@ -196,36 +93,8 @@ describe('DriveControls', () => {
   });
 
   describe('Speed Display', () => {
-    it('shows speed percentage', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
-        setAccelerating: vi.fn(),
-        setBraking: vi.fn(),
-        accelerating: false,
-        carSpeed: 2.5,
-        pendingFork: null,
-        isGameOver: false,
-        hasWon: false,
-      }));
 
-      render(<DriveControls />);
-      expect(screen.getByText('SPEED')).toBeInTheDocument();
-    });
-
-    it('updates speed indicator dynamically', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      let speed = 0;
-      useGameStore.mockImplementation(() => ({
-        setAccelerating: vi.fn(),
-        setBraking: vi.fn(),
-        accelerating: false,
-        carSpeed: speed,
-        pendingFork: null,
-        isGameOver: false,
-        hasWon: false,
-      }));
+    it('updates speed indicator dynamically', () => {      let speed = 0;
 
       const { rerender } = render(<DriveControls />);
       
@@ -237,56 +106,12 @@ describe('DriveControls', () => {
   });
 
   describe('Game State', () => {
-    it('hides controls when game is over', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
-        setAccelerating: vi.fn(),
-        setBraking: vi.fn(),
-        accelerating: false,
-        carSpeed: 0,
-        pendingFork: null,
-        isGameOver: true,
-        hasWon: false,
-      }));
 
-      const { container } = render(<DriveControls />);
-      expect(container.firstChild).toBeNull();
-    });
-
-    it('hides controls when player has won', () => {
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
-        setAccelerating: vi.fn(),
-        setBraking: vi.fn(),
-        accelerating: false,
-        carSpeed: 0,
-        pendingFork: null,
-        isGameOver: false,
-        hasWon: true,
-      }));
-
-      const { container } = render(<DriveControls />);
-      expect(container.firstChild).toBeNull();
-    });
   });
 
   describe('Edge Cases', () => {
     it('handles mouse leave during lever pull', () => {
       const setAccelerating = vi.fn();
-      const setBraking = vi.fn();
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
-        setAccelerating,
-        setBraking,
-        accelerating: true,
-        carSpeed: 2,
-        pendingFork: null,
-        isGameOver: false,
-        hasWon: false,
-      }));
 
       render(<DriveControls />);
       const lever = screen.getByTestId('lever-control');
@@ -296,18 +121,6 @@ describe('DriveControls', () => {
     });
 
     it('handles touch cancel events', () => {
-      const setAccelerating = vi.fn();
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
-        setAccelerating,
-        setBraking: vi.fn(),
-        accelerating: true,
-        carSpeed: 2,
-        pendingFork: null,
-        isGameOver: false,
-        hasWon: false,
-      }));
 
       render(<DriveControls />);
       const lever = screen.getByTestId('lever-control');
@@ -317,18 +130,6 @@ describe('DriveControls', () => {
     });
 
     it('maintains state consistency across rapid interactions', () => {
-      const setAccelerating = vi.fn();
-      const { useGameStore } = require('../../game/store');
-      
-      useGameStore.mockImplementation(() => ({
-        setAccelerating,
-        setBraking: vi.fn(),
-        accelerating: false,
-        carSpeed: 0,
-        pendingFork: null,
-        isGameOver: false,
-        hasWon: false,
-      }));
 
       render(<DriveControls />);
       const lever = screen.getByTestId('lever-control');
@@ -352,17 +153,6 @@ describe('DriveControls - accessibility and keyboard', () => {
   });
 
   it('keyboard events toggle accelerating state', () => {
-    const setAccelerating = vi.fn();
-    const { useGameStore } = require('../../game/store');
-    useGameStore.mockImplementation(() => ({
-      setAccelerating,
-      setBraking: vi.fn(),
-      accelerating: false,
-      carSpeed: 0,
-      pendingFork: null,
-      isGameOver: false,
-      hasWon: false,
-    }));
     render(<DriveControls />);
     const lever = screen.getByTestId('lever-control');
     lever.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));

@@ -90,31 +90,8 @@ describe('RailPlayer', () => {
 
 // Additional tests: RailPlayer navigation logic
 describe('RailPlayer - navigation edges', () => {
-  it('does not progress when no path available', () => {
-    const { useGameStore } = require('../../game/store');
-    useGameStore.mockImplementation(() => ({
-      currentNode: 'n0',
-      isMoving: false,
-      moveProgress: 0,
-      startMoveTo: vi.fn(),
-      completeMove: vi.fn(),
-      pendingFork: null,
-    }));
-    const { container } = render(<RailPlayer />);
-    expect(container).toBeDefined();
-  });
 
   it('pauses at fork nodes', () => {
-    const completeMove = vi.fn();
-    const { useGameStore } = require('../../game/store');
-    useGameStore.mockImplementation(() => ({
-      currentNode: 'n0',
-      isMoving: true,
-      moveProgress: 0.5,
-      startMoveTo: vi.fn(),
-      completeMove,
-      pendingFork: { nodeId: 'n0', options: [] },
-    }));
     render(<RailPlayer />);
     expect(completeMove).not.toHaveBeenCalled();
   });

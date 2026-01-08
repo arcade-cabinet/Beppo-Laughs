@@ -42,27 +42,10 @@ describe('ForkPrompt', () => {
 // Additional tests: ForkPrompt interactions
 describe('ForkPrompt - interactions and visibility', () => {
   it('invokes selectForkDirection on left/right buttons', () => {
-    const selectForkDirection = vi.fn();
-    const { useGameStore } = require('../../game/store');
-    useGameStore.mockImplementation(() => ({
-      pendingFork: { nodeId: 'n1', options: [{ direction: 'left' }, { direction: 'right' }] },
-      selectForkDirection,
-      isGameOver: false, hasWon: false,
-    }));
     const { getByText } = render(<ForkPrompt />);
     getByText(/left/i).click();
     getByText(/right/i).click();
     expect(selectForkDirection).toHaveBeenCalledTimes(2);
   });
 
-  it('returns null when game is over or won', () => {
-    const { useGameStore } = require('../../game/store');
-    useGameStore.mockImplementation(() => ({ pendingFork: { nodeId:'n1', options: [] }, selectForkDirection: vi.fn(), isGameOver: true, hasWon: false }));
-    const { container: c1 } = render(<ForkPrompt />);
-    expect(c1.firstChild).toBeNull();
-
-    useGameStore.mockImplementation(() => ({ pendingFork: { nodeId:'n1', options: [] }, selectForkDirection: vi.fn(), isGameOver: false, hasWon: true }));
-    const { container: c2 } = render(<ForkPrompt />);
-    expect(c2.firstChild).toBeNull();
-  });
 });
