@@ -1,5 +1,42 @@
 # PR History & Analysis
 
+## PR #100: 3D First-Person Car Interior with GPS Dashboard
+**Branch**: `feature/3d-car-interior-with-gps-dashboard`
+**Status**: Open
+**Link**: https://github.com/arcade-cabinet/Beppo-Laughs/pull/100
+
+### Changes
+- **ClownCarInterior.tsx**: Redesigned as proper first-person driver perspective
+  - Dashboard with Fear/Despair gauges positioned below eye level
+  - Center GPS display as 3D Canvas texture showing journey map
+  - Steering wheel at arm's reach with subtle idle animation
+  - Hood extending forward with clown ornament
+  - A-pillars framing the windshield view
+
+- **GPS Integration**: Map rendered as texture on dashboard screen
+  - Path thickness shows revisit count (despair visualization)
+  - Memory fade effect as sanity drops
+  - Blinking red clown nose at current position
+
+- **ForkPrompt.tsx**: Fixed camera-relative direction controls
+  - Shows FORWARD/BACK/LEFT/RIGHT relative to camera rotation
+  - RIGHT button now correctly turns right from player perspective
+
+- **JourneyMapReveal.tsx**: Game over journey map
+  - Full-screen reveal on death/escape
+  - Color-coded paths (red=fear, blue=despair)
+  - Start/end markers with stats
+
+### Files Changed
+- `ClownCarInterior.tsx` (new) - Main car interior with integrated GPS
+- `CameraAttachedCockpit.tsx` (modified) - Attaches interior to camera
+- `ForkPrompt.tsx` (modified) - Camera-relative directions
+- `JourneyMapReveal.tsx` (new) - End-game journey map
+- `Scene.tsx` (modified) - Integration point
+- Other supporting files
+
+---
+
 ## Branch: `feat/maze-refactoring-and-ai-manifest`
 
 ### Current State (Pre-Refactor)
