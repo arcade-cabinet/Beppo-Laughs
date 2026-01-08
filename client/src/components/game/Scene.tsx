@@ -155,11 +155,11 @@ export function Scene({ seed }: SceneProps) {
   const avgInsanity = maxSanity > 0 ? (fear + despair) / 2 / maxSanity : 0;
 
   // Fog calculations for atmosphere and depth perception
-  // Adjusted to ensure maze visibility while hiding edges
-  const fogNear = Math.max(8, 15 - avgInsanity * 5); // Start fog further out (was 2)
-  const fogFar = Math.max(25, 45 - avgInsanity * 15); // End fog further out (was 15)
+  // Restored to production values for horror atmosphere
+  const fogNear = Math.max(2, 12 - avgInsanity * 8);
+  const fogFar = Math.max(15, 35 - avgInsanity * 20);
   const fogHue = 30 + avgInsanity * 60;
-  const fogColor = `hsl(${fogHue}, ${30 - avgInsanity * 15}%, ${15 - avgInsanity * 5}%)`;
+  const fogColor = `hsl(${fogHue}, ${30 - avgInsanity * 15}%, ${20 - avgInsanity * 10}%)`;
 
   const bgBrightness = Math.max(8, 25 - avgInsanity * 17);
   const bgColor = `hsl(30, 40%, ${bgBrightness}%)`;
