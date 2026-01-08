@@ -107,17 +107,86 @@ Before implementing custom solutions, check if `@react-three/drei` provides a co
 
 ## Testing
 
-### E2E Tests (Playwright)
-- Located in `e2e/` directory
-- Use role-based selectors: `getByRole('heading', { name: '...' })`
-- Use test IDs: `data-testid="button-start-game"`
-- Run with: `pnpm run test:e2e`
-- **Astro Testing Guide**: https://docs.astro.build/en/guides/testing/
+**⚠️ MANDATORY: Read `docs/TESTING_STANDARDS.md` before writing any tests.**
 
-### Unit Tests (Vitest)
-- Co-located with source files or in `__tests__/` directories
-- React components: Use @testing-library/react
-- Run with: `pnpm run test`
+### Coverage Requirements
+
+| Category | Minimum | Target |
+|----------|---------|--------|
+| Pure Functions | 90% | 100% |
+| React Components (non-R3F) | 80% | 95% |
+| R3F Components | 70% | 85% |
+| Zustand Store | 95% | 100% |
+| E2E Critical Paths | 100% | 100% |
+
+### Testing Libraries
+
+```bash
+# Required dependencies
+@react-three/test-renderer  # R3F component testing (MANDATORY for R3F)
+@testing-library/react      # DOM component testing
+vitest                      # Unit test runner
+@playwright/test            # E2E testing
+```
+
+### ❌ FORBIDDEN Test Patterns
+
+```typescript
+// NEVER ACCEPTABLE as the only test for a component:
+it('renders without crashing', () => { ... });
+it('accepts props', () => { ... });
+
+// NEVER USE in E2E tests:
+await page.waitForTimeout(2000);
+```
+
+### ✅ REQUIRED Test Patterns
+
+**R3F Components** - Use `@react-three/test-renderer`:
+```typescript
+import ReactThreeTestRenderer from '@react-three/test-renderer';
+
+test('mesh scales on click', async () => {
+  const renderer = await ReactThreeTestRenderer.create(<MyMesh />);
+  const mesh = renderer.scene.children[0];
+  expect(mesh.props.scale).toBe(1);
+  await renderer.fireEvent(mesh, 'click');
+  expect(mesh.props.scale).toBe(1.5);
+});
+```
+
+**Zustand Store** - Test actual state transitions:
+```typescript
+test('increaseFear caps at 100', () => {
+  const store = createTestStore();
+  store.getState().increaseFear(150);
+  expect(store.getState().fear).toBe(100);
+});
+```
+
+**E2E** - Use condition-based waits:
+```typescript
+// ✅ GOOD
+await expect(page.getByTestId('game-canvas')).toBeVisible();
+
+// ❌ BAD
+await page.waitForTimeout(2000);
+```
+
+### Running Tests
+
+```bash
+pnpm test              # Unit tests
+pnpm test:coverage     # With coverage report
+pnpm test:e2e          # E2E tests
+pnpm test:e2e:ui       # Interactive E2E
+```
+
+### Test Files
+
+- Unit tests: Co-located as `Component.test.tsx`
+- E2E tests: `e2e/` directory
+- Store tests: `client/src/game/store.test.ts`
 
 ## Code Quality
 
@@ -231,5 +300,6 @@ See `docs/` directory for:
 - `ARCHITECTURE.md` - Technical architecture details
 - `STYLE_GUIDE.md` - Visual and audio design guidelines
 - `GITHUB_PAGES_FIX.md` - Router base path solution
+- `TESTING_STANDARDS.md` - **MANDATORY** testing standards and coverage requirements
 - `TESTING_ENHANCEMENTS.md` - E2E test suite documentation
 
