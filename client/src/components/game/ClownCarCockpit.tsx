@@ -196,14 +196,7 @@ export function ClownCarCockpit() {
       despairFillRef.current.scale.x = Math.max(0.01, despairPercent);
       despairFillRef.current.position.x = -0.14 * (1 - despairPercent);
     }
-
-    // REMOVED PROCEDURAL MOVEMENT
-    // The cockpit must remain ABSOLUTELY STATIC relative to the camera group
-    // to act as a fixed frame of reference.
-    if (chassisRef.current) {
-      chassisRef.current.position.set(0, 0, 0);
-      chassisRef.current.rotation.set(0, 0, 0);
-    }
+    // useFrame continues with other logic...
   });
 
   const scale = 2.5;
