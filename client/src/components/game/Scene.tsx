@@ -15,6 +15,7 @@ import { HorrorEffects } from './HorrorEffects';
 import { InteractionPrompt } from './InteractionPrompt';
 import { JourneyMapReveal } from './JourneyMapReveal';
 import { Maze } from './Maze';
+import { NightmareJournal } from './NightmareJournal';
 import { RailPlayer } from './RailPlayer';
 import { Villains } from './Villains';
 
@@ -272,6 +273,7 @@ export function Scene({ seed }: SceneProps) {
       {/* HTML overlays for UI that needs to be 2D */}
       <ForkPrompt />
       <InteractionPrompt />
+      <NightmareJournal />
       <JourneyMapReveal />
     </>
   );

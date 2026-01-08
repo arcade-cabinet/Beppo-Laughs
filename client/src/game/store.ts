@@ -9,6 +9,13 @@ export interface VisitedCell {
   firstVisitTime: number;
 }
 
+export interface JournalEntry {
+  id: string;
+  text: string;
+  timestamp: number;
+  corrupted?: boolean;
+}
+
 export interface GameState {
   // Dual Sanity Meters
   fear: number; // Red - exploring the unknown
@@ -56,6 +63,15 @@ export interface GameState {
   nearbyExit: { nodeId: string } | null;
   showCollectedPopup: { name: string; timestamp: number } | null;
   itemInventory: number; // Count of collected items
+
+  // Journal
+  journalEntries: JournalEntry[];
+  addJournalEntry: (text: string) => void;
+  corruptJournal: () => void;
+
+  // Settings
+  graphicsQuality: 'low' | 'medium' | 'high';
+  setGraphicsQuality: (quality: 'low' | 'medium' | 'high') => void;
 
   // Actions
   setSeed: (seed: string) => void;
@@ -149,6 +165,27 @@ export const useGameStore = create<GameState>()(
       nearbyExit: null,
       showCollectedPopup: null,
       itemInventory: 0,
+
+      journalEntries: [],
+      addJournalEntry: (text) =>
+        set((state) => ({
+          journalEntries: [
+            { id: Math.random().toString(36).substr(2, 9), text, timestamp: Date.now() },
+            ...state.journalEntries,
+          ],
+        })),
+      corruptJournal: () =>
+        set((state) => {
+          const newEntries = [...state.journalEntries];
+          if (newEntries.length > 0 && Math.random() < 0.3) {
+            const idx = Math.floor(Math.random() * newEntries.length);
+            newEntries.splice(idx, 1);
+          }
+          return { journalEntries: newEntries };
+        }),
+
+      graphicsQuality: 'high',
+      setGraphicsQuality: (quality) => set({ graphicsQuality: quality }),
 
       setSeed: (seed) => set({ seed }),
 
@@ -460,6 +497,8 @@ export const useGameStore = create<GameState>()(
         collectedItems: state.collectedItems,
         currentNode: state.currentNode,
         itemInventory: state.itemInventory,
+        journalEntries: state.journalEntries,
+        graphicsQuality: state.graphicsQuality,
       }),
     },
   ),

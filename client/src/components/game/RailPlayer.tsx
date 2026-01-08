@@ -158,6 +158,25 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
           gameState.setNearbyExit(null);
         }
 
+        // Journal Entry Generation
+        if (!gameState.visitedCells.has(toNode.id) || Math.random() < 0.2) {
+          const exits = toNode.connections.length;
+          const isDeadEnd = exits === 1;
+          const description = isDeadEnd
+            ? 'Hit a dead end. The canvas walls are closing in.'
+            : exits > 2
+              ? 'The path splits here. Too many choices...'
+              : 'Moving deeper into the maze.';
+
+          gameState.addJournalEntry(description);
+
+          // Chance to corrupt if insane
+          const insanity = gameState.getSanityLevel(); // 100 is sane, 0 insane
+          if (insanity < 50 && Math.random() < 0.3) {
+            gameState.corruptJournal();
+          }
+        }
+
         checkForFork(toNode);
       } else {
         // Interpolate along path - LINEAR for smooth rail feel
