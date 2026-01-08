@@ -297,7 +297,12 @@ issue_enrichment:
     auto_planning:
       enabled: true
       labels:
-        - "synthesis"  # Auto-plan synthesis issues
+        - "synthesis"     # Auto-plan synthesis issues
+        - "bug"           # Auto-plan bug fixes
+        - "critical"      # Auto-plan critical issues
+        - "game/gameplay" # Auto-plan gameplay issues
+        - "game/rendering" # Auto-plan rendering issues
+        - "game/maze"     # Auto-plan maze issues
   labeling:
     labeling_instructions:
       - label: "bug"
