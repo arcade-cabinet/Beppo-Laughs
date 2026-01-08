@@ -21,12 +21,12 @@ This document defines the **mandatory testing standards** for the Beppo Laughs c
 ```json
 {
   "devDependencies": {
-    "@react-three/test-renderer": "^9.x",
-    "@testing-library/react": "^16.x",
-    "@testing-library/jest-dom": "^6.x",
-    "vitest": "^4.x",
-    "@vitest/coverage-v8": "^4.x",
-    "@playwright/test": "^1.x"
+    "@react-three/test-renderer": "^9.0.0",
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/jest-dom": "^6.0.0",
+    "vitest": "^4.0.0",
+    "@vitest/coverage-v8": "^4.0.0",
+    "@playwright/test": "^1.0.0"
   }
 }
 ```
