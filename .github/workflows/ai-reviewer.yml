@@ -30,31 +30,25 @@ jobs:
       contents: read
       pull-requests: write
     outputs:
-      suggestion_count: ${{ steps.review.outputs.suggestion_count }}
+      suggestion_count: ${{ steps.suggestions.outputs.suggestion_count }}
       needs_escalation: ${{ steps.check.outputs.needs_escalation }}
     steps:
-      - name: Download binary
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
-        with:
-          name: control-center-binary
-          path: /tmp
-          run-id: ${{ github.run_id }}
-          github-token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
-
       - name: Run reviewer
         id: review
-        env:
-          GITHUB_TOKEN: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
-          OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
+        uses: ./.github/actions/control-center-run
+        with:
+          command: reviewer
+          args: --repo "${{ github.repository }}" --pr "${{ github.event.pull_request.number }}" --log-level info
+          run_id: ${{ github.run_id }}
+          github_token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          ollama_api_key: ${{ secrets.OLLAMA_API_KEY }}
+          allow_failure: 'true'
+
+      - name: Extract suggestion count
+        id: suggestions
         run: |
-          chmod +x /tmp/control-center
-          OUTPUT=$(/tmp/control-center reviewer \
-            --repo "${{ github.repository }}" \
-            --pr "${{ github.event.pull_request.number }}" \
-            --log-level info 2>&1) || true
-          
-          # Extract suggestion count from output
-          SUGGESTIONS=$(echo "$OUTPUT" | grep -oP 'suggestions?: \K\d+' || echo "0")
+          OUTPUT="${{ steps.review.outputs.command_output }}"
+          SUGGESTIONS=$(echo "$OUTPUT" | grep -oP 'suggestions?: \\K\\d+' || echo "0")
           echo "suggestion_count=$SUGGESTIONS" >> $GITHUB_OUTPUT
 
       - name: Check if escalation needed
@@ -63,7 +57,7 @@ jobs:
           GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           PR_NUM: ${{ github.event.pull_request.number }}
         run: |
-          SUGGESTIONS="${{ steps.review.outputs.suggestion_count }}"
+          SUGGESTIONS="${{ steps.suggestions.outputs.suggestion_count }}"
           ADDITIONS=$(gh pr view "$PR_NUM" --json additions --jq '.additions' || echo "0")
           
           # Escalate if: >5 suggestions OR >500 lines changed
@@ -113,7 +107,7 @@ jobs:
 
       - name: Claude Code Review
         if: steps.check-key.outputs.available == 'true'
-        uses: anthropics/claude-code-action@7145c3e0510bcdbdd29f67cc4a8c1958f1acfa2f # v1
+        uses: ./.github/actions/claude-code
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.CI_GITHUB_TOKEN }}

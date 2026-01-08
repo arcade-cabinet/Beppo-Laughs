@@ -48,7 +48,7 @@ jobs:
 
       - name: Claude Code Action
         if: steps.check-key.outputs.available == 'true'
-        uses: anthropics/claude-code-action@7145c3e0510bcdbdd29f67cc4a8c1958f1acfa2f # v1
+        uses: ./.github/actions/claude-code
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.CI_GITHUB_TOKEN }}
@@ -88,24 +88,14 @@ jobs:
       issues: write
       pull-requests: write
     steps:
-      - name: Download binary
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
-        with:
-          name: control-center-binary
-          path: /tmp
-          run-id: ${{ github.run_id }}
-          github-token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
-
       - name: Run delegator
+        uses: ./.github/actions/control-center-run
         env:
-          GITHUB_TOKEN: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
-          GOOGLE_JULES_API_KEY: ${{ secrets.GOOGLE_JULES_API_KEY }}
-          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
           COMMAND_BODY: ${{ github.event.comment.body }}
-        run: |
-          chmod +x /tmp/control-center
-          /tmp/control-center delegator \
-            --repo "${{ github.repository }}" \
-            --issue "${{ github.event.issue.number }}" \
-            --command "$COMMAND_BODY" \
-            --log-level info
+        with:
+          command: delegator
+          args: --repo "${{ github.repository }}" --issue "${{ github.event.issue.number }}" --command "$COMMAND_BODY" --log-level info
+          run_id: ${{ github.run_id }}
+          github_token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          google_jules_api_key: ${{ secrets.GOOGLE_JULES_API_KEY }}
+          cursor_api_key: ${{ secrets.CURSOR_API_KEY }}

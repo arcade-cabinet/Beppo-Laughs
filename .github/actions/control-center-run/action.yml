@@ -1,0 +1,85 @@
+name: 'Control Center Runner'
+description: 'Download and run the control-center binary with shared defaults.'
+author: 'jbcom/agentic-control'
+branding:
+  icon: 'terminal'
+  color: 'gray-dark'
+
+inputs:
+  command:
+    description: 'Control-center subcommand to execute'
+    required: true
+  args:
+    description: 'Arguments to pass to control-center'
+    required: false
+    default: ''
+  github_token:
+    description: 'GitHub token for authentication'
+    required: true
+  run_id:
+    description: 'Workflow run ID for artifact download'
+    required: true
+  artifact_name:
+    description: 'Artifact name for control-center binary'
+    required: false
+    default: 'control-center-binary'
+  artifact_path:
+    description: 'Artifact download path'
+    required: false
+    default: '/tmp'
+  ollama_api_key:
+    description: 'Ollama API key'
+    required: false
+  google_jules_api_key:
+    description: 'Google Jules API key'
+    required: false
+  cursor_api_key:
+    description: 'Cursor API key'
+    required: false
+  allow_failure:
+    description: 'Allow command failure without failing the step'
+    required: false
+    default: 'false'
+
+outputs:
+  command_output:
+    description: 'Raw output from the control-center command'
+    value: ${{ steps.run.outputs.command_output }}
+  exit_code:
+    description: 'Exit code from the control-center command'
+    value: ${{ steps.run.outputs.exit_code }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Download control-center binary
+      uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+      with:
+        name: ${{ inputs.artifact_name }}
+        path: ${{ inputs.artifact_path }}
+        run-id: ${{ inputs.run_id }}
+        github-token: ${{ inputs.github_token }}
+
+    - name: Run control-center
+      id: run
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        OLLAMA_API_KEY: ${{ inputs.ollama_api_key }}
+        GOOGLE_JULES_API_KEY: ${{ inputs.google_jules_api_key }}
+        CURSOR_API_KEY: ${{ inputs.cursor_api_key }}
+      run: |
+        set +e
+        BINARY_PATH="${{ inputs.artifact_path }}/control-center"
+        chmod +x "$BINARY_PATH"
+        OUTPUT=$("$BINARY_PATH" ${{ inputs.command }} ${{ inputs.args }} 2>&1)
+        EXIT_CODE=$?
+
+        echo "command_output<<'EOF'" >> $GITHUB_OUTPUT
+        echo "$OUTPUT" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+        echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
+
+        if [ "$EXIT_CODE" -ne 0 ] && [ "${{ inputs.allow_failure }}" != "true" ]; then
+          exit "$EXIT_CODE"
+        fi

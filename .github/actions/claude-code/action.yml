@@ -1,0 +1,68 @@
+name: 'Claude Code Task'
+description: 'Run the Claude Code Action with shared defaults.'
+author: 'jbcom/agentic-control'
+branding:
+  icon: 'message-square'
+  color: 'purple'
+
+inputs:
+  anthropic_api_key:
+    description: 'Anthropic API key'
+    required: true
+  github_token:
+    description: 'GitHub token'
+    required: true
+  prompt:
+    description: 'Prompt for Claude'
+    required: false
+  direct_prompt:
+    description: 'Direct prompt for Claude'
+    required: false
+  model:
+    description: 'Claude model override'
+    required: false
+  allowed_bots:
+    description: 'Allowed bots list'
+    required: false
+  allowed_tools:
+    description: 'Allowed tools list'
+    required: false
+  trigger_phrase:
+    description: 'Trigger phrase'
+    required: false
+  claude_args:
+    description: 'Claude CLI arguments'
+    required: false
+  additional_permissions:
+    description: 'Additional permissions block'
+    required: false
+  track_progress:
+    description: 'Track progress flag'
+    required: false
+
+outputs:
+  structured_output:
+    description: 'Structured output from Claude'
+    value: ${{ steps.claude.outputs.structured_output }}
+  critical_issues:
+    description: 'Critical issues output from Claude (when provided)'
+    value: ${{ steps.claude.outputs.critical_issues }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run Claude Code Action
+      id: claude
+      uses: anthropics/claude-code-action@154d0de144ff82240e1c3deedff56280381fd122 # v1
+      with:
+        anthropic_api_key: ${{ inputs.anthropic_api_key }}
+        github_token: ${{ inputs.github_token }}
+        prompt: ${{ inputs.prompt }}
+        direct_prompt: ${{ inputs.direct_prompt }}
+        model: ${{ inputs.model }}
+        allowed_bots: ${{ inputs.allowed_bots }}
+        allowed_tools: ${{ inputs.allowed_tools }}
+        trigger_phrase: ${{ inputs.trigger_phrase }}
+        claude_args: ${{ inputs.claude_args }}
+        additional_permissions: ${{ inputs.additional_permissions }}
+        track_progress: ${{ inputs.track_progress }}
