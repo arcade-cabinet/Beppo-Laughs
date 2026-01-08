@@ -109,6 +109,7 @@
     "@astrojs/tailwind": "^6.0.2",
     "@biomejs/biome": "^2.3.11",
     "@playwright/test": "^1.57.0",
+    "@react-three/test-renderer": "^9.1.0",
     "@replit/vite-plugin-cartographer": "^0.4.4",
     "@replit/vite-plugin-dev-banner": "^0.1.1",
     "@replit/vite-plugin-runtime-error-modal": "^0.0.4",

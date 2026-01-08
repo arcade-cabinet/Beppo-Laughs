@@ -59,8 +59,8 @@ test.describe('Beppo Laughs - Gameplay', () => {
     const seedInput = page.getByTestId('input-seed');
     await seedInput.fill('test seed alpha');
     await page.getByTestId('button-start-game').click({ force: true });
-    // Wait for game to load
-    await page.waitForTimeout(2000);
+    // Wait for game to load using condition-based wait
+    await expect(page.getByTestId('button-exit')).toBeVisible({ timeout: 10000 });
   });
 
   test('shows exit button during gameplay', async ({ page }) => {
@@ -92,7 +92,8 @@ test.describe('Beppo Laughs - Accessibility', () => {
   test('buttons have proper aria attributes', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('button-start-game').click({ force: true });
-    await page.waitForTimeout(2000);
+    // Wait for game to load using condition-based wait
+    await expect(page.getByTestId('button-exit')).toBeVisible({ timeout: 10000 });
   });
 });
 
@@ -100,11 +101,10 @@ test.describe('Beppo Laughs - Visual Effects', () => {
   test('screen effects are present during gameplay', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('button-start-game').click({ force: true });
-    await page.waitForTimeout(2000);
 
-    // The game should have loaded
+    // Wait for game to load using condition-based wait, then verify
     const exitBtn = page.getByTestId('button-exit');
-    await expect(exitBtn).toBeVisible();
+    await expect(exitBtn).toBeVisible({ timeout: 10000 });
   });
 
   test('main menu has horror aesthetic elements', async ({ page }) => {
