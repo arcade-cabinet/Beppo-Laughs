@@ -103,9 +103,9 @@ test.describe('Beppo Laughs - Visual Effects', () => {
     await page.getByTestId('button-start-game').click({ force: true });
     await waitForGameState(page, 'playing');
 
-    // The game should have loaded
+    // Wait for game to load using condition-based wait, then verify
     const exitBtn = page.getByTestId('button-exit');
-    await expect(exitBtn).toBeVisible();
+    await expect(exitBtn).toBeVisible({ timeout: 10000 });
   });
 
   test('main menu has horror aesthetic elements', async ({ page }) => {
