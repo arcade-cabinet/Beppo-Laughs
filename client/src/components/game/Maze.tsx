@@ -98,7 +98,7 @@ export function Maze({ geometry }: MazeProps) {
           roughness={0.9}
           side={DoubleSide}
           transparent={true} // Handle potential PNG transparency
-          alphaTest={0.5}   // Cutout transparency for clean edges if needed
+          alphaTest={0.5} // Cutout transparency for clean edges if needed
         />
       </mesh>
     ));

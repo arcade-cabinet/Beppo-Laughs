@@ -1,6 +1,6 @@
 import { useFrame, useThree } from '@react-three/fiber';
 import { Suspense, useCallback, useEffect, useRef } from 'react';
-import { type Group, MathUtils, Vector3 } from 'three';
+import type { Group } from 'three';
 import type { MazeGeometry, RailNode } from '../../game/maze/geometry';
 import { useGameStore } from '../../game/store';
 import { ClownCarCockpit } from './ClownCarCockpit';
@@ -97,7 +97,7 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
     return Math.atan2(to.worldX - from.worldX, -(to.worldZ - from.worldZ));
   };
 
-  useFrame((state, delta) => {
+  useFrame((_state, delta) => {
     const gameState = useGameStore.getState();
     const {
       carSpeed,

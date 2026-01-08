@@ -2,7 +2,6 @@ import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
 import type React from 'react';
 import { afterEach, vi } from 'vitest';
-import * as THREE from 'three';
 
 // Cleanup after each test
 afterEach(() => {
@@ -77,11 +76,12 @@ global.ResizeObserver = class ResizeObserver {
 const originalConsoleError = console.error;
 console.error = (...args) => {
   const msg = args[0];
-  if (typeof msg === 'string' && (
-    msg.includes('is using incorrect casing') ||
-    msg.includes('The tag <') ||
-    msg.includes('unrecognized in this browser')
-  )) {
+  if (
+    typeof msg === 'string' &&
+    (msg.includes('is using incorrect casing') ||
+      msg.includes('The tag <') ||
+      msg.includes('unrecognized in this browser'))
+  ) {
     return;
   }
   originalConsoleError(...args);

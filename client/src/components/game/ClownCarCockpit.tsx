@@ -171,7 +171,7 @@ export function ClownCarCockpit() {
   const cockpitRef = useRef<THREE.Group>(null);
   const chassisRef = useRef<THREE.Group>(null);
 
-  useFrame((state) => {
+  useFrame((_state) => {
     const gameState = useGameStore.getState();
     const { accelerating, braking, fear, despair, maxSanity } = gameState;
 

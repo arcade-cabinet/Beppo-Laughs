@@ -407,7 +407,9 @@ test.describe('3D Component Coverage - BrainMeter & ClownCar 3D Models', () => {
     await expect(page.getByText(/CELLS:/)).toBeVisible({ timeout: 15000 });
   });
 
-  test('BrainMeter: verify 3D brain visualization and sanity-driven deformation', async ({ page }) => {
+  test('BrainMeter: verify 3D brain visualization and sanity-driven deformation', async ({
+    page,
+  }) => {
     await page.screenshot({
       path: 'test-results/screenshots/3d-brainmeter-01-initial.png',
       fullPage: true,

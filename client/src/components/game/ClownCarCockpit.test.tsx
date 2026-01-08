@@ -34,10 +34,7 @@ vi.mock('../../game/store', () => ({
 }));
 
 // Helper to traverse scene graph
-function traverseScene(
-  children: SceneNode[],
-  callback: (node: SceneNode) => void,
-): void {
+function traverseScene(children: SceneNode[], callback: (node: SceneNode) => void): void {
   for (const child of children) {
     callback(child);
     if (child.children && child.children.length > 0) {

@@ -24,3 +24,22 @@
 06:45:13 [404] /fonts/Creepster-Regular.ttf 3ms
 06:47:27 [200] / 13ms
 06:47:35 [404] /fonts/Creepster-Regular.ttf 3ms
+06:51:06 [watch] client/src/components/game/ClownCarCockpit.test.tsx
+06:51:06 [watch] client/src/components/game/ClownCarCockpit.test.tsx
+06:51:06 [watch] /client/src/components/game/Maze.tsx, /client/src/index.css
+06:51:06 [watch] client/src/components/game/Maze.tsx
+06:51:06 [watch] /client/src/components/game/RailPlayer.tsx, /client/src/index.css
+06:51:06 [watch] client/src/components/game/RailPlayer.tsx
+06:51:06 [watch] /client/src/components/game/Scene.tsx, /client/src/index.css
+06:51:06 [watch] client/src/components/game/Scene.tsx
+06:51:06 [watch] e2e/comprehensive-3d-coverage.spec.ts
+06:51:06 [watch] e2e/comprehensive-3d-coverage.spec.ts
+06:51:06 [watch] client/src/test-setup.tsx
+06:51:06 [watch] client/src/test-setup.tsx
+06:51:18 [watch] /client/src/components/game/ClownCarCockpit.tsx, /client/src/index.css
+06:51:18 [watch] client/src/components/game/ClownCarCockpit.tsx
+06:51:18 [watch] /client/src/components/game/RailPlayer.tsx, /client/src/index.css
+06:51:18 [watch] client/src/components/game/RailPlayer.tsx
+06:51:18 [watch] client/src/test-setup.tsx
+06:51:18 [watch] client/src/test-setup.tsx
+06:52:14 [200] / 888ms
