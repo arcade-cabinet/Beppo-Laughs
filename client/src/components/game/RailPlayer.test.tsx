@@ -92,7 +92,7 @@ describe('RailPlayer', () => {
 describe('RailPlayer - navigation edges', () => {
 
   it('pauses at fork nodes', () => {
-    render(<RailPlayer />);
+    render(<RailPlayer geometry={mockGeometry} />);
     expect(completeMove).not.toHaveBeenCalled();
   });
 });
