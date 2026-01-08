@@ -2,6 +2,7 @@ import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
 import type React from 'react';
 import { afterEach, vi } from 'vitest';
+import * as THREE from 'three';
 
 // Cleanup after each test
 afterEach(() => {
@@ -60,3 +61,28 @@ vi.mock('framer-motion', () => ({
 vi.mock('@assets/generated_videos/beppo_clown_emerging_laughing_game_over.mp4', () => ({
   default: 'mock-video-url',
 }));
+
+// Mock ResizeObserver
+global.ResizeObserver = class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
+
+// Mock Three.js/Canvas elements if needed,
+// though typically R3F tests use @react-three/test-renderer or
+// we just ignore the console warnings about <mesh> etc when using @testing-library/react
+// on R3F components because they render custom elements.
+// However, we can suppress the specific console errors that are expected.
+const originalConsoleError = console.error;
+console.error = (...args) => {
+  const msg = args[0];
+  if (typeof msg === 'string' && (
+    msg.includes('is using incorrect casing') ||
+    msg.includes('The tag <') ||
+    msg.includes('unrecognized in this browser')
+  )) {
+    return;
+  }
+  originalConsoleError(...args);
+};

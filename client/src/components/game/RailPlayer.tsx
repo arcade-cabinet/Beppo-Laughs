@@ -1,6 +1,6 @@
 import { useFrame, useThree } from '@react-three/fiber';
 import { Suspense, useCallback, useEffect, useRef } from 'react';
-import { type Group, MathUtils } from 'three';
+import { type Group, MathUtils, Vector3 } from 'three';
 import type { MazeGeometry, RailNode } from '../../game/maze/geometry';
 import { useGameStore } from '../../game/store';
 import { ClownCarCockpit } from './ClownCarCockpit';
@@ -114,12 +114,13 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
     if (!currentNodeRef.current) return;
 
     if (pendingFork) {
-      camera.position.y = MathUtils.lerp(camera.position.y, 1.4, 0.1);
+      // Just ensure height is correct, no damping needed for static feel
+      camera.position.y = 1.4;
       return;
     }
 
     if (nearbyExit) {
-      camera.position.y = MathUtils.lerp(camera.position.y, 1.4, 0.1);
+      camera.position.y = 1.4;
       return;
     }
 
@@ -130,27 +131,32 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
         edgeProgress.current = 0;
 
         const targetRotation = getDirectionAngle(currentNodeRef.current, newTarget);
-        camera.rotation.y = MathUtils.lerp(camera.rotation.y, targetRotation, 0.3);
+        // Instant rotation update for "on rails" feel, or very fast smooth
+        const rotDiff = targetRotation - camera.rotation.y;
+        const wrappedDiff = ((rotDiff + Math.PI) % (Math.PI * 2)) - Math.PI;
+        camera.rotation.y += wrappedDiff * Math.min(1, delta * 5);
         gameState.setCameraRotation(camera.rotation.y);
       }
     }
 
-    // Speed increments/decrements and HOLDS - no decay
-    // Gas: increment speed while held (up to max 5)
-    // Brake: decrement speed while held (down to 0)
-    // Neither: speed stays constant (cruise control style)
-    let newSpeed = carSpeed;
+    // Physics-based speed update
+    // Acceleration: 5m/s^2, Braking: 8m/s^2, Drag: 0.5/s
+    let targetSpeed = carSpeed;
     if (accelerating) {
-      newSpeed = Math.min(5, carSpeed + delta * 2);
+      targetSpeed = Math.min(5, carSpeed + delta * 5);
     } else if (braking) {
-      newSpeed = Math.max(0, carSpeed - delta * 3);
-    }
-    // No decay when neither pressed - speed holds
-    if (newSpeed !== carSpeed) {
-      gameState.setCarSpeed(newSpeed);
+      targetSpeed = Math.max(0, carSpeed - delta * 8);
+    } else {
+      // Natural deceleration (friction/drag)
+      targetSpeed = Math.max(0, carSpeed - delta * 0.5);
     }
 
-    if (newSpeed > 0.05 && targetNodeRef.current && currentNodeRef.current) {
+    if (Math.abs(targetSpeed - carSpeed) > 0.001) {
+      gameState.setCarSpeed(targetSpeed);
+    }
+
+    // Update position
+    if (targetSpeed > 0.05 && targetNodeRef.current && currentNodeRef.current) {
       const fromNode = currentNodeRef.current;
       const toNode = targetNodeRef.current;
 
@@ -158,10 +164,11 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
       const dz = toNode.worldZ - fromNode.worldZ;
       const edgeLength = Math.sqrt(dx * dx + dz * dz);
 
-      const progressDelta = (newSpeed * delta) / edgeLength;
+      const progressDelta = (targetSpeed * delta) / edgeLength;
       edgeProgress.current += progressDelta;
 
       if (edgeProgress.current >= 1) {
+        // Arrived at node
         camera.position.x = toNode.worldX;
         camera.position.z = toNode.worldZ;
 
@@ -181,46 +188,42 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
 
         checkForFork(toNode);
       } else {
+        // Interpolate along path - LINEAR for smooth rail feel
         const t = edgeProgress.current;
         camera.position.x = fromNode.worldX + dx * t;
         camera.position.z = fromNode.worldZ + dz * t;
       }
 
+      // Smooth rotation to look ahead
       if (targetNodeRef.current && currentNodeRef.current) {
         const targetRotation = getDirectionAngle(currentNodeRef.current, targetNodeRef.current);
-        camera.rotation.y = MathUtils.lerp(camera.rotation.y, targetRotation, delta * 5);
+        let diff = targetRotation - camera.rotation.y;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+
+        camera.rotation.y += diff * delta * 5;
         gameState.setCameraRotation(camera.rotation.y);
       }
 
-      const bobAmount =
-        Math.sin(state.clock.elapsedTime * 8 * (newSpeed / 3)) * 0.03 * (newSpeed / 3);
-      camera.position.y = 1.4 + bobAmount;
+      // NO HEAD BOB - Smooth rail glide
+      camera.position.y = 1.4;
     } else {
-      camera.position.y = MathUtils.lerp(camera.position.y, 1.4, 0.1);
+      camera.position.y = 1.4;
     }
 
-    camera.rotation.x = MathUtils.clamp(camera.rotation.x, -0.15, 0.15);
-    camera.rotation.z = MathUtils.lerp(camera.rotation.z, 0, 0.2);
+    // Reset tilts - ensure camera is level
+    camera.rotation.x = 0;
+    camera.rotation.z = 0;
 
-    const sanity = gameState.getSanityLevel();
-    if (sanity < 50) {
-      const shake = ((50 - sanity) / 50) * 0.01 * (1 + newSpeed / 3);
-      camera.position.x += (Math.random() - 0.5) * shake;
-      camera.position.z += (Math.random() - 0.5) * shake;
-
-      const tilt = Math.sin(state.clock.elapsedTime * 2) * 0.02 * (1 - sanity / 50);
-      camera.rotation.z = MathUtils.lerp(camera.rotation.z, tilt, 0.1);
-    }
-
-    // Update cockpit position to follow camera
+    // Update cockpit position to STRICTLY follow camera
     if (cockpitGroupRef.current) {
+      // EXACT copy of position/rotation
       cockpitGroupRef.current.position.copy(camera.position);
       cockpitGroupRef.current.rotation.copy(camera.rotation);
     }
   });
 
   // Cockpit follows camera position updated in useFrame
-  // Wrapped in Suspense because ClownCarCockpit uses Text which loads fonts
   return (
     <group ref={cockpitGroupRef}>
       <Suspense fallback={null}>

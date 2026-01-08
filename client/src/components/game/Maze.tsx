@@ -92,7 +92,14 @@ export function Maze({ geometry }: MazeProps) {
         receiveShadow
       >
         <boxGeometry args={[wall.width, wall.height, wall.depth]} />
-        <meshStandardMaterial map={wallTexture} color="#c4a882" roughness={0.9} side={DoubleSide} />
+        <meshStandardMaterial
+          map={wallTexture}
+          color="#c4a882"
+          roughness={0.9}
+          side={DoubleSide}
+          transparent={true} // Handle potential PNG transparency
+          alphaTest={0.5}   // Cutout transparency for clean edges if needed
+        />
       </mesh>
     ));
   }, [geometry, wallTexture]);
@@ -139,6 +146,8 @@ export function Maze({ geometry }: MazeProps) {
           color="#8a7a6a"
           roughness={0.95}
           side={DoubleSide}
+          transparent={true}
+          alphaTest={0.5}
         />
       </mesh>
 
