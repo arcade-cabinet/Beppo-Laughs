@@ -1,4 +1,4 @@
-import { useFrame, useThree } from '@react-three/fiber';
+import { useFrame } from '@react-three/fiber';
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '../../game/store';
@@ -25,23 +25,6 @@ function GPSDisplay({ position }: { position: [number, number, number] }) {
   const textureRef = useRef<THREE.CanvasTexture | null>(null);
   const meshRef = useRef<THREE.Mesh>(null);
 
-  function GPSDisplay({ position }: { position: [number, number, number] }) {
-    const canvasRef = useRef<HTMLCanvasElement>(document.createElement('canvas'));
-    const textureRef = useRef<THREE.CanvasTexture | null>(null);
-    const meshRef = useRef<THREE.Mesh>(null);
-
-    useEffect(() => {
-      // ... texture setup unchanged
-    }, []);
-
-    useFrame(() => {
-      const { pathHistory, currentNode, visitedCells, fear, despair, maxSanity } =
-        useGameStore.getState();
-      const canvas = canvasRef.current;
-      // ... rest unchanged
-    });
-  }
-
   useEffect(() => {
     const canvas = canvasRef.current;
     canvas.width = 256;
@@ -62,6 +45,8 @@ function GPSDisplay({ position }: { position: [number, number, number] }) {
   }, []);
 
   useFrame(() => {
+    const { pathHistory, currentNode, visitedCells, fear, despair, maxSanity } =
+      useGameStore.getState();
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     if (!ctx || !textureRef.current) return;
