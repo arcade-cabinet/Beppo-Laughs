@@ -4,7 +4,6 @@ import { ClownCarCockpit } from './ClownCarCockpit';
 import { Maze } from './Maze';
 import { RailPlayer } from './RailPlayer';
 import { Scene } from './Scene';
-import { useGameStore } from '../../game/store';
 
 // Mock R3F
 vi.mock('@react-three/fiber', () => ({

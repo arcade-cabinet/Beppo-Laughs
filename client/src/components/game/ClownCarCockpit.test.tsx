@@ -29,7 +29,7 @@ vi.mock('@react-three/fiber', async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,
-    useFrame: (callback: any) => {
+    useFrame: (_callback: any) => {
       // Allow testing frame updates if needed
     },
   };
@@ -46,7 +46,7 @@ describe('ClownCarCockpit', () => {
 
   // Helper to safely get root group
   const getRootGroup = (renderer: any) => {
-    if (renderer.scene && renderer.scene.children && renderer.scene.children.length > 0) {
+    if (renderer.scene?.children && renderer.scene.children.length > 0) {
       return renderer.scene.children[0];
     }
     return null;

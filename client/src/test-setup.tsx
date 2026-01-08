@@ -75,12 +75,13 @@ global.fetch = vi.fn(() =>
     json: () => Promise.resolve({}),
     blob: () => Promise.resolve(new Blob()),
     arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
-  })
+  }),
 ) as any;
 
 // Mock InstancedMesh if not present in the environment (e.g. happy-dom)
 // We add it to the THREE namespace if it's missing or incomplete in tests
 import * as THREE from 'three';
+
 if (!THREE.InstancedMesh.prototype.setMatrixAt) {
   THREE.InstancedMesh.prototype.setMatrixAt = vi.fn();
   THREE.InstancedMesh.prototype.setColorAt = vi.fn();

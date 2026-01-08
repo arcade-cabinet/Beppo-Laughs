@@ -1,7 +1,6 @@
 import { render } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import type { MazeGeometry } from '../../game/maze/geometry';
-import { useGameStore } from '../../game/store';
 import { RailPlayer } from './RailPlayer';
 
 // Mock R3F

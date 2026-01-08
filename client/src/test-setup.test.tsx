@@ -1,5 +1,4 @@
-import { describe, expect, it } from 'vitest';
-import { vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 describe('test-setup.tsx configuration', () => {
   describe('ResizeObserver mock', () => {
@@ -43,10 +42,10 @@ describe('test-setup.tsx configuration', () => {
 
     it('suppresses R3F custom element warnings', () => {
       const originalError = console.error;
-      let errorCalled = false;
+      let _errorCalled = false;
 
       console.error = (...args: any[]) => {
-        errorCalled = true;
+        _errorCalled = true;
         originalError(...args);
       };
 

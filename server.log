@@ -73,3 +73,26 @@
 07:26:29 [watch] client/src/components/game/RailPlayer.tsx
 07:28:03 [200] / 1020ms
 07:28:13 [404] /fonts/Creepster-Regular.ttf 5ms
+07:32:17 [watch] client/src/components/game/ClownCarCockpit.test.tsx
+07:32:17 [watch] client/src/components/game/ClownCarCockpit.test.tsx
+07:32:17 [watch] client/src/components/game/ClownCarCockpit.test.tsx
+07:32:17 [watch] client/src/components/game/ClownCarCockpit.test.tsx
+07:32:17 [watch] /client/src/components/game/ClownCarCockpit.tsx, /client/src/index.css
+07:32:17 [watch] client/src/components/game/ClownCarCockpit.tsx
+07:32:17 [watch] client/src/components/game/PhysicsIntegration.test.tsx
+07:32:17 [watch] client/src/components/game/PhysicsIntegration.test.tsx
+07:32:17 [watch] client/src/components/game/RailPlayer.test.tsx
+07:32:17 [watch] client/src/components/game/RailPlayer.test.tsx
+07:32:18 [watch] client/src/test-setup.tsx
+07:32:18 [watch] client/src/test-setup.tsx
+07:32:18 [watch] client/src/test-setup.test.tsx
+07:32:18 [watch] client/src/test-setup.test.tsx
+07:32:46 [watch] client/src/components/game/ClownCarCockpit.test.tsx
+07:32:46 [watch] client/src/components/game/ClownCarCockpit.test.tsx
+07:32:46 [watch] client/src/components/game/PhysicsIntegration.test.tsx
+07:32:46 [watch] client/src/components/game/PhysicsIntegration.test.tsx
+07:32:46 [watch] client/src/components/game/RailPlayer.test.tsx
+07:32:46 [watch] client/src/components/game/RailPlayer.test.tsx
+07:32:46 [watch] client/src/test-setup.test.tsx
+07:32:46 [watch] client/src/test-setup.test.tsx
+07:33:59 [200] / 668ms
