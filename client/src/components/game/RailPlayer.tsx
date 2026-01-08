@@ -68,7 +68,7 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
     const centerNode = geometry.railNodes.get(geometry.centerNodeId);
     if (centerNode) {
       useGameStore.getState().setCurrentNode(geometry.centerNodeId);
-      camera.position.set(centerNode.worldX, 0.15, centerNode.worldZ);
+      camera.position.set(centerNode.worldX, 1.2, centerNode.worldZ);
       currentNodeRef.current = centerNode;
       targetNodeRef.current = null;
       edgeProgress.current = 0;
@@ -104,7 +104,7 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
 
     // Stop at forks and exits - player must make choice
     if (pendingFork || nearbyExit) {
-      camera.position.y = 0.15;
+      camera.position.y = 1.2;
       return;
     }
 
@@ -178,9 +178,9 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
       }
 
       // NO HEAD BOB - Smooth rail glide at "sitting in car" height
-      camera.position.y = 0.15;
+      camera.position.y = 1.2;
     } else {
-      camera.position.y = 0.15;
+      camera.position.y = 1.2;
     }
 
     // Reset tilts - ensure camera is level
