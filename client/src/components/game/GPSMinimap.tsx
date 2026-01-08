@@ -59,7 +59,7 @@ export function GPSMinimap({ size = 150 }: MinimapProps) {
       const from = pathHistory[i - 1];
       const to = pathHistory[i];
       const fromCanvas = toCanvas(from.x, from.z);
-      const toCanvas = toCanvas(to.x, to.z);
+      const toCanvasPos = toCanvas(to.x, to.z);
 
       // Get visit count for line thickness
       const toNodeId = `${to.x},${to.z}`;
@@ -77,7 +77,7 @@ export function GPSMinimap({ size = 150 }: MinimapProps) {
 
       ctx.beginPath();
       ctx.moveTo(fromCanvas.x, fromCanvas.y);
-      ctx.lineTo(toCanvas.x, toCanvas.y);
+      ctx.lineTo(toCanvasPos.x, toCanvasPos.y);
       ctx.stroke();
     }
 
