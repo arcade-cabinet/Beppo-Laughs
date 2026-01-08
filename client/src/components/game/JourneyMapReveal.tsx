@@ -13,28 +13,6 @@ export function JourneyMapReveal() {
 
   const shouldShow = isGameOver || hasWon;
 
-  useEffect(() => {
-    if (!shouldShow) return;
-
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const handleResize = () => {
-      // Use full canvas size
-      const size = Math.min(window.innerWidth * 0.8, window.innerHeight * 0.6);
-      canvas.width = size;
-      canvas.height = size;
-      drawMap(canvas);
-    };
-
-    window.addEventListener('resize', handleResize);
-    handleResize(); // Initial draw
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [shouldShow, drawMap]);
-
   const drawMap = useCallback(
     (canvas: HTMLCanvasElement) => {
       const ctx = canvas.getContext('2d');
@@ -155,6 +133,28 @@ export function JourneyMapReveal() {
     },
     [pathHistory, visitedCells, hasWon],
   );
+
+  useEffect(() => {
+    if (!shouldShow) return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const handleResize = () => {
+      // Use full canvas size
+      const size = Math.min(window.innerWidth * 0.8, window.innerHeight * 0.6);
+      canvas.width = size;
+      canvas.height = size;
+      drawMap(canvas);
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Initial draw
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [shouldShow, drawMap]);
 
   if (!shouldShow) return null;
 

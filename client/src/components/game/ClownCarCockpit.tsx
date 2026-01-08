@@ -407,8 +407,8 @@ export function ClownCarCockpit() {
         </mesh>
 
         {/* Rivets along the dash */}
-        {[-0.5, -0.3, -0.1, 0.1, 0.3, 0.5].map((x, i) => (
-          <mesh key={i} position={[x, 0.08, 0.18]}>
+        {[-0.5, -0.3, -0.1, 0.1, 0.3, 0.5].map((x) => (
+          <mesh key={x} position={[x, 0.08, 0.18]}>
             <sphereGeometry args={[0.015, 8, 8]} />
             <meshStandardMaterial color={COLORS.chrome} metalness={0.95} roughness={0.15} />
           </mesh>

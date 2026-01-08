@@ -35,7 +35,7 @@ vi.mock('@react-three/fiber', async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,
-    useFrame: (callback: any) => {
+    useFrame: (_callback: unknown) => {
       // We can't easily simulate the frame loop here without complex setup,
       // but we can manually invoke if needed.
     },
@@ -52,6 +52,7 @@ describe('ClownCarCockpit', () => {
   });
 
   // Helper to safely get root group
+  // biome-ignore lint/suspicious/noExplicitAny: Mock renderer structure is complex
   const getRootGroup = (renderer: any) => {
     if (renderer.scene?.children && renderer.scene.children.length > 0) {
       return renderer.scene.children[0];

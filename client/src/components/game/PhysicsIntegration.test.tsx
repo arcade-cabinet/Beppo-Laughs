@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import { describe, expect, it, vi, type Mock } from 'vitest';
+import { describe, expect, it, type Mock, vi } from 'vitest';
 import { ClownCarCockpit } from './ClownCarCockpit';
 import { Maze } from './Maze';
 import { RailPlayer } from './RailPlayer';

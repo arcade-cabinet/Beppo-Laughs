@@ -53,7 +53,6 @@ export default function Home() {
       } else if (elem.msRequestFullscreen) {
         await elem.msRequestFullscreen();
       }
-
     } catch (_e) {
       console.log('Fullscreen not supported or denied');
     }
