@@ -113,7 +113,9 @@ describe('Collectibles', () => {
 
 // Additional tests: Collectibles behaviors
 describe('Collectibles - behaviors', () => {
-  it('does not render collectible in blocked node', () => {    useGameStore.mockImplementation(() => ({
+  it('does not render collectible in blocked node', () => {
+    const { useGameStore } = require('../../game/store');
+    useGameStore.mockImplementation(() => ({
       currentNode: 'center',
       blockades: new Set(['center']),
       collectedItems: new Set(),

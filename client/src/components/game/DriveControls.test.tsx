@@ -46,10 +46,12 @@ describe('DriveControls', () => {
     expect(() => unmount()).not.toThrow();
   });
 
-
   describe('Lever Interaction', () => {
     it('starts acceleration on lever pull', () => {
-      const setAccelerating = vi.fn();      useGameStore.mockImplementation(() => ({
+      const setAccelerating = vi.fn();
+      const { useGameStore } = require('../../game/store');
+      
+      useGameStore.mockImplementation(() => ({
         setAccelerating,
         setBraking: vi.fn(),
         accelerating: false,
@@ -68,7 +70,10 @@ describe('DriveControls', () => {
 
     it('stops acceleration on lever release', () => {
       const setAccelerating = vi.fn();
-      const setBraking = vi.fn();      useGameStore.mockImplementation(() => ({
+      const setBraking = vi.fn();
+      const { useGameStore } = require('../../game/store');
+      
+      useGameStore.mockImplementation(() => ({
         setAccelerating,
         setBraking,
         accelerating: true,
@@ -87,7 +92,10 @@ describe('DriveControls', () => {
     });
 
     it('handles touch events', () => {
-      const setAccelerating = vi.fn();      useGameStore.mockImplementation(() => ({
+      const setAccelerating = vi.fn();
+      const { useGameStore } = require('../../game/store');
+      
+      useGameStore.mockImplementation(() => ({
         setAccelerating,
         setBraking: vi.fn(),
         accelerating: false,
@@ -104,7 +112,10 @@ describe('DriveControls', () => {
       expect(setAccelerating).toHaveBeenCalledWith(true);
     });
 
-    it('hides hint after first interaction', () => {      useGameStore.mockImplementation(() => ({
+    it('hides hint after first interaction', () => {
+      const { useGameStore } = require('../../game/store');
+      
+      useGameStore.mockImplementation(() => ({
         setAccelerating: vi.fn(),
         setBraking: vi.fn(),
         accelerating: false,
@@ -122,10 +133,13 @@ describe('DriveControls', () => {
       
       expect(screen.queryByText('Pull the lever!')).not.toBeInTheDocument();
     });
-  
+  });
 
   describe('Fork Interaction', () => {
-    it('disables lever when at fork', () => {      useGameStore.mockImplementation(() => ({
+    it('disables lever when at fork', () => {
+      const { useGameStore } = require('../../game/store');
+      
+      useGameStore.mockImplementation(() => ({
         setAccelerating: vi.fn(),
         setBraking: vi.fn(),
         accelerating: false,
@@ -141,7 +155,10 @@ describe('DriveControls', () => {
       expect(lever).toBeDisabled();
     });
 
-    it('shows fork instruction message', () => {      useGameStore.mockImplementation(() => ({
+    it('shows fork instruction message', () => {
+      const { useGameStore } = require('../../game/store');
+      
+      useGameStore.mockImplementation(() => ({
         setAccelerating: vi.fn(),
         setBraking: vi.fn(),
         accelerating: false,
@@ -155,7 +172,20 @@ describe('DriveControls', () => {
       expect(screen.getByText('Choose a direction first!')).toBeInTheDocument();
     });
 
-    it('enables lever after fork resolution', () => {      let fork = { nodeId: 'node1', options: [] };
+    it('enables lever after fork resolution', () => {
+      const { useGameStore } = require('../../game/store');
+      
+      let fork = { nodeId: 'node1', options: [] };
+      useGameStore.mockImplementation(() => ({
+        setAccelerating: vi.fn(),
+        setBraking: vi.fn(),
+        accelerating: false,
+        carSpeed: 0,
+        pendingFork: fork,
+        isGameOver: false,
+        hasWon: false,
+      }));
+
       const { rerender } = render(<DriveControls />);
       expect(screen.getByTestId('lever-control')).toBeDisabled();
       
@@ -163,10 +193,13 @@ describe('DriveControls', () => {
       rerender(<DriveControls />);
       expect(screen.getByTestId('lever-control')).not.toBeDisabled();
     });
-  
+  });
 
   describe('Speed Display', () => {
-    it('shows speed percentage', () => {      useGameStore.mockImplementation(() => ({
+    it('shows speed percentage', () => {
+      const { useGameStore } = require('../../game/store');
+      
+      useGameStore.mockImplementation(() => ({
         setAccelerating: vi.fn(),
         setBraking: vi.fn(),
         accelerating: false,
@@ -180,7 +213,20 @@ describe('DriveControls', () => {
       expect(screen.getByText('SPEED')).toBeInTheDocument();
     });
 
-    it('updates speed indicator dynamically', () => {      let speed = 0;
+    it('updates speed indicator dynamically', () => {
+      const { useGameStore } = require('../../game/store');
+      
+      let speed = 0;
+      useGameStore.mockImplementation(() => ({
+        setAccelerating: vi.fn(),
+        setBraking: vi.fn(),
+        accelerating: false,
+        carSpeed: speed,
+        pendingFork: null,
+        isGameOver: false,
+        hasWon: false,
+      }));
+
       const { rerender } = render(<DriveControls />);
       
       speed = 5;
@@ -188,10 +234,13 @@ describe('DriveControls', () => {
       
       expect(screen.getByText('SPEED')).toBeInTheDocument();
     });
-  
+  });
 
   describe('Game State', () => {
-    it('hides controls when game is over', () => {      useGameStore.mockImplementation(() => ({
+    it('hides controls when game is over', () => {
+      const { useGameStore } = require('../../game/store');
+      
+      useGameStore.mockImplementation(() => ({
         setAccelerating: vi.fn(),
         setBraking: vi.fn(),
         accelerating: false,
@@ -205,7 +254,10 @@ describe('DriveControls', () => {
       expect(container.firstChild).toBeNull();
     });
 
-    it('hides controls when player has won', () => {      useGameStore.mockImplementation(() => ({
+    it('hides controls when player has won', () => {
+      const { useGameStore } = require('../../game/store');
+      
+      useGameStore.mockImplementation(() => ({
         setAccelerating: vi.fn(),
         setBraking: vi.fn(),
         accelerating: false,
@@ -218,12 +270,15 @@ describe('DriveControls', () => {
       const { container } = render(<DriveControls />);
       expect(container.firstChild).toBeNull();
     });
-  
+  });
 
   describe('Edge Cases', () => {
     it('handles mouse leave during lever pull', () => {
       const setAccelerating = vi.fn();
-      const setBraking = vi.fn();      useGameStore.mockImplementation(() => ({
+      const setBraking = vi.fn();
+      const { useGameStore } = require('../../game/store');
+      
+      useGameStore.mockImplementation(() => ({
         setAccelerating,
         setBraking,
         accelerating: true,
@@ -241,7 +296,10 @@ describe('DriveControls', () => {
     });
 
     it('handles touch cancel events', () => {
-      const setAccelerating = vi.fn();      useGameStore.mockImplementation(() => ({
+      const setAccelerating = vi.fn();
+      const { useGameStore } = require('../../game/store');
+      
+      useGameStore.mockImplementation(() => ({
         setAccelerating,
         setBraking: vi.fn(),
         accelerating: true,
@@ -259,7 +317,10 @@ describe('DriveControls', () => {
     });
 
     it('maintains state consistency across rapid interactions', () => {
-      const setAccelerating = vi.fn();      useGameStore.mockImplementation(() => ({
+      const setAccelerating = vi.fn();
+      const { useGameStore } = require('../../game/store');
+      
+      useGameStore.mockImplementation(() => ({
         setAccelerating,
         setBraking: vi.fn(),
         accelerating: false,
@@ -291,7 +352,9 @@ describe('DriveControls - accessibility and keyboard', () => {
   });
 
   it('keyboard events toggle accelerating state', () => {
-    const setAccelerating = vi.fn();    useGameStore.mockImplementation(() => ({
+    const setAccelerating = vi.fn();
+    const { useGameStore } = require('../../game/store');
+    useGameStore.mockImplementation(() => ({
       setAccelerating,
       setBraking: vi.fn(),
       accelerating: false,
@@ -307,5 +370,4 @@ describe('DriveControls - accessibility and keyboard', () => {
     lever.dispatchEvent(new KeyboardEvent('keyup', { key: ' ' }));
     expect(setAccelerating).toHaveBeenCalledWith(false);
   });
-});
 });

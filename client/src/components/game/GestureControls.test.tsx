@@ -35,7 +35,6 @@ describe('GestureControls', () => {
     expect(() => render(<GestureControls />)).not.toThrow();
   });
 
-
   describe('Component Lifecycle', () => {
     it('sets up event listeners on mount', () => {
       const addEventListener = vi.spyOn(HTMLCanvasElement.prototype, 'addEventListener');
@@ -55,10 +54,13 @@ describe('GestureControls', () => {
       
       expect(removeEventListener).toHaveBeenCalled();
     });
-  
+  });
 
   describe('Store Integration', () => {
-    it('uses available moves from store', () => {      useGameStore.mockImplementation(() => ({
+    it('uses available moves from store', () => {
+      const { useGameStore } = require('../../game/store');
+      
+      useGameStore.mockImplementation(() => ({
         availableMoves: [
           { direction: 'north', nodeId: 'node1', isExit: false },
           { direction: 'east', nodeId: 'node2', isExit: false },
@@ -73,7 +75,10 @@ describe('GestureControls', () => {
     });
 
     it('respects isMoving state', () => {
-      const startMoveTo = vi.fn();      useGameStore.mockImplementation(() => ({
+      const startMoveTo = vi.fn();
+      const { useGameStore } = require('../../game/store');
+      
+      useGameStore.mockImplementation(() => ({
         availableMoves: [{ direction: 'north', nodeId: 'node1', isExit: false }],
         isMoving: true,
         startMoveTo,
@@ -88,7 +93,10 @@ describe('GestureControls', () => {
     });
 
     it('updates camera rotation', () => {
-      const setCameraRotation = vi.fn();      useGameStore.mockImplementation(() => ({
+      const setCameraRotation = vi.fn();
+      const { useGameStore } = require('../../game/store');
+      
+      useGameStore.mockImplementation(() => ({
         availableMoves: [],
         isMoving: false,
         startMoveTo: vi.fn(),
@@ -99,10 +107,13 @@ describe('GestureControls', () => {
       render(<GestureControls />);
       expect(setCameraRotation).toBeDefined();
     });
-  
+  });
 
   describe('Edge Cases', () => {
-    it('handles no available moves', () => {      useGameStore.mockImplementation(() => ({
+    it('handles no available moves', () => {
+      const { useGameStore } = require('../../game/store');
+      
+      useGameStore.mockImplementation(() => ({
         availableMoves: [],
         isMoving: false,
         startMoveTo: vi.fn(),
@@ -113,7 +124,9 @@ describe('GestureControls', () => {
       expect(() => render(<GestureControls />)).not.toThrow();
     });
 
-    it('handles rapid camera rotation changes', () => {      let rotation = 0;
+    it('handles rapid camera rotation changes', () => {
+      const { useGameStore } = require('../../game/store');
+      let rotation = 0;
       
       useGameStore.mockImplementation(() => ({
         availableMoves: [],
@@ -132,7 +145,7 @@ describe('GestureControls', () => {
       
       expect(() => rerender(<GestureControls />)).not.toThrow();
     });
-  
+  });
 
   describe('Canvas Dependency', () => {
     it('handles missing canvas gracefully on mount', () => {
@@ -158,7 +171,9 @@ describe('GestureControls', () => {
 // Additional tests: GestureControls gestures
 describe('GestureControls - gestures', () => {
   it('does not start move when move not permitted', () => {
-    const startMoveTo = vi.fn();    useGameStore.mockImplementation(() => ({
+    const startMoveTo = vi.fn();
+    const { useGameStore } = require('../../game/store');
+    useGameStore.mockImplementation(() => ({
       availableMoves: [],
       isMoving: false,
       startMoveTo,
@@ -170,7 +185,9 @@ describe('GestureControls - gestures', () => {
   });
 
   it('keeps rotation within sane bounds', () => {
-    let rotation = 0;    useGameStore.mockImplementation(() => ({
+    let rotation = 0;
+    const { useGameStore } = require('../../game/store');
+    useGameStore.mockImplementation(() => ({
       availableMoves: [],
       isMoving: false,
       startMoveTo: vi.fn(),
@@ -181,5 +198,4 @@ describe('GestureControls - gestures', () => {
     for (let i=0;i<50;i++) { rotation += 10; rerender(<GestureControls />); }
     expect(rotation).toBeDefined();
   });
-});
 });
