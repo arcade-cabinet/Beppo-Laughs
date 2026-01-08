@@ -50,12 +50,7 @@ function DashboardPanel({
       </mesh>
 
       {/* Fill bar (dynamic) */}
-      <mesh
-        ref={valueRef}
-        name={fillName}
-        position={[0, -0.02, 0.022]}
-        rotation={[-0.3, 0, 0]}
-      >
+      <mesh ref={valueRef} name={fillName} position={[0, -0.02, 0.022]} rotation={[-0.3, 0, 0]}>
         <boxGeometry args={[0.28, 0.12, 0.003]} />
         <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.4} />
       </mesh>
@@ -351,12 +346,7 @@ export function ClownCarCockpit() {
       </mesh>
 
       {/* Central drive lever */}
-      <group
-        ref={leverRef}
-        name="driveLever"
-        position={[0, -0.05, -0.25]}
-        rotation={[-0.1, 0, 0]}
-      >
+      <group ref={leverRef} name="driveLever" position={[0, -0.05, -0.25]} rotation={[-0.1, 0, 0]}>
         {/* Base plate */}
         <mesh position={[0, -0.12, 0]}>
           <cylinderGeometry args={[0.2, 0.2, 0.06, 24]} />
