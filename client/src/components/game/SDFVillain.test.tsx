@@ -30,7 +30,7 @@ vi.mock('../../game/store', () => ({
 describe('SDFVillain', () => {
   const mockProps = {
     position: [0, 1, -5] as [number, number, number],
-    isVisible: true,
+    isActive: true,
   };
 
   it('renders without crashing', () => {
