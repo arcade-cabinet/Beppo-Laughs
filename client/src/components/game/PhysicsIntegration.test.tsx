@@ -13,6 +13,7 @@ vi.mock('@react-three/fiber', () => ({
       position: { x: 0, y: 1.4, z: 0, copy: vi.fn(), set: vi.fn() },
       rotation: { x: 0, y: 0, z: 0, copy: vi.fn(), set: vi.fn() },
     },
+    size: { width: 800, height: 600 },
   })),
   Canvas: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   extend: vi.fn(),

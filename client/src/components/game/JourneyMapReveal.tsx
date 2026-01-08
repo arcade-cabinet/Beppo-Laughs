@@ -13,6 +13,28 @@ export function JourneyMapReveal() {
 
   const shouldShow = isGameOver || hasWon;
 
+  const drawMap = useCallback(
+    (canvas: HTMLCanvasElement) => {
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const size = canvas.width;
+      ctx.clearRect(0, 0, size, size);
+
+      if (pathHistory.length === 0) return;
+
+      // Calculate bounds to scale the map using single-pass reduce
+      const { minX, maxX, minZ, maxZ } = pathHistory.reduce(
+        (acc, p) => ({
+          minX: Math.min(acc.minX, p.x),
+          maxX: Math.max(acc.maxX, p.x),
+          minZ: Math.min(acc.minZ, p.z),
+          maxZ: Math.max(acc.maxZ, p.z),
+        }),
+        { minX: Infinity, maxX: -Infinity, minZ: Infinity, maxZ: -Infinity },
+      );
+
+      const rangeX = maxX - minX || 1;
       const rangeZ = maxZ - minZ || 1;
       const maxRange = Math.max(rangeX, rangeZ);
       const padding = 40;
@@ -111,29 +133,6 @@ export function JourneyMapReveal() {
     },
     [pathHistory, visitedCells, hasWon],
   );
-
-  useEffect(() => {
-    if (!shouldShow) return;
-
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const handleResize = () => {
-      // Use full canvas size
-      const size = Math.min(window.innerWidth * 0.8, window.innerHeight * 0.6);
-      canvas.width = size;
-      canvas.height = size;
-      drawMap(canvas);
-    };
-
-    window.addEventListener('resize', handleResize);
-    handleResize(); // Initial draw
-
-    return () => {
-      // Any additional drawing logic remains unchanged
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [shouldShow, drawMap]);
 
   useEffect(() => {
     if (!shouldShow) return;
