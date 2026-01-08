@@ -25,20 +25,6 @@ function GPSDisplay({ position }: { position: [number, number, number] }) {
   const textureRef = useRef<THREE.CanvasTexture | null>(null);
   const meshRef = useRef<THREE.Mesh>(null);
 
-<<<<<<< HEAD
-=======
-  useEffect(() => {
-    // ... texture setup unchanged
-  }, []);
-
-  useFrame(() => {
-    const { pathHistory, currentNode, visitedCells, fear, despair, maxSanity } = useGameStore.getState();
-    const canvas = canvasRef.current;
-    // ... rest unchanged
-  });
-}
-
->>>>>>> 43d2bde73e4d4ea8b60bbb57375aae3d963c7eff
   useEffect(() => {
     const canvas = canvasRef.current;
     canvas.width = 256;
