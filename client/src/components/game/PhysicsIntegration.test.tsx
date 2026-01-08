@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi, type Mock } from 'vitest';
 import { ClownCarCockpit } from './ClownCarCockpit';
 import { Maze } from './Maze';
 import { RailPlayer } from './RailPlayer';
@@ -73,8 +73,11 @@ const mockState = {
 
 // Mock useGameStore as a function that returns state AND has getState method
 vi.mock('../../game/store', () => {
-  const storeFn = vi.fn(() => mockState);
-  (storeFn as any).getState = vi.fn(() => mockState);
+  interface MockStore extends Mock {
+    getState: Mock;
+  }
+  const storeFn = vi.fn(() => mockState) as MockStore;
+  storeFn.getState = vi.fn(() => mockState);
   return { useGameStore: storeFn };
 });
 

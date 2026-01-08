@@ -2,14 +2,14 @@ import seedrandom from 'seedrandom';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-interface VisitedCell {
+export interface VisitedCell {
   x: number;
   z: number;
   visitCount: number;
   firstVisitTime: number;
 }
 
-interface GameState {
+export interface GameState {
   // Dual Sanity Meters
   fear: number; // Red - exploring the unknown
   despair: number; // Blue - retreading known ground

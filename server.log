@@ -39,3 +39,15 @@
 22:12:24 [watch] client/src/components/game/ClownCarInterior.tsx
 22:12:58 [watch] /client/src/components/game/ClownCarInterior.tsx, /client/src/index.css
 22:12:58 [watch] client/src/components/game/ClownCarInterior.tsx
+22:19:32 [watch] /client/src/index.css, /client/src/pages/Home.tsx, /client/src/components/game/Scene.tsx, /client/src/components/game/MainMenu.tsx, /client/src/components/game/HUD.tsx, /client/src/components/game/AudioManager.tsx, /client/src/components/game/Blockades.tsx, /client/src/components/game/Collectibles.tsx, /client/src/components/game/ForkPrompt.tsx, /client/src/components/game/InteractionPrompt.tsx, /client/src/components/game/JourneyMapReveal.tsx, /client/src/components/game/Maze.tsx, /client/src/components/game/RailPlayer.tsx, /client/src/components/game/Villains.tsx, /client/src/components/game/ClownCarInterior.tsx, /client/src/components/game/HorrorEffects.tsx
+22:19:32 [watch] client/src/game/store.ts
+22:19:51 [watch] client/src/components/game/MainMenu.test.tsx
+22:19:51 [watch] client/src/components/game/MainMenu.test.tsx
+22:20:11 [watch] client/src/components/game/PhysicsIntegration.test.tsx
+22:20:11 [watch] client/src/components/game/PhysicsIntegration.test.tsx
+22:20:23 [watch] client/src/test-setup.tsx
+22:20:23 [watch] client/src/test-setup.tsx
+22:21:03 [watch] /client/src/pages/Home.tsx, /client/src/index.css
+22:21:03 [watch] client/src/pages/Home.tsx
+22:23:25 [watch] /client/src/components/game/JourneyMapReveal.tsx, /client/src/index.css
+22:23:25 [watch] client/src/components/game/JourneyMapReveal.tsx

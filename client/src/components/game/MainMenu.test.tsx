@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MainMenu } from '@/components/game/MainMenu';
+import type { GameState } from '@/game/store';
 
 // Mock Lucide icons
 vi.mock('lucide-react', () => ({
@@ -16,7 +17,7 @@ vi.mock('@/components/game/SettingsModal', () => ({
 // Mock Zustand store
 const mockUseGameStore = vi.fn();
 vi.mock('@/game/store', () => ({
-  useGameStore: (selector: any) => mockUseGameStore(selector),
+  useGameStore: (selector: (state: GameState) => unknown) => mockUseGameStore(selector),
 }));
 
 describe('MainMenu', () => {
@@ -25,12 +26,12 @@ describe('MainMenu', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Default store state
-    mockUseGameStore.mockImplementation((selector: any) => {
+    mockUseGameStore.mockImplementation((selector: (state: Partial<GameState>) => unknown) => {
       const state = {
         seed: '',
         isGameOver: false,
       };
-      return selector(state);
+      return selector(state as GameState);
     });
   });
 
@@ -111,12 +112,12 @@ describe('MainMenu', () => {
 
     it('calls onStart with false for Continue Game', () => {
       // Mock store with saved game
-      mockUseGameStore.mockImplementation((selector: any) => {
+      mockUseGameStore.mockImplementation((selector: (state: Partial<GameState>) => unknown) => {
         const state = {
           seed: 'saved seed',
           isGameOver: false,
         };
-        return selector(state);
+        return selector(state as GameState);
       });
 
       render(<MainMenu onStart={mockOnStart} />);
@@ -127,12 +128,12 @@ describe('MainMenu', () => {
 
     it('disables Continue Game when no saved game exists', () => {
       // Mock store with no saved game
-      mockUseGameStore.mockImplementation((selector: any) => {
+      mockUseGameStore.mockImplementation((selector: (state: Partial<GameState>) => unknown) => {
         const state = {
           seed: '',
           isGameOver: false,
         };
-        return selector(state);
+        return selector(state as GameState);
       });
 
       render(<MainMenu onStart={mockOnStart} />);
@@ -142,12 +143,12 @@ describe('MainMenu', () => {
 
     it('disables Continue Game when game is over', () => {
       // Mock store with game over
-      mockUseGameStore.mockImplementation((selector: any) => {
+      mockUseGameStore.mockImplementation((selector: (state: Partial<GameState>) => unknown) => {
         const state = {
           seed: 'saved seed',
           isGameOver: true,
         };
-        return selector(state);
+        return selector(state as GameState);
       });
 
       render(<MainMenu onStart={mockOnStart} />);

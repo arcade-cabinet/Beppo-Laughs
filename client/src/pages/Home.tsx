@@ -42,9 +42,6 @@ export default function Home() {
         webkitRequestFullscreen?: () => Promise<void>;
         msRequestFullscreen?: () => Promise<void>;
       };
-      type ScreenOrientationWithLock = ScreenOrientation & {
-        lock?: (orientation: string) => Promise<void>;
-      };
 
       const elem = document.documentElement as FullscreenElement;
 
@@ -101,7 +98,7 @@ export default function Home() {
   useEffect(() => {
     // We now support portrait mode, so no need to force rotation
     setShowRotatePrompt(false);
-  }, [isMobile, isPlaying]);
+  }, []);
 
   // Show loading while checking WebGL
   if (webglSupported === null) {
