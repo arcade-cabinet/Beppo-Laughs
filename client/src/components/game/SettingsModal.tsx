@@ -1,9 +1,15 @@
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
 import { Settings } from 'lucide-react';
 import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
 
 export function SettingsModal() {
   const [graphicsQuality, setGraphicsQuality] = useState([50]);
@@ -33,9 +39,7 @@ export function SettingsModal() {
               <Label htmlFor="graphics" className="font-creepy text-xl">
                 Graphics Quality
               </Label>
-              <span className="font-mono text-sm text-muted-foreground">
-                {graphicsQuality}%
-              </span>
+              <span className="font-mono text-sm text-muted-foreground">{graphicsQuality}%</span>
             </div>
             <Slider
               id="graphics"
@@ -51,9 +55,7 @@ export function SettingsModal() {
               <Label htmlFor="volume" className="font-creepy text-xl">
                 Volume
               </Label>
-              <span className="font-mono text-sm text-muted-foreground">
-                {volume}%
-              </span>
+              <span className="font-mono text-sm text-muted-foreground">{volume}%</span>
             </div>
             <Slider
               id="volume"

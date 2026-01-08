@@ -349,161 +349,160 @@ export const useGameStore = create<GameState>()(
             targetNode: null,
             isMoving: false,
             moveProgress: 0,
+          });
 
-            });
+          // Record visit to new node
+          get().visitNode(targetNode);
+        }
+      },
 
-      // Record visit to new node
-      get().visitNode(targetNode);
-    }
-  },
+      setCameraRotation: (rotation) => set({ cameraRotation: rotation }),
 
-  setCameraRotation: (rotation) => set({ cameraRotation: rotation }),
+      setAvailableMoves: (moves) => set({ availableMoves: moves }),
 
-  setAvailableMoves: (moves) => set({ availableMoves: moves }),
+      // Clown car driving actions
+      setAccelerating: (value) => set({ accelerating: value }),
+      setBraking: (value) => set({ braking: value }),
+      setPendingFork: (fork) => set({ pendingFork: fork }),
 
-  // Clown car driving actions
-  setAccelerating: (value) => set({ accelerating: value }),
-  setBraking: (value) => set({ braking: value }),
-  setPendingFork: (fork) => set({ pendingFork: fork }),
+      selectForkDirection: (targetNodeId) =>
+        set({
+          pendingFork: null,
+          targetNode: targetNodeId,
+        }),
+      setCarSpeed: (speed) => set({ carSpeed: Math.max(0, Math.min(5, speed)) }),
 
-  selectForkDirection: (targetNodeId) =>
-    set({
-      pendingFork: null,
-      targetNode: targetNodeId,
+      updateDriving: (delta) => {
+        const state = get();
+        const { accelerating, braking, carSpeed } = state;
+
+        let newSpeed = carSpeed;
+
+        // Speed increments/decrements and HOLDS - no decay
+        if (accelerating) {
+          newSpeed = Math.min(5, carSpeed + delta * 2);
+        } else if (braking) {
+          newSpeed = Math.max(0, carSpeed - delta * 3);
+        }
+        // No decay - speed holds when neither pressed
+
+        if (newSpeed !== carSpeed) {
+          set({ carSpeed: newSpeed });
+        }
+      },
+
+      // Interaction Actions
+      setNearbyItem: (item) => set({ nearbyItem: item }),
+      setNearbyExit: (exit) => set({ nearbyExit: exit }),
+
+      collectNearbyItem: () => {
+        const state = get();
+        if (!state.nearbyItem) return;
+
+        const itemName = state.nearbyItem.name;
+        const itemId = state.nearbyItem.id;
+
+        // Add to collected items
+        const newItems = new Set(state.collectedItems);
+        newItems.add(itemId);
+
+        // Remove a blockade if any exist
+        let newBlockades = state.blockades;
+        let newRequirements = state.blockadeRequirements;
+
+        if (state.blockadeRequirements.size > 0) {
+          for (const [blockadeId, requirement] of state.blockadeRequirements.entries()) {
+            if (requirement.itemId === itemId) {
+              newBlockades = new Set(state.blockades);
+              newBlockades.delete(blockadeId);
+              newRequirements = new Map(state.blockadeRequirements);
+              newRequirements.delete(blockadeId);
+              break;
+            }
+          }
+        }
+
+        set({
+          collectedItems: newItems,
+          blockades: newBlockades,
+          blockadeRequirements: newRequirements,
+          nearbyItem: null,
+          showCollectedPopup: { name: itemName, timestamp: Date.now() },
+          itemInventory: state.itemInventory + 1,
+          fear: Math.max(state.fear - 5, 0),
+          despair: Math.max(state.despair - 5, 0),
+        });
+
+        // Haptic feedback
+        if (navigator.vibrate) {
+          navigator.vibrate([50, 30, 50, 30, 100]);
+        }
+      },
+
+      triggerExitInteraction: () => {
+        const state = get();
+        if (state.nearbyExit) {
+          set({ hasWon: true });
+        }
+      },
+
+      clearCollectedPopup: () => set({ showCollectedPopup: null }),
+
+      getSanityLevel: () => {
+        const state = get();
+        const avgInsanity = (state.fear + state.despair) / 2;
+        return 100 - avgInsanity; // 100 = sane, 0 = insane
+      },
+
+      isInverted: () => {
+        const state = get();
+        return state.fear + state.despair > 140;
+      },
     }),
-  setCarSpeed: (speed) => set({ carSpeed: Math.max(0, Math.min(5, speed)) }),
-
-  updateDriving: (delta) => {
-    const state = get();
-    const { accelerating, braking, carSpeed } = state;
-
-    let newSpeed = carSpeed;
-
-    // Speed increments/decrements and HOLDS - no decay
-    if (accelerating) {
-      newSpeed = Math.min(5, carSpeed + delta * 2);
-    } else if (braking) {
-      newSpeed = Math.max(0, carSpeed - delta * 3);
-    }
-    // No decay - speed holds when neither pressed
-
-    if (newSpeed !== carSpeed) {
-      set({ carSpeed: newSpeed });
-    }
-  },
-
-  // Interaction Actions
-  setNearbyItem: (item) => set({ nearbyItem: item }),
-  setNearbyExit: (exit) => set({ nearbyExit: exit }),
-
-  collectNearbyItem: () => {
-    const state = get();
-    if (!state.nearbyItem) return;
-
-    const itemName = state.nearbyItem.name;
-    const itemId = state.nearbyItem.id;
-
-    // Add to collected items
-    const newItems = new Set(state.collectedItems);
-    newItems.add(itemId);
-
-    // Remove a blockade if any exist
-    let newBlockades = state.blockades;
-    let newRequirements = state.blockadeRequirements;
-
-    if (state.blockadeRequirements.size > 0) {
-      for (const [blockadeId, requirement] of state.blockadeRequirements.entries()) {
-        if (requirement.itemId === itemId) {
-          newBlockades = new Set(state.blockades);
-          newBlockades.delete(blockadeId);
-          newRequirements = new Map(state.blockadeRequirements);
-          newRequirements.delete(blockadeId);
-          break;
-        }
-      }
-    }
-
-    set({
-      collectedItems: newItems,
-      blockades: newBlockades,
-      blockadeRequirements: newRequirements,
-      nearbyItem: null,
-      showCollectedPopup: { name: itemName, timestamp: Date.now() },
-      itemInventory: state.itemInventory + 1,
-      fear: Math.max(state.fear - 5, 0),
-      despair: Math.max(state.despair - 5, 0),
-    });
-
-    // Haptic feedback
-    if (navigator.vibrate) {
-      navigator.vibrate([50, 30, 50, 30, 100]);
-    }
-  },
-
-  triggerExitInteraction: () => {
-    const state = get();
-    if (state.nearbyExit) {
-      set({ hasWon: true });
-    }
-  },
-
-  clearCollectedPopup: () => set({ showCollectedPopup: null }),
-
-  getSanityLevel: () => {
-    const state = get();
-    const avgInsanity = (state.fear + state.despair) / 2;
-    return 100 - avgInsanity; // 100 = sane, 0 = insane
-  },
-
-  isInverted: () => {
-    const state = get();
-    return state.fear + state.despair > 140;
-  },
-}),
-{
-  name: 'beppo-laughs-storage',
-  storage: createJSONStorage(() => localStorage, {
-    reviver: (_key, value) => {
-      if (typeof value === 'object' && value !== null) {
-        // @ts-ignore
-        if (value.__type === 'Map') {
-          // @ts-ignore
-          return new Map(value.value);
-        }
-        // @ts-ignore
-        if (value.__type === 'Set') {
-          // @ts-ignore
-          return new Set(value.value);
-        }
-      }
-      return value;
+    {
+      name: 'beppo-laughs-storage',
+      storage: createJSONStorage(() => localStorage, {
+        reviver: (_key, value) => {
+          if (typeof value === 'object' && value !== null) {
+            // @ts-expect-error
+            if (value.__type === 'Map') {
+              // @ts-expect-error
+              return new Map(value.value);
+            }
+            // @ts-expect-error
+            if (value.__type === 'Set') {
+              // @ts-expect-error
+              return new Set(value.value);
+            }
+          }
+          return value;
+        },
+        replacer: (_key, value) => {
+          if (value instanceof Map) {
+            return { __type: 'Map', value: Array.from(value.entries()) };
+          }
+          if (value instanceof Set) {
+            return { __type: 'Set', value: Array.from(value.values()) };
+          }
+          return value;
+        },
+      }),
+      partialize: (state) => ({
+        fear: state.fear,
+        despair: state.despair,
+        maxSanity: state.maxSanity,
+        visitedCells: state.visitedCells,
+        pathHistory: state.pathHistory,
+        seed: state.seed,
+        isGameOver: state.isGameOver,
+        hasWon: state.hasWon,
+        gameOverReason: state.gameOverReason,
+        blockades: state.blockades,
+        blockadeRequirements: state.blockadeRequirements,
+        collectedItems: state.collectedItems,
+        currentNode: state.currentNode,
+        itemInventory: state.itemInventory,
+      }),
     },
-    replacer: (_key, value) => {
-      if (value instanceof Map) {
-        return { __type: 'Map', value: Array.from(value.entries()) };
-      }
-      if (value instanceof Set) {
-        return { __type: 'Set', value: Array.from(value.values()) };
-      }
-      return value;
-    },
-  }),
-  partialize: (state) => ({
-    fear: state.fear,
-    despair: state.despair,
-    maxSanity: state.maxSanity,
-    visitedCells: state.visitedCells,
-    pathHistory: state.pathHistory,
-    seed: state.seed,
-    isGameOver: state.isGameOver,
-    hasWon: state.hasWon,
-    gameOverReason: state.gameOverReason,
-    blockades: state.blockades,
-    blockadeRequirements: state.blockadeRequirements,
-    collectedItems: state.collectedItems,
-    currentNode: state.currentNode,
-    itemInventory: state.itemInventory,
-  }),
-}
-)
+  ),
 );

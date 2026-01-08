@@ -114,31 +114,10 @@ export function Scene({ seed }: SceneProps) {
     console.log('Rail nodes:', geometry.railNodes.size);
 
     const store = useGameStore.getState();
-    store.setCurrentNode(geometry.centerNodeId);
 
-    const centerNode = geometry.railNodes.get(geometry.centerNodeId);
-    if (centerNode) {
-      const moves: {
-        direction: 'north' | 'south' | 'east' | 'west';
-        nodeId: string;
-        isExit: boolean;
-      }[] = [];
-      for (const connId of centerNode.connections) {
-        const node = geometry.railNodes.get(connId);
-        if (!node) continue;
-
-        const dx = node.gridX - centerNode.gridX;
-        const dy = node.gridY - centerNode.gridY;
-        let direction: 'north' | 'south' | 'east' | 'west' = 'north';
-        if (dy < 0) direction = 'north';
-        else if (dy > 0) direction = 'south';
-        else if (dx > 0) direction = 'east';
-        else direction = 'west';
-
-        moves.push({ direction, nodeId: node.id, isExit: node.isExit });
-      }
-      store.setAvailableMoves(moves);
-      console.log('Initial available moves:', moves);
+    // Only set starting node if not already set (e.g. New Game vs Continue)
+    if (!store.currentNode) {
+      store.setCurrentNode(geometry.centerNodeId);
     }
   }, [seed]);
 
@@ -155,11 +134,11 @@ export function Scene({ seed }: SceneProps) {
   const avgInsanity = maxSanity > 0 ? (fear + despair) / 2 / maxSanity : 0;
 
   // Fog calculations for atmosphere and depth perception
-  // Restored to production values for horror atmosphere
-  const fogNear = Math.max(2, 12 - avgInsanity * 10);
-  const fogFar = Math.max(15, 35 - avgInsanity * 20);
+  // Adjusted to ensure maze visibility while hiding edges
+  const fogNear = Math.max(8, 15 - avgInsanity * 5); // Start fog further out (was 2)
+  const fogFar = Math.max(25, 45 - avgInsanity * 15); // End fog further out (was 15)
   const fogHue = 30 + avgInsanity * 60;
-  const fogColor = `hsl(${fogHue}, ${40 - avgInsanity * 15}%, ${20 - avgInsanity * 10}%)`;
+  const fogColor = `hsl(${fogHue}, ${30 - avgInsanity * 15}%, ${15 - avgInsanity * 5}%)`;
 
   const bgBrightness = Math.max(8, 25 - avgInsanity * 17);
   const bgColor = `hsl(30, 40%, ${bgBrightness}%)`;

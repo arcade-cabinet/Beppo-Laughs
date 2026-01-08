@@ -128,7 +128,7 @@ export function MainMenu({ onStart }: MainMenuProps) {
           {/* Continue Game Button */}
           <Button
             size="lg"
-            variant={hasSavedGame ? "secondary" : "outline"}
+            variant={hasSavedGame ? 'secondary' : 'outline'}
             onClick={handleContinueGame}
             disabled={!hasSavedGame}
             className={`w-full font-creepy tracking-wider text-2xl h-16 ${
