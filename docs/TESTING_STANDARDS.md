@@ -93,6 +93,7 @@ import ReactThreeTestRenderer from '@react-three/test-renderer';
 
 describe('RailPlayer', () => {
   it('updates camera position when moving along rail', async () => {
+    const store = createTestStore();
     const renderer = await ReactThreeTestRenderer.create(
       <RailPlayer geometry={mockGeometry} />
     );
@@ -102,7 +103,8 @@ describe('RailPlayer', () => {
 
     // Simulate movement
     await act(async () => {
-      // Trigger movement state
+      store.getState().setAccelerating(true);
+      await renderer.advanceFrames(10, 16);
     });
 
     expect(camera.props.position.z).not.toBe(initialPos.z);

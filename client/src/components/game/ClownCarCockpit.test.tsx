@@ -1,4 +1,5 @@
 import ReactThreeTestRenderer from '@react-three/test-renderer';
+import * as THREE from 'three';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ClownCarCockpit } from './ClownCarCockpit';
 
@@ -44,6 +45,20 @@ function traverseScene(
       traverseScene(child.children, callback);
     }
   }
+}
+
+function getObjectByName<T extends THREE.Object3D>(scene: THREE.Scene, name: string): T {
+  const object = scene.getObjectByName(name);
+  expect(object, `Expected scene object named "${name}"`).toBeTruthy();
+  return object as T;
+}
+
+function lerpValue(start: number, target: number, alpha: number, iterations: number): number {
+  let value = start;
+  for (let i = 0; i < iterations; i += 1) {
+    value += (target - value) * alpha;
+  }
+  return value;
 }
 
 describe('ClownCarCockpit', () => {
@@ -161,52 +176,60 @@ describe('ClownCarCockpit', () => {
       mockStoreState.accelerating = true;
 
       const renderer = await ReactThreeTestRenderer.create(<ClownCarCockpit />);
+      const lever = getObjectByName<THREE.Group>(renderer.scene, 'driveLever');
 
       // Advance frames to allow animation to process
       await renderer.advanceFrames(10, 16);
 
-      // The component should have processed the accelerating state without crashing
-      expect(renderer.scene.children.length).toBeGreaterThan(0);
+      const expectedRotation = lerpValue(-0.1, -0.5, 0.15, 10);
+      expect(lever.rotation.x).toBeCloseTo(expectedRotation, 4);
     });
 
     it('processes frames without errors when braking', async () => {
       mockStoreState.braking = true;
 
       const renderer = await ReactThreeTestRenderer.create(<ClownCarCockpit />);
+      const lever = getObjectByName<THREE.Group>(renderer.scene, 'driveLever');
 
       await renderer.advanceFrames(10, 16);
 
-      expect(renderer.scene.children.length).toBeGreaterThan(0);
+      const expectedRotation = lerpValue(-0.1, 0.2, 0.15, 10);
+      expect(lever.rotation.x).toBeCloseTo(expectedRotation, 4);
     });
 
     it('processes frames with fear value of 50', async () => {
       mockStoreState.fear = 50;
 
       const renderer = await ReactThreeTestRenderer.create(<ClownCarCockpit />);
+      const fearFill = getObjectByName<THREE.Mesh>(renderer.scene, 'fearFill');
 
       await renderer.advanceFrames(10, 16);
 
-      expect(renderer.scene.children.length).toBeGreaterThan(0);
+      expect(fearFill.scale.x).toBeCloseTo(0.5, 4);
     });
 
     it('processes frames with despair value of 75', async () => {
       mockStoreState.despair = 75;
 
       const renderer = await ReactThreeTestRenderer.create(<ClownCarCockpit />);
+      const despairFill = getObjectByName<THREE.Mesh>(renderer.scene, 'despairFill');
 
       await renderer.advanceFrames(10, 16);
 
-      expect(renderer.scene.children.length).toBeGreaterThan(0);
+      expect(despairFill.scale.x).toBeCloseTo(0.75, 4);
     });
 
     it('processes frames with carSpeed of 3.5', async () => {
       mockStoreState.carSpeed = 3.5;
 
       const renderer = await ReactThreeTestRenderer.create(<ClownCarCockpit />);
+      const needle = getObjectByName<THREE.Mesh>(renderer.scene, 'speedometerNeedle');
 
       await renderer.advanceFrames(10, 16);
 
-      expect(renderer.scene.children.length).toBeGreaterThan(0);
+      const targetRotation = 0.8 - (3.5 / 5) * 1.6;
+      const expectedRotation = lerpValue(0.8, targetRotation, 0.15, 10);
+      expect(needle.rotation.z).toBeCloseTo(expectedRotation, 4);
     });
 
     it('maintains scene integrity across multiple frame advances', async () => {
@@ -215,22 +238,30 @@ describe('ClownCarCockpit', () => {
       mockStoreState.carSpeed = 2;
 
       const renderer = await ReactThreeTestRenderer.create(<ClownCarCockpit />);
+      const lever = getObjectByName<THREE.Group>(renderer.scene, 'driveLever');
+      const fearFill = getObjectByName<THREE.Mesh>(renderer.scene, 'fearFill');
+      const needle = getObjectByName<THREE.Mesh>(renderer.scene, 'speedometerNeedle');
 
       // Advance multiple batches of frames
       await renderer.advanceFrames(5, 16);
+
+      expect(lever.rotation.x).toBeLessThan(-0.1);
+      expect(fearFill.scale.x).toBeCloseTo(0.3, 4);
+      expect(needle.rotation.z).toBeLessThan(0.8);
 
       mockStoreState.accelerating = false;
       mockStoreState.braking = true;
 
       await renderer.advanceFrames(5, 16);
 
+      expect(lever.rotation.x).toBeGreaterThan(-0.1);
+
       mockStoreState.braking = false;
       mockStoreState.fear = 60;
 
       await renderer.advanceFrames(5, 16);
 
-      // Scene should still be intact
-      expect(renderer.scene.children.length).toBeGreaterThan(0);
+      expect(fearFill.scale.x).toBeCloseTo(0.6, 4);
     });
   });
 
@@ -239,18 +270,20 @@ describe('ClownCarCockpit', () => {
       mockStoreState.fear = 100;
 
       const renderer = await ReactThreeTestRenderer.create(<ClownCarCockpit />);
+      const fearFill = getObjectByName<THREE.Mesh>(renderer.scene, 'fearFill');
       await renderer.advanceFrames(5, 16);
 
-      expect(renderer.scene.children.length).toBeGreaterThan(0);
+      expect(fearFill.scale.x).toBeCloseTo(1, 4);
     });
 
     it('handles max despair value (100)', async () => {
       mockStoreState.despair = 100;
 
       const renderer = await ReactThreeTestRenderer.create(<ClownCarCockpit />);
+      const despairFill = getObjectByName<THREE.Mesh>(renderer.scene, 'despairFill');
       await renderer.advanceFrames(5, 16);
 
-      expect(renderer.scene.children.length).toBeGreaterThan(0);
+      expect(despairFill.scale.x).toBeCloseTo(1, 4);
     });
 
     it('handles both fear and despair at max simultaneously', async () => {
@@ -258,18 +291,24 @@ describe('ClownCarCockpit', () => {
       mockStoreState.despair = 100;
 
       const renderer = await ReactThreeTestRenderer.create(<ClownCarCockpit />);
+      const fearFill = getObjectByName<THREE.Mesh>(renderer.scene, 'fearFill');
+      const despairFill = getObjectByName<THREE.Mesh>(renderer.scene, 'despairFill');
       await renderer.advanceFrames(5, 16);
 
-      expect(renderer.scene.children.length).toBeGreaterThan(0);
+      expect(fearFill.scale.x).toBeCloseTo(1, 4);
+      expect(despairFill.scale.x).toBeCloseTo(1, 4);
     });
 
     it('handles max speed value (5)', async () => {
       mockStoreState.carSpeed = 5;
 
       const renderer = await ReactThreeTestRenderer.create(<ClownCarCockpit />);
+      const needle = getObjectByName<THREE.Mesh>(renderer.scene, 'speedometerNeedle');
       await renderer.advanceFrames(5, 16);
 
-      expect(renderer.scene.children.length).toBeGreaterThan(0);
+      const targetRotation = 0.8 - (5 / 5) * 1.6;
+      const expectedRotation = lerpValue(0.8, targetRotation, 0.15, 5);
+      expect(needle.rotation.z).toBeCloseTo(expectedRotation, 4);
     });
 
     it('handles simultaneous accelerating and braking (priority test)', async () => {
@@ -277,10 +316,12 @@ describe('ClownCarCockpit', () => {
       mockStoreState.braking = true;
 
       const renderer = await ReactThreeTestRenderer.create(<ClownCarCockpit />);
+      const lever = getObjectByName<THREE.Group>(renderer.scene, 'driveLever');
       await renderer.advanceFrames(5, 16);
 
       // Component should handle this gracefully (accelerating takes priority in code)
-      expect(renderer.scene.children.length).toBeGreaterThan(0);
+      const expectedRotation = lerpValue(-0.1, -0.5, 0.15, 5);
+      expect(lever.rotation.x).toBeCloseTo(expectedRotation, 4);
     });
 
     it('handles zero values for all metrics', async () => {
@@ -291,27 +332,34 @@ describe('ClownCarCockpit', () => {
       mockStoreState.braking = false;
 
       const renderer = await ReactThreeTestRenderer.create(<ClownCarCockpit />);
+      const fearFill = getObjectByName<THREE.Mesh>(renderer.scene, 'fearFill');
+      const despairFill = getObjectByName<THREE.Mesh>(renderer.scene, 'despairFill');
+      const needle = getObjectByName<THREE.Mesh>(renderer.scene, 'speedometerNeedle');
       await renderer.advanceFrames(5, 16);
 
-      expect(renderer.scene.children.length).toBeGreaterThan(0);
+      expect(fearFill.scale.x).toBeCloseTo(0.01, 4);
+      expect(despairFill.scale.x).toBeCloseTo(0.01, 4);
+      expect(needle.rotation.z).toBeCloseTo(0.8, 4);
     });
 
     it('handles very small fear values', async () => {
       mockStoreState.fear = 0.001;
 
       const renderer = await ReactThreeTestRenderer.create(<ClownCarCockpit />);
+      const fearFill = getObjectByName<THREE.Mesh>(renderer.scene, 'fearFill');
       await renderer.advanceFrames(5, 16);
 
-      expect(renderer.scene.children.length).toBeGreaterThan(0);
+      expect(fearFill.scale.x).toBeCloseTo(0.01, 4);
     });
 
     it('handles very small despair values', async () => {
       mockStoreState.despair = 0.001;
 
       const renderer = await ReactThreeTestRenderer.create(<ClownCarCockpit />);
+      const despairFill = getObjectByName<THREE.Mesh>(renderer.scene, 'despairFill');
       await renderer.advanceFrames(5, 16);
 
-      expect(renderer.scene.children.length).toBeGreaterThan(0);
+      expect(despairFill.scale.x).toBeCloseTo(0.01, 4);
     });
   });
 

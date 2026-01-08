@@ -20,11 +20,13 @@ function DashboardPanel({
   position,
   color,
   label,
+  fillName,
   valueRef,
 }: {
   position: [number, number, number];
   color: string;
   label: string;
+  fillName: string;
   valueRef: React.MutableRefObject<THREE.Mesh | null>;
 }) {
   return (
@@ -48,7 +50,12 @@ function DashboardPanel({
       </mesh>
 
       {/* Fill bar (dynamic) */}
-      <mesh ref={valueRef} position={[0, -0.02, 0.022]} rotation={[-0.3, 0, 0]}>
+      <mesh
+        ref={valueRef}
+        name={fillName}
+        position={[0, -0.02, 0.022]}
+        rotation={[-0.3, 0, 0]}
+      >
         <boxGeometry args={[0.28, 0.12, 0.003]} />
         <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.4} />
       </mesh>
@@ -125,7 +132,12 @@ function SpeedometerPanel({ position }: { position: [number, number, number] }) 
       })}
 
       {/* Needle */}
-      <mesh ref={needleRef} position={[0, 0, 0.025]} rotation={[-0.3, 0, 0.8]}>
+      <mesh
+        ref={needleRef}
+        name="speedometerNeedle"
+        position={[0, 0, 0.025]}
+        rotation={[-0.3, 0, 0.8]}
+      >
         <boxGeometry args={[0.01, 0.09, 0.003]} />
         <meshStandardMaterial color="#ff3300" emissive="#ff3300" emissiveIntensity={0.5} />
       </mesh>
@@ -209,6 +221,7 @@ export function ClownCarCockpit() {
           position={[-0.42, 0, 0]}
           color="#cc0000"
           label="FEAR"
+          fillName="fearFill"
           valueRef={fearFillRef}
         />
 
@@ -220,6 +233,7 @@ export function ClownCarCockpit() {
           position={[0.42, 0, 0]}
           color="#0000cc"
           label="DESPAIR"
+          fillName="despairFill"
           valueRef={despairFillRef}
         />
       </group>
@@ -337,7 +351,12 @@ export function ClownCarCockpit() {
       </mesh>
 
       {/* Central drive lever */}
-      <group ref={leverRef} position={[0, -0.05, -0.25]} rotation={[-0.1, 0, 0]}>
+      <group
+        ref={leverRef}
+        name="driveLever"
+        position={[0, -0.05, -0.25]}
+        rotation={[-0.1, 0, 0]}
+      >
         {/* Base plate */}
         <mesh position={[0, -0.12, 0]}>
           <cylinderGeometry args={[0.2, 0.2, 0.06, 24]} />
