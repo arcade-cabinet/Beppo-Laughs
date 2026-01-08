@@ -81,12 +81,10 @@ describe('DriveControls', () => {
   describe('Fork Interaction', () => {
 
 
-    it('enables lever after fork resolution', () => {      let fork = { nodeId: 'node1', options: [] };
-
+    it('enables lever after fork resolution', () => {
       const { rerender } = render(<DriveControls />);
       expect(screen.getByTestId('lever-control')).toBeDisabled();
       
-      fork = null as any;
       rerender(<DriveControls />);
       expect(screen.getByTestId('lever-control')).not.toBeDisabled();
     });
