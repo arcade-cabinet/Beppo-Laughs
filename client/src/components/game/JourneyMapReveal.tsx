@@ -167,6 +167,8 @@ export function JourneyMapReveal() {
         <div className="relative bg-black/80 p-6 rounded-lg border-2 border-red-900/50">
           <canvas
             ref={canvasRef}
+            role="img"
+            aria-label={`Journey map showing ${pathHistory.length} steps through ${visitedCells.size} cells. ${hasWon ? 'You escaped!' : 'You were caught.'}`}
             className="max-w-full max-h-full"
             style={{ imageRendering: 'crisp-edges' }}
           />
