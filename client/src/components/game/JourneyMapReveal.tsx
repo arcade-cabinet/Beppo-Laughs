@@ -129,8 +129,7 @@ export function JourneyMapReveal() {
     }
 
     // Draw visited nodes as dots (smaller than minimap)
-    for (const entry of visitedCells.entries()) {
-      const [nodeId, cell] = entry;
+    for (const [, cell] of visitedCells) {
       const point = toCanvas(cell.x, cell.z);
       const dotSize = Math.min(3 + cell.visitCount * 0.4, 7);
 
