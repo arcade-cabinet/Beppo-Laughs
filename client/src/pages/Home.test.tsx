@@ -467,7 +467,7 @@ describe('Home', () => {
       });
     });
 
-    it('shows rotate prompt on mobile in portrait mode when playing', async () => {
+    it('does NOT show rotate prompt on mobile in portrait mode (portrait supported)', async () => {
       render(<Home />);
 
       const startButton = screen.getByTestId('mock-start');
@@ -477,8 +477,8 @@ describe('Home', () => {
       fireEvent.resize(window);
 
       await waitFor(() => {
-        expect(screen.getByText('ROTATE YOUR DEVICE')).toBeInTheDocument();
-        expect(screen.getByText('Landscape mode required')).toBeInTheDocument();
+        expect(screen.queryByText('ROTATE YOUR DEVICE')).not.toBeInTheDocument();
+        expect(screen.queryByText('Landscape mode required')).not.toBeInTheDocument();
       });
     });
 
@@ -533,7 +533,7 @@ describe('Home', () => {
       expect(screen.queryByText('ROTATE YOUR DEVICE')).not.toBeInTheDocument();
     });
 
-    it('updates rotate prompt when orientation changes', async () => {
+    it('never shows rotate prompt when orientation changes', async () => {
       render(<Home />);
 
       const startButton = screen.getByTestId('mock-start');
@@ -543,7 +543,7 @@ describe('Home', () => {
       fireEvent.resize(window);
 
       await waitFor(() => {
-        expect(screen.getByText('ROTATE YOUR DEVICE')).toBeInTheDocument();
+        expect(screen.queryByText('ROTATE YOUR DEVICE')).not.toBeInTheDocument();
       });
 
       // Change to landscape

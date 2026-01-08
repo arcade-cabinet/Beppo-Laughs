@@ -30,25 +30,13 @@ export function GPSMinimap({ size = 150 }: MinimapProps) {
 
     if (pathHistory.length === 0) return;
 
-    // Calculate bounds in a single pass
-    if (pathHistory.length === 0) {
-      const minX = 0;
-      const maxX = 0;
-      const minZ = 0;
-      const maxZ = 0;
-    } else {
-      let minX = pathHistory[0].x;
-      let maxX = pathHistory[0].x;
-      let minZ = pathHistory[0].z;
-      let maxZ = pathHistory[0].z;
-      for (let i = 1; i < pathHistory.length; i++) {
-        const p = pathHistory[i];
-        if (p.x < minX) minX = p.x;
-        if (p.x > maxX) maxX = p.x;
-        if (p.z < minZ) minZ = p.z;
-        if (p.z > maxZ) maxZ = p.z;
-      }
-    }
+    // Calculate bounds to scale the map
+    const xs = pathHistory.map((p) => p.x);
+    const zs = pathHistory.map((p) => p.z);
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const minZ = Math.min(...zs);
+    const maxZ = Math.max(...zs);
 
     const rangeX = maxX - minX || 1;
     const rangeZ = maxZ - minZ || 1;
@@ -58,8 +46,8 @@ export function GPSMinimap({ size = 150 }: MinimapProps) {
 
     // Helper to convert maze coords to canvas coords
     const toCanvas = (x: number, z: number) => ({
-      x: ((x - minX) * scale) + padding,
-      y: ((z - minZ) * scale) + padding,
+      x: (x - minX) * scale + padding,
+      y: (z - minZ) * scale + padding,
     });
 
     // Calculate memory fade based on average insanity
@@ -118,8 +106,12 @@ export function GPSMinimap({ size = 150 }: MinimapProps) {
 
       // Outer glow
       const gradient = ctx.createRadialGradient(
-        currentPos.x, currentPos.y, 0,
-        currentPos.x, currentPos.y, 8
+        currentPos.x,
+        currentPos.y,
+        0,
+        currentPos.x,
+        currentPos.y,
+        8,
       );
       gradient.addColorStop(0, `rgba(255, 0, 0, ${blink * 0.8})`);
       gradient.addColorStop(1, 'rgba(255, 0, 0, 0)');
@@ -155,12 +147,7 @@ export function GPSMinimap({ size = 150 }: MinimapProps) {
     <div className="relative">
       <div className="absolute top-0 right-0 m-2 p-2 bg-black/60 border border-red-900/50 rounded backdrop-blur-sm">
         <div className="font-creepy text-red-500 text-xs mb-1 text-center">GPS</div>
-        <canvas
-          ref={canvasRef}
-          width={size}
-          height={size}
-          className="border border-red-900/30"
-        />
+        <canvas ref={canvasRef} width={size} height={size} className="border border-red-900/30" />
         <div className="font-mono text-red-400/60 text-xs mt-1 text-center">
           {visitedCells.size} nodes
         </div>

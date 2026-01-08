@@ -25,16 +25,22 @@ function GPSDisplay({ position }: { position: [number, number, number] }) {
   const textureRef = useRef<THREE.CanvasTexture | null>(null);
   const meshRef = useRef<THREE.Mesh>(null);
 
-  useEffect(() => {
-    // ... texture setup unchanged
-  }, []);
+  function GPSDisplay({ position }: { position: [number, number, number] }) {
+    const canvasRef = useRef<HTMLCanvasElement>(document.createElement('canvas'));
+    const textureRef = useRef<THREE.CanvasTexture | null>(null);
+    const meshRef = useRef<THREE.Mesh>(null);
 
-  useFrame(() => {
-    const { pathHistory, currentNode, visitedCells, fear, despair, maxSanity } = useGameStore.getState();
-    const canvas = canvasRef.current;
-    // ... rest unchanged
-  });
-}
+    useEffect(() => {
+      // ... texture setup unchanged
+    }, []);
+
+    useFrame(() => {
+      const { pathHistory, currentNode, visitedCells, fear, despair, maxSanity } =
+        useGameStore.getState();
+      const canvas = canvasRef.current;
+      // ... rest unchanged
+    });
+  }
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -83,8 +89,8 @@ function GPSDisplay({ position }: { position: [number, number, number] }) {
     const scale = (size - padding * 2) / maxRange;
 
     const toCanvas = (x: number, z: number) => ({
-      x: ((x - minX) * scale) + padding,
-      y: ((z - minZ) * scale) + padding,
+      x: (x - minX) * scale + padding,
+      y: (z - minZ) * scale + padding,
     });
 
     // Memory fade
@@ -126,8 +132,12 @@ function GPSDisplay({ position }: { position: [number, number, number] }) {
 
       // Glow
       const gradient = ctx.createRadialGradient(
-        currentPos.x, currentPos.y, 0,
-        currentPos.x, currentPos.y, 12
+        currentPos.x,
+        currentPos.y,
+        0,
+        currentPos.x,
+        currentPos.y,
+        12,
       );
       gradient.addColorStop(0, `rgba(255, 0, 0, ${blink * 0.8})`);
       gradient.addColorStop(1, 'rgba(255, 0, 0, 0)');
@@ -163,11 +173,7 @@ function GPSDisplay({ position }: { position: [number, number, number] }) {
       {/* Screen display */}
       <mesh ref={meshRef} position={[0, 0, 0.016]} rotation={[-0.3, 0, 0]}>
         <planeGeometry args={[0.32, 0.32]} />
-        <meshStandardMaterial
-          color="#ffffff"
-          emissive="#ff4400"
-          emissiveIntensity={0.2}
-        />
+        <meshStandardMaterial color="#ffffff" emissive="#ff4400" emissiveIntensity={0.2} />
       </mesh>
     </group>
   );
@@ -193,7 +199,7 @@ export function ClownCarInterior() {
       leftGaugeNeedleRef.current.rotation.z = THREE.MathUtils.lerp(
         leftGaugeNeedleRef.current.rotation.z,
         targetAngle,
-        0.1
+        0.1,
       );
     }
 
@@ -204,7 +210,7 @@ export function ClownCarInterior() {
       rightGaugeNeedleRef.current.rotation.z = THREE.MathUtils.lerp(
         rightGaugeNeedleRef.current.rotation.z,
         targetAngle,
-        0.1
+        0.1,
       );
     }
   });
@@ -234,18 +240,10 @@ export function ClownCarInterior() {
           {/* Red danger zone arc */}
           <mesh position={[0, 0, 0.002]} rotation={[-0.3, 0, Math.PI + 0.6]}>
             <ringGeometry args={[0.08, 0.1, 16, 1, 0, 1.2]} />
-            <meshStandardMaterial
-              color="#ff0000"
-              emissive="#ff0000"
-              emissiveIntensity={0.3}
-            />
+            <meshStandardMaterial color="#ff0000" emissive="#ff0000" emissiveIntensity={0.3} />
           </mesh>
           {/* Needle */}
-          <mesh
-            ref={leftGaugeNeedleRef}
-            position={[0, 0, 0.003]}
-            rotation={[-0.3, 0, -2.1]}
-          >
+          <mesh ref={leftGaugeNeedleRef} position={[0, 0, 0.003]} rotation={[-0.3, 0, -2.1]}>
             <boxGeometry args={[0.008, 0.09, 0.002]} />
             <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.4} />
           </mesh>
@@ -271,18 +269,10 @@ export function ClownCarInterior() {
           {/* Blue danger zone arc */}
           <mesh position={[0, 0, 0.002]} rotation={[-0.3, 0, Math.PI + 0.6]}>
             <ringGeometry args={[0.08, 0.1, 16, 1, 0, 1.2]} />
-            <meshStandardMaterial
-              color="#0000ff"
-              emissive="#0000ff"
-              emissiveIntensity={0.3}
-            />
+            <meshStandardMaterial color="#0000ff" emissive="#0000ff" emissiveIntensity={0.3} />
           </mesh>
           {/* Needle */}
-          <mesh
-            ref={rightGaugeNeedleRef}
-            position={[0, 0, 0.003]}
-            rotation={[-0.3, 0, -2.1]}
-          >
+          <mesh ref={rightGaugeNeedleRef} position={[0, 0, 0.003]} rotation={[-0.3, 0, -2.1]}>
             <boxGeometry args={[0.008, 0.09, 0.002]} />
             <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.4} />
           </mesh>
@@ -319,10 +309,7 @@ export function ClownCarInterior() {
 
         {/* Three spokes */}
         {[0, 120, 240].map((angle) => (
-          <mesh
-            key={angle}
-            rotation={[0, 0, (angle * Math.PI) / 180]}
-          >
+          <mesh key={angle} rotation={[0, 0, (angle * Math.PI) / 180]}>
             <boxGeometry args={[0.5, 0.02, 0.015]} />
             <meshStandardMaterial color={COLORS.chrome} metalness={0.95} roughness={0.1} />
           </mesh>
@@ -337,11 +324,7 @@ export function ClownCarInterior() {
         {/* Clown nose on hub */}
         <mesh position={[0, 0, 0.03]}>
           <sphereGeometry args={[0.035, 16, 16]} />
-          <meshStandardMaterial
-            color="#ff0000"
-            emissive="#ff0000"
-            emissiveIntensity={0.3}
-          />
+          <meshStandardMaterial color="#ff0000" emissive="#ff0000" emissiveIntensity={0.3} />
         </mesh>
       </group>
 
@@ -375,28 +358,16 @@ export function ClownCarInterior() {
           {/* Red nose */}
           <mesh position={[0, -0.02, 0.1]}>
             <sphereGeometry args={[0.035, 16, 16]} />
-            <meshStandardMaterial
-              color="#ff0000"
-              emissive="#ff0000"
-              emissiveIntensity={0.5}
-            />
+            <meshStandardMaterial color="#ff0000" emissive="#ff0000" emissiveIntensity={0.5} />
           </mesh>
           {/* Evil eyes */}
           <mesh position={[-0.03, 0.02, 0.09]}>
             <sphereGeometry args={[0.015, 8, 8]} />
-            <meshStandardMaterial
-              color="#000000"
-              emissive="#ffff00"
-              emissiveIntensity={0.2}
-            />
+            <meshStandardMaterial color="#000000" emissive="#ffff00" emissiveIntensity={0.2} />
           </mesh>
           <mesh position={[0.03, 0.02, 0.09]}>
             <sphereGeometry args={[0.015, 8, 8]} />
-            <meshStandardMaterial
-              color="#000000"
-              emissive="#ffff00"
-              emissiveIntensity={0.2}
-            />
+            <meshStandardMaterial color="#000000" emissive="#ffff00" emissiveIntensity={0.2} />
           </mesh>
         </group>
 
@@ -436,12 +407,7 @@ export function ClownCarInterior() {
       </group>
 
       {/* === SUBTLE AMBIENT LIGHT for interior === */}
-      <pointLight
-        position={[0, -0.3, -0.5]}
-        intensity={0.3}
-        distance={2}
-        color="#ff8844"
-      />
+      <pointLight position={[0, -0.3, -0.5]} intensity={0.3} distance={2} color="#ff8844" />
     </group>
   );
 }

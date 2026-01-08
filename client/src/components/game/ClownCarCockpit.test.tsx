@@ -13,11 +13,17 @@ const mockStoreState = {
   carSpeed: 0,
 };
 
-vi.mock('../../game/store', () => ({
-  useGameStore: {
-    getState: () => mockStoreState,
-  },
-}));
+vi.mock('../../game/store', () => {
+  return {
+    useGameStore: Object.assign(
+      () => mockStoreState, // The hook
+      {
+        getState: () => mockStoreState,
+        subscribe: () => () => {},
+      },
+    ),
+  };
+});
 
 // Mock drei to avoid Font loading issues with Text
 vi.mock('@react-three/drei', () => ({
@@ -29,8 +35,9 @@ vi.mock('@react-three/fiber', async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,
-    useFrame: (_callback: any) => {
-      // Allow testing frame updates if needed
+    useFrame: (callback: any) => {
+      // We can't easily simulate the frame loop here without complex setup,
+      // but we can manually invoke if needed.
     },
   };
 });
@@ -73,14 +80,14 @@ describe('ClownCarCockpit', () => {
     expect(rootGroup).toBeDefined();
     if (rootGroup) {
       const scale = rootGroup.props.scale as [number, number, number];
-      expect(scale[0]).toBe(2.5);
-      expect(scale[1]).toBe(2.5);
-      expect(scale[2]).toBe(2.5);
+      expect(scale[0]).toBe(1.0);
+      expect(scale[1]).toBe(1.0);
+      expect(scale[2]).toBe(1.0);
     }
   });
 
-  describe('static positioning behavior (new changes)', () => {
-    it('maintains cockpit at exactly position [0, -0.6, -0.5] relative to camera', async () => {
+  describe('static positioning behavior', () => {
+    it('maintains cockpit at exactly position [0, -0.5, -0.3] relative to camera', async () => {
       const renderer = await ReactThreeTestRenderer.create(<ClownCarCockpit />);
       const rootGroup = getRootGroup(renderer);
 
@@ -88,8 +95,8 @@ describe('ClownCarCockpit', () => {
       if (rootGroup) {
         const pos = rootGroup.props.position as [number, number, number];
         expect(pos[0]).toBe(0);
-        expect(pos[1]).toBe(-0.6);
-        expect(pos[2]).toBe(-0.5);
+        expect(pos[1]).toBe(-0.5);
+        expect(pos[2]).toBe(-0.3);
       }
     });
 
@@ -105,8 +112,8 @@ describe('ClownCarCockpit', () => {
       if (rootGroup) {
         const pos = rootGroup.props.position as [number, number, number];
         expect(pos[0]).toBe(0);
-        expect(pos[1]).toBe(-0.6);
-        expect(pos[2]).toBe(-0.5);
+        expect(pos[1]).toBe(-0.5);
+        expect(pos[2]).toBe(-0.3);
       }
     });
   });

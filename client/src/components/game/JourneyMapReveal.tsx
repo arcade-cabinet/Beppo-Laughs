@@ -19,30 +19,41 @@ export function JourneyMapReveal() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    const handleResize = () => {
+      // Use full canvas size
+      const size = Math.min(window.innerWidth * 0.8, window.innerHeight * 0.6);
+      canvas.width = size;
+      canvas.height = size;
+      drawMap(canvas);
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Initial draw
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [shouldShow, pathHistory, visitedCells, hasWon]);
+
+  const drawMap = (canvas: HTMLCanvasElement) => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Use full canvas size
-    const size = Math.min(window.innerWidth * 0.8, window.innerHeight * 0.6);
-    canvas.width = size;
-    canvas.height = size;
-
-    // Clear canvas
+    const size = canvas.width;
     ctx.clearRect(0, 0, size, size);
 
     if (pathHistory.length === 0) return;
 
-    // Calculate bounds to scale the map
-    let minX = pathHistory[0].x;
-    let maxX = pathHistory[0].x;
-    let minZ = pathHistory[0].z;
-    let maxZ = pathHistory[0].z;
-    for (const p of pathHistory) {
-      if (p.x < minX) minX = p.x;
-      if (p.x > maxX) maxX = p.x;
-      if (p.z < minZ) minZ = p.z;
-      if (p.z > maxZ) maxZ = p.z;
-    }
+    // Calculate bounds to scale the map using single-pass reduce
+    const { minX, maxX, minZ, maxZ } = pathHistory.reduce(
+      (acc, p) => ({
+        minX: Math.min(acc.minX, p.x),
+        maxX: Math.max(acc.maxX, p.x),
+        minZ: Math.min(acc.minZ, p.z),
+        maxZ: Math.max(acc.maxZ, p.z),
+      }),
+      { minX: Infinity, maxX: -Infinity, minZ: Infinity, maxZ: -Infinity },
+    );
 
     const rangeX = maxX - minX || 1;
     const rangeZ = maxZ - minZ || 1;
@@ -52,8 +63,8 @@ export function JourneyMapReveal() {
 
     // Helper to convert maze coords to canvas coords
     const toCanvas = (x: number, z: number) => ({
-      x: ((x - minX) * scale) + padding,
-      y: ((z - minZ) * scale) + padding,
+      x: (x - minX) * scale + padding,
+      y: (z - minZ) * scale + padding,
     });
 
     // Draw path segments with color coding based on fear/despair
@@ -134,15 +145,13 @@ export function JourneyMapReveal() {
       const dotSize = Math.min(3 + cell.visitCount * 0.4, 7);
 
       const isRetread = cell.visitCount > 1;
-      ctx.fillStyle = isRetread
-        ? 'rgba(59, 130, 246, 0.6)'
-        : 'rgba(220, 38, 38, 0.6)';
+      ctx.fillStyle = isRetread ? 'rgba(59, 130, 246, 0.6)' : 'rgba(220, 38, 38, 0.6)';
 
       ctx.beginPath();
       ctx.arc(point.x, point.y, dotSize, 0, Math.PI * 2);
       ctx.fill();
     }
-  }, [pathHistory, visitedCells, shouldShow, hasWon]);
+  };
 
   if (!shouldShow) return null;
 
@@ -168,6 +177,7 @@ export function JourneyMapReveal() {
             ref={canvasRef}
             role="img"
             aria-label={`Journey map showing ${pathHistory.length} steps through ${visitedCells.size} cells. ${hasWon ? 'You escaped!' : 'You were caught.'}`}
+            tabIndex={0}
             className="max-w-full max-h-full"
             style={{ imageRendering: 'crisp-edges' }}
           />
@@ -198,7 +208,7 @@ export function JourneyMapReveal() {
 
         <p className="text-white/50 font-creepy text-sm mt-6 text-center max-w-md">
           {hasWon
-            ? "You navigated the nightmare and found your way out. But the memories will haunt you forever..."
+            ? 'You navigated the nightmare and found your way out. But the memories will haunt you forever...'
             : "You wandered too deep into the madness. Beppo's laughter echoes through your mind..."}
         </p>
       </motion.div>

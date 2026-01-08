@@ -57,16 +57,6 @@ export default function Home() {
         await elem.msRequestFullscreen();
       }
 
-      // Lock orientation to landscape
-      const screenOrientation = screen.orientation as ScreenOrientationWithLock | null;
-      if (screenOrientation?.lock) {
-        try {
-          await screenOrientation.lock('landscape');
-        } catch (_e) {
-          // Orientation lock may not be supported
-          console.log('Orientation lock not supported');
-        }
-      }
     } catch (_e) {
       console.log('Fullscreen not supported or denied');
     }
@@ -75,11 +65,6 @@ export default function Home() {
   const exitFullscreen = useCallback(() => {
     if (document.fullscreenElement) {
       document.exitFullscreen().catch(() => {});
-    }
-    if (screen.orientation?.unlock) {
-      try {
-        screen.orientation.unlock();
-      } catch (_e) {}
     }
   }, []);
 
@@ -114,21 +99,8 @@ export default function Home() {
 
   // Check orientation on mobile
   useEffect(() => {
-    if (!isMobile) return;
-
-    const checkOrientation = () => {
-      const isPortrait = window.innerHeight > window.innerWidth;
-      setShowRotatePrompt(isPlaying && isPortrait);
-    };
-
-    checkOrientation();
-    window.addEventListener('resize', checkOrientation);
-    window.addEventListener('orientationchange', checkOrientation);
-
-    return () => {
-      window.removeEventListener('resize', checkOrientation);
-      window.removeEventListener('orientationchange', checkOrientation);
-    };
+    // We now support portrait mode, so no need to force rotation
+    setShowRotatePrompt(false);
   }, [isMobile, isPlaying]);
 
   // Show loading while checking WebGL

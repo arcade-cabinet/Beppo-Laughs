@@ -1,7 +1,7 @@
 import { useFrame, useThree } from '@react-three/fiber';
 import { Suspense, useRef } from 'react';
 import type { Group } from 'three';
-import { ClownCarInterior } from './ClownCarInterior';
+import { ClownCarCockpit } from './ClownCarCockpit';
 
 /**
  * Attaches the clown car interior to the camera viewport.
@@ -27,7 +27,7 @@ export function CameraAttachedCockpit() {
   return (
     <group ref={cockpitGroupRef}>
       <Suspense fallback={null}>
-        <ClownCarInterior />
+        <ClownCarCockpit />
       </Suspense>
     </group>
   );
