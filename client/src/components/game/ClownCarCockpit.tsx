@@ -1,6 +1,6 @@
 import { Text } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
-import { useLayoutEffect, useRef, useState } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '../../game/store';
 
@@ -218,7 +218,6 @@ function SpeedometerPanel({ position }: { position: [number, number, number] }) 
   );
 }
 
-// Prototype-based Steering Wheel (Centered)
 function SteeringWheel({ position }: { position: [number, number, number] }) {
   const wheelRef = useRef<THREE.Group>(null);
   const { carSpeed } = useGameStore();
@@ -273,11 +272,10 @@ function SteeringWheel({ position }: { position: [number, number, number] }) {
   );
 }
 
-// Prototype-based Lever (Right side)
 function Lever({ position }: { position: [number, number, number] }) {
   const leverRef = useRef<THREE.Group>(null);
-  const [hovered, setHovered] = useState(false);
   const { accelerating, braking } = useGameStore();
+  const [isHovered, setIsHovered] = useState(false);
 
   useFrame(() => {
     if (leverRef.current) {
@@ -295,11 +293,11 @@ function Lever({ position }: { position: [number, number, number] }) {
       ref={leverRef}
       position={position}
       onPointerOver={() => {
-        setHovered(true);
+        setIsHovered(true);
         document.body.style.cursor = 'pointer';
       }}
       onPointerOut={() => {
-        setHovered(false);
+        setIsHovered(false);
         document.body.style.cursor = 'default';
       }}
     >
@@ -307,7 +305,7 @@ function Lever({ position }: { position: [number, number, number] }) {
       <mesh position={[0, -0.02, 0]}>
         <cylinderGeometry args={[0.06, 0.07, 0.04, 16]} />
         <meshStandardMaterial
-          color={hovered ? COLORS.gold : COLORS.chrome}
+          color={isHovered ? COLORS.gold : COLORS.chrome}
           metalness={0.95}
           roughness={0.1}
         />
@@ -386,12 +384,12 @@ export function ClownCarCockpit() {
     }
   });
 
-  // Scale fixed to 1.0 as requested (not massive)
   const scale = 1.0;
 
   // Position relative to camera: Center and Bottom
+  // Modified to [0, -0.35, -0.5] to fit with Camera Height 1.0
   return (
-    <group ref={cockpitRef} position={[0, -0.5, -0.3]} scale={[scale, scale, scale]}>
+    <group ref={cockpitRef} position={[0, -0.35, -0.5]} scale={[scale, scale, scale]}>
       {/* === DASHBOARD BASE (From Prototype Aesthetic) === */}
       <group position={[0, 0.3, -0.3]} rotation={[0.4, 0, 0]}>
         {/* Main Dashboard Block */}
