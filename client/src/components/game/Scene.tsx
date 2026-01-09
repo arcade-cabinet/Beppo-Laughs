@@ -1,6 +1,6 @@
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import type { PointLight } from 'three';
+import * as THREE from 'three';
 import { useGameStore } from '@/game/store';
 import { loadAssetCatalog } from '../../game/assetCatalog';
 import { generateMaze, type MazeLayout } from '../../game/maze/core';
@@ -8,12 +8,14 @@ import { buildGeometry, DEFAULT_CONFIG, type MazeGeometry } from '../../game/maz
 import { buildSpawnPlan } from '../../game/spawnPlan';
 import { AudioManager } from './AudioManager';
 import { Blockades } from './Blockades';
+import { CameraAttachedCockpit } from './CameraAttachedCockpit';
 import { Collectibles } from './Collectibles';
-import { DriveControls } from './DriveControls';
 import { ForkPrompt } from './ForkPrompt';
 import { HorrorEffects } from './HorrorEffects';
 import { InteractionPrompt } from './InteractionPrompt';
+import { JourneyMapReveal } from './JourneyMapReveal';
 import { Maze } from './Maze';
+import { NightmareJournal } from './NightmareJournal';
 import { RailPlayer } from './RailPlayer';
 import { Villains } from './Villains';
 
@@ -77,7 +79,8 @@ export function Scene({ seed }: SceneProps) {
     null,
   );
   const [catalog, setCatalog] = useState<Awaited<ReturnType<typeof loadAssetCatalog>>>(null);
-  const { fear, despair, maxSanity, currentNode, blockades, isMoving } = useGameStore();
+  const { fear, despair, maxSanity, currentNode, blockades, isMoving, graphicsQuality } =
+    useGameStore();
 
   useEffect(() => {
     if (!mazeData || !currentNode || isMoving) return;
@@ -182,7 +185,17 @@ export function Scene({ seed }: SceneProps) {
       <AudioManager />
 
       <div className="w-full h-full">
-        <Canvas shadows camera={{ position: [0, 1.4, 0], fov: 70, near: 0.1, far: 100 }}>
+        <Canvas
+          shadows
+          camera={{ position: [0, 0.15, -2.2], fov: 78, near: 0.1, far: 100 }}
+          gl={{ antialias: graphicsQuality !== 'low', alpha: false }}
+          onCreated={({ gl }) => {
+            if (graphicsQuality !== 'low') {
+              gl.toneMapping = THREE.ACESFilmicToneMapping;
+              gl.toneMappingExposure = 1.1;
+            }
+          }}
+        >
           <color attach="background" args={[bgColor]} />
 
           {/* Fog for depth perception - essential for 3D feel */}
@@ -258,16 +271,21 @@ export function Scene({ seed }: SceneProps) {
             <Collectibles geometry={geometry} items={spawnPlan?.collectibles} />
             <RailPlayer geometry={geometry} />
             <Villains geometry={geometry} />
+
+            {/* 3D Cockpit attached to camera */}
+            <CameraAttachedCockpit />
           </Suspense>
 
           {/* GPU post-processing effects for horror atmosphere */}
-          <HorrorEffects />
+          {graphicsQuality !== 'low' && <HorrorEffects />}
         </Canvas>
       </div>
 
-      <DriveControls />
+      {/* HTML overlays for UI that needs to be 2D */}
       <ForkPrompt />
       <InteractionPrompt />
+      <NightmareJournal />
+      <JourneyMapReveal />
     </>
   );
 }

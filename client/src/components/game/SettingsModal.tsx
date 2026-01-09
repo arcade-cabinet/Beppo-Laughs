@@ -10,10 +10,20 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
+import { useGameStore } from '@/game/store';
 
 export function SettingsModal() {
-  const [graphicsQuality, setGraphicsQuality] = useState([50]);
+  const graphicsQuality = useGameStore((state) => state.graphicsQuality);
+  const setGraphicsQuality = useGameStore((state) => state.setGraphicsQuality);
   const [volume, setVolume] = useState([80]);
+
+  const getQualityValue = (q: string) => (q === 'high' ? 100 : q === 'medium' ? 50 : 0);
+  const handleQualityChange = (val: number[]) => {
+    const v = val[0];
+    if (v < 33) setGraphicsQuality('low');
+    else if (v < 66) setGraphicsQuality('medium');
+    else setGraphicsQuality('high');
+  };
 
   return (
     <Dialog>
@@ -39,14 +49,16 @@ export function SettingsModal() {
               <Label htmlFor="graphics" className="font-creepy text-xl">
                 Graphics Quality
               </Label>
-              <span className="font-mono text-sm text-muted-foreground">{graphicsQuality}%</span>
+              <span className="font-mono text-sm text-muted-foreground">
+                {graphicsQuality.toUpperCase()}
+              </span>
             </div>
             <Slider
               id="graphics"
               max={100}
               step={10}
-              value={graphicsQuality}
-              onValueChange={setGraphicsQuality}
+              value={[getQualityValue(graphicsQuality)]}
+              onValueChange={handleQualityChange}
               className="[&>.relative>.bg-primary]:bg-primary/50 [&>.relative>.bg-primary]:h-2"
             />
           </div>

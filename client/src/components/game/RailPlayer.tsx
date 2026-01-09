@@ -1,22 +1,37 @@
 import { useFrame, useThree } from '@react-three/fiber';
-import { Suspense, useCallback, useEffect, useRef } from 'react';
-import type { Group } from 'three';
+import { useCallback, useEffect, useRef } from 'react';
 import type { MazeGeometry, RailNode } from '../../game/maze/geometry';
 import { useGameStore } from '../../game/store';
-import { ClownCarCockpit } from './ClownCarCockpit';
 
 interface RailPlayerProps {
   geometry: MazeGeometry;
+  autoSpeed?: number; // Configurable auto-movement speed (default: 3.0)
 }
 
-export function RailPlayer({ geometry }: RailPlayerProps) {
+// Helper function to smooth camera rotation toward target angle
+function smoothRotateToward(
+  currentRotation: number,
+  targetRotation: number,
+  delta: number,
+  speed: number = 5,
+): number {
+  let diff = targetRotation - currentRotation;
+  // Normalize to [-π, π]
+  while (diff > Math.PI) diff -= Math.PI * 2;
+  while (diff < -Math.PI) diff += Math.PI * 2;
+  return currentRotation + diff * delta * speed;
+}
+
+export function RailPlayer({ geometry, autoSpeed = 3.0 }: RailPlayerProps) {
+  // Validate autoSpeed to ensure it's positive
+  const validatedSpeed = autoSpeed > 0 ? autoSpeed : 3.0;
+
   const { camera } = useThree();
 
   const initialized = useRef(false);
   const currentNodeRef = useRef<RailNode | null>(null);
   const targetNodeRef = useRef<RailNode | null>(null);
   const edgeProgress = useRef(0);
-  const cockpitGroupRef = useRef<Group>(null);
 
   const checkForFork = useCallback(
     (node: RailNode) => {
@@ -46,7 +61,6 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
 
       if (node.isExit) {
         gameState.setPendingFork(null);
-        gameState.setCarSpeed(0);
         targetNodeRef.current = null;
         return;
       }
@@ -72,11 +86,13 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
     const centerNode = geometry.railNodes.get(geometry.centerNodeId);
     if (centerNode) {
       useGameStore.getState().setCurrentNode(geometry.centerNodeId);
-      camera.position.set(centerNode.worldX, 1.4, centerNode.worldZ);
+      camera.position.set(centerNode.worldX, 0.15, centerNode.worldZ);
       currentNodeRef.current = centerNode;
       targetNodeRef.current = null;
       edgeProgress.current = 0;
 
+      // Camera faces the direction of first connection
+      // Player always looks "forward" in direction of travel
       const firstConn = centerNode.connections[0];
       const firstNode = geometry.railNodes.get(firstConn);
       if (firstNode) {
@@ -99,64 +115,36 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
 
   useFrame((_state, delta) => {
     const gameState = useGameStore.getState();
-    const {
-      carSpeed,
-      accelerating,
-      braking,
-      isGameOver,
-      hasWon,
-      pendingFork,
-      targetNode,
-      nearbyExit,
-    } = gameState;
+    const { isGameOver, hasWon, pendingFork, targetNode, nearbyExit } = gameState;
 
     if (isGameOver || hasWon) return;
     if (!currentNodeRef.current) return;
 
-    if (pendingFork) {
-      // Just ensure height is correct, no damping needed for static feel
-      camera.position.y = 1.4;
+    // Stop at forks and exits - player must make choice
+    if (pendingFork || nearbyExit) {
+      camera.position.y = 0.15;
       return;
     }
 
-    if (nearbyExit) {
-      camera.position.y = 1.4;
-      return;
-    }
-
+    // Set target if direction was chosen
     if (targetNode && !targetNodeRef.current) {
       const newTarget = geometry.railNodes.get(targetNode);
       if (newTarget) {
         targetNodeRef.current = newTarget;
         edgeProgress.current = 0;
 
+        // Rotate camera to face new direction of travel
         const targetRotation = getDirectionAngle(currentNodeRef.current, newTarget);
-        // Instant rotation update for "on rails" feel, or very fast smooth
-        const rotDiff = targetRotation - camera.rotation.y;
-        const wrappedDiff = ((rotDiff + Math.PI) % (Math.PI * 2)) - Math.PI;
-        camera.rotation.y += wrappedDiff * Math.min(1, delta * 5);
+        camera.rotation.y = smoothRotateToward(camera.rotation.y, targetRotation, delta);
         gameState.setCameraRotation(camera.rotation.y);
       }
     }
 
-    // Physics-based speed update
-    // Acceleration: 5m/s^2, Braking: 8m/s^2, Drag: 0.5/s
-    let targetSpeed: number;
-    if (accelerating) {
-      targetSpeed = Math.min(5, carSpeed + delta * 5);
-    } else if (braking) {
-      targetSpeed = Math.max(0, carSpeed - delta * 8);
-    } else {
-      // Natural deceleration (friction/drag)
-      targetSpeed = Math.max(0, carSpeed - delta * 0.5);
-    }
+    // Automatic constant-speed movement when target is set
+    // autoSpeed is now configurable via props (default: 3.0)
 
-    if (Math.abs(targetSpeed - carSpeed) > 0.001) {
-      gameState.setCarSpeed(targetSpeed);
-    }
-
-    // Update position
-    if (targetSpeed > 0.05 && targetNodeRef.current && currentNodeRef.current) {
+    // Update position if moving toward target
+    if (targetNodeRef.current && currentNodeRef.current) {
       const fromNode = currentNodeRef.current;
       const toNode = targetNodeRef.current;
 
@@ -164,7 +152,7 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
       const dz = toNode.worldZ - fromNode.worldZ;
       const edgeLength = Math.sqrt(dx * dx + dz * dz);
 
-      const progressDelta = (targetSpeed * delta) / edgeLength;
+      const progressDelta = (validatedSpeed * delta) / edgeLength;
       edgeProgress.current += progressDelta;
 
       if (edgeProgress.current >= 1) {
@@ -186,6 +174,25 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
           gameState.setNearbyExit(null);
         }
 
+        // Journal Entry Generation
+        if (!gameState.visitedCells.has(toNode.id) || Math.random() < 0.2) {
+          const exits = toNode.connections.length;
+          const isDeadEnd = exits === 1;
+          const description = isDeadEnd
+            ? 'Hit a dead end. The canvas walls are closing in.'
+            : exits > 2
+              ? 'The path splits here. Too many choices...'
+              : 'Moving deeper into the maze.';
+
+          gameState.addJournalEntry(description);
+
+          // Chance to corrupt if insane
+          const insanity = gameState.getSanityLevel(); // 100 is sane, 0 insane
+          if (insanity < 50 && Math.random() < 0.3) {
+            gameState.corruptJournal();
+          }
+        }
+
         checkForFork(toNode);
       } else {
         // Interpolate along path - LINEAR for smooth rail feel
@@ -194,41 +201,24 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
         camera.position.z = fromNode.worldZ + dz * t;
       }
 
-      // Smooth rotation to look ahead
+      // Smooth rotation to face direction of travel (like steering a car)
       if (targetNodeRef.current && currentNodeRef.current) {
         const targetRotation = getDirectionAngle(currentNodeRef.current, targetNodeRef.current);
-        let diff = targetRotation - camera.rotation.y;
-        while (diff > Math.PI) diff -= Math.PI * 2;
-        while (diff < -Math.PI) diff += Math.PI * 2;
-
-        camera.rotation.y += diff * delta * 5;
+        camera.rotation.y = smoothRotateToward(camera.rotation.y, targetRotation, delta);
         gameState.setCameraRotation(camera.rotation.y);
       }
 
-      // NO HEAD BOB - Smooth rail glide
-      camera.position.y = 1.4;
+      // NO HEAD BOB - Smooth rail glide at "sitting in car" height
+      camera.position.y = 0.15;
     } else {
-      camera.position.y = 1.4;
+      camera.position.y = 0.15;
     }
 
     // Reset tilts - ensure camera is level
     camera.rotation.x = 0;
     camera.rotation.z = 0;
-
-    // Update cockpit position to STRICTLY follow camera
-    if (cockpitGroupRef.current) {
-      // EXACT copy of position/rotation
-      cockpitGroupRef.current.position.copy(camera.position);
-      cockpitGroupRef.current.rotation.copy(camera.rotation);
-    }
   });
 
-  // Cockpit follows camera position updated in useFrame
-  return (
-    <group ref={cockpitGroupRef}>
-      <Suspense fallback={null}>
-        <ClownCarCockpit />
-      </Suspense>
-    </group>
-  );
+  // RailPlayer only manages camera movement - no visual elements
+  return null;
 }

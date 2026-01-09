@@ -2,14 +2,21 @@ import seedrandom from 'seedrandom';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-interface VisitedCell {
+export interface VisitedCell {
   x: number;
   z: number;
   visitCount: number;
   firstVisitTime: number;
 }
 
-interface GameState {
+export interface JournalEntry {
+  id: string;
+  text: string;
+  timestamp: number;
+  corrupted?: boolean;
+}
+
+export interface GameState {
   // Dual Sanity Meters
   fear: number; // Red - exploring the unknown
   despair: number; // Blue - retreading known ground
@@ -45,11 +52,6 @@ interface GameState {
     isExit: boolean;
   }[];
 
-  // Clown Car Driving State
-  carSpeed: number; // Current speed (0-5)
-  accelerating: boolean; // Is accelerator pressed
-  braking: boolean; // Is brake pressed
-
   // Fork Choice State (when at junction with multiple paths)
   pendingFork: {
     nodeId: string;
@@ -61,6 +63,15 @@ interface GameState {
   nearbyExit: { nodeId: string } | null;
   showCollectedPopup: { name: string; timestamp: number } | null;
   itemInventory: number; // Count of collected items
+
+  // Journal
+  journalEntries: JournalEntry[];
+  addJournalEntry: (text: string) => void;
+  corruptJournal: () => void;
+
+  // Settings
+  graphicsQuality: 'low' | 'medium' | 'high';
+  setGraphicsQuality: (quality: 'low' | 'medium' | 'high') => void;
 
   // Actions
   setSeed: (seed: string) => void;
@@ -90,12 +101,6 @@ interface GameState {
   setAvailableMoves: (
     moves: { direction: 'north' | 'south' | 'east' | 'west'; nodeId: string; isExit: boolean }[],
   ) => void;
-
-  // Clown Car Driving Actions
-  setAccelerating: (value: boolean) => void;
-  setBraking: (value: boolean) => void;
-  setCarSpeed: (speed: number) => void;
-  updateDriving: (delta: number) => void;
 
   // Fork Choice Actions
   setPendingFork: (
@@ -152,11 +157,6 @@ export const useGameStore = create<GameState>()(
       cameraRotation: 0,
       availableMoves: [],
 
-      // Clown car driving
-      carSpeed: 0,
-      accelerating: false,
-      braking: false,
-
       // Fork choice
       pendingFork: null,
 
@@ -165,6 +165,27 @@ export const useGameStore = create<GameState>()(
       nearbyExit: null,
       showCollectedPopup: null,
       itemInventory: 0,
+
+      journalEntries: [],
+      addJournalEntry: (text) =>
+        set((state) => ({
+          journalEntries: [
+            { id: Math.random().toString(36).substr(2, 9), text, timestamp: Date.now() },
+            ...state.journalEntries,
+          ],
+        })),
+      corruptJournal: () =>
+        set((state) => {
+          const newEntries = [...state.journalEntries];
+          if (newEntries.length > 0 && Math.random() < 0.3) {
+            const idx = Math.floor(Math.random() * newEntries.length);
+            newEntries.splice(idx, 1);
+          }
+          return { journalEntries: newEntries };
+        }),
+
+      graphicsQuality: 'high',
+      setGraphicsQuality: (quality) => set({ graphicsQuality: quality }),
 
       setSeed: (seed) => set({ seed }),
 
@@ -295,9 +316,6 @@ export const useGameStore = create<GameState>()(
           cameraRotation: 0,
           availableMoves: [],
 
-          carSpeed: 0,
-          accelerating: false,
-          braking: false,
           pendingFork: null,
           nearbyItem: null,
           nearbyExit: null,
@@ -360,9 +378,6 @@ export const useGameStore = create<GameState>()(
 
       setAvailableMoves: (moves) => set({ availableMoves: moves }),
 
-      // Clown car driving actions
-      setAccelerating: (value) => set({ accelerating: value }),
-      setBraking: (value) => set({ braking: value }),
       setPendingFork: (fork) => set({ pendingFork: fork }),
 
       selectForkDirection: (targetNodeId) =>
@@ -370,26 +385,6 @@ export const useGameStore = create<GameState>()(
           pendingFork: null,
           targetNode: targetNodeId,
         }),
-      setCarSpeed: (speed) => set({ carSpeed: Math.max(0, Math.min(5, speed)) }),
-
-      updateDriving: (delta) => {
-        const state = get();
-        const { accelerating, braking, carSpeed } = state;
-
-        let newSpeed = carSpeed;
-
-        // Speed increments/decrements and HOLDS - no decay
-        if (accelerating) {
-          newSpeed = Math.min(5, carSpeed + delta * 2);
-        } else if (braking) {
-          newSpeed = Math.max(0, carSpeed - delta * 3);
-        }
-        // No decay - speed holds when neither pressed
-
-        if (newSpeed !== carSpeed) {
-          set({ carSpeed: newSpeed });
-        }
-      },
 
       // Interaction Actions
       setNearbyItem: (item) => set({ nearbyItem: item }),
@@ -502,6 +497,8 @@ export const useGameStore = create<GameState>()(
         collectedItems: state.collectedItems,
         currentNode: state.currentNode,
         itemInventory: state.itemInventory,
+        journalEntries: state.journalEntries,
+        graphicsQuality: state.graphicsQuality,
       }),
     },
   ),

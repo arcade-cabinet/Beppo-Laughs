@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, type Mock, vi } from 'vitest';
 import { ClownCarCockpit } from './ClownCarCockpit';
 import { Maze } from './Maze';
 import { RailPlayer } from './RailPlayer';
@@ -13,6 +13,7 @@ vi.mock('@react-three/fiber', () => ({
       position: { x: 0, y: 1.4, z: 0, copy: vi.fn(), set: vi.fn() },
       rotation: { x: 0, y: 0, z: 0, copy: vi.fn(), set: vi.fn() },
     },
+    size: { width: 800, height: 600 },
   })),
   Canvas: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   extend: vi.fn(),
@@ -73,8 +74,11 @@ const mockState = {
 
 // Mock useGameStore as a function that returns state AND has getState method
 vi.mock('../../game/store', () => {
-  const storeFn = vi.fn(() => mockState);
-  (storeFn as any).getState = vi.fn(() => mockState);
+  interface MockStore extends Mock {
+    getState: Mock;
+  }
+  const storeFn = vi.fn(() => mockState) as MockStore;
+  storeFn.getState = vi.fn(() => mockState);
   return { useGameStore: storeFn };
 });
 

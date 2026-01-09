@@ -17,6 +17,10 @@
 - [x] Dependabot auto-merge job no longer fails when approval is disallowed.
 - [x] Latest Dependabot dependency updates merged to main.
 - [x] Foundational HUD/lever/seed validation PRs are integrated in main.
+- [x] 3D first-person car interior with proper driver perspective (PR #100).
+- [x] GPS map integrated as 3D dashboard texture component.
+- [x] Camera-relative direction controls fixed (RIGHT actually turns right).
+- [x] Journey map reveal on game over showing full path with color-coding.
 
 ## What Works
 - Project structure according to current `CLAUDE.md`.
