@@ -82,10 +82,7 @@ export function ForkPrompt() {
   if (!pendingFork || isGameOver || hasWon) return null;
 
   return (
-    <div
-      className="absolute inset-0 pointer-events-none z-40"
-      data-has-fork="true"
-    >
+    <div className="absolute inset-0 pointer-events-none z-40" data-has-fork="true">
       {pendingFork.options.map((option) => {
         const relativeDir = getCameraRelativeDirection(option.direction, cameraRotation);
         return (

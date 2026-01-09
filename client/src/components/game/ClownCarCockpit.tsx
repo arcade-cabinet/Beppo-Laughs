@@ -1,6 +1,7 @@
 import { Text } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
-import React, { useLayoutEffect, useRef, useState } from 'react';
+import type React from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '../../game/store';
 

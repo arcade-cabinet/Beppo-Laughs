@@ -37,7 +37,7 @@ function getAlphaColor(color: string, alphaHex: string): string {
   return color;
 }
 
-function DashMeterPanel({ label, percent, color, side }: MeterPanelProps) {
+function _DashMeterPanel({ label, percent, color, side }: MeterPanelProps) {
   const clamped = Math.max(0, Math.min(100, Math.round(percent)));
   const isLeft = side === 'left';
 
@@ -79,8 +79,8 @@ export function HUD() {
   const sanityLevel = useGameStore((state) => state.getSanityLevel());
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoEnded, setVideoEnded] = useState(false);
-  const fearPercent = maxSanity > 0 ? (fear / maxSanity) * 100 : 0;
-  const despairPercent = maxSanity > 0 ? (despair / maxSanity) * 100 : 0;
+  const _fearPercent = maxSanity > 0 ? (fear / maxSanity) * 100 : 0;
+  const _despairPercent = maxSanity > 0 ? (despair / maxSanity) * 100 : 0;
 
   const avgInsanity = maxSanity > 0 ? (fear + despair) / 2 / maxSanity : 0;
   const redOverlayOpacity = Math.min(fear / 300, 0.2);
