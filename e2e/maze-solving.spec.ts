@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { performLeverPull, waitForGameState } from './utils/test-helpers';
 
 test.describe('Beppo Laughs - Maze Solving Flow', () => {
   test('can navigate from menu to maze and move through junctions', async ({ page }) => {
@@ -12,6 +13,7 @@ test.describe('Beppo Laughs - Maze Solving Flow', () => {
     await startBtn.click();
 
     // 3. Wait for the game to initialize and the HUD to appear
+    await waitForGameState(page, 'playing');
     await expect(page.getByText(/CELLS:/)).toBeVisible({ timeout: 15000 });
 
     // 4. Test movement with lever control
@@ -19,9 +21,7 @@ test.describe('Beppo Laughs - Maze Solving Flow', () => {
     await expect(leverControl).toBeVisible();
 
     // Hold lever down to accelerate and move to the next cell
-    await leverControl.dispatchEvent('mousedown');
-    await page.waitForTimeout(3000);
-    await leverControl.dispatchEvent('mouseup');
+    await performLeverPull(page, 3000);
 
     // Check if we reached a new cell or a fork
     const forkBtn = page.locator('[data-testid^="button-fork-"]').first();
@@ -46,7 +46,8 @@ test.describe('Beppo Laughs - Maze Solving Flow', () => {
     await expect(startBtn).toBeVisible({ timeout: 10000 });
     await startBtn.click();
 
-    // Verify HUD elements appear
+    // Verify HUD elements appear with state-based wait
+    await waitForGameState(page, 'playing');
     await expect(page.getByText(/CELLS:/)).toBeVisible({ timeout: 15000 });
     await expect(page.getByTestId('lever-control')).toBeVisible();
   });

@@ -1,4 +1,5 @@
 import { devices, expect, test } from '@playwright/test';
+import { waitForGameState, waitForMovement } from './utils/test-helpers';
 
 test.describe('Beppo Laughs - Mobile Controls', () => {
   test.use({
@@ -33,6 +34,7 @@ test.describe('Beppo Laughs - Mobile Controls', () => {
     }
 
     // Wait for HUD (game may start if landscape)
+    await waitForGameState(page, 'playing', 15000);
     await expect(page.getByText(/CELLS:/)).toBeVisible({ timeout: 15000 });
     await page.screenshot({ path: 'test-results/screenshots/mobile-03-game-started.png' });
 
@@ -47,11 +49,11 @@ test.describe('Beppo Laughs - Mobile Controls', () => {
 
     // Simulate touch on lever
     await leverControl.dispatchEvent('touchstart');
-    await page.waitForTimeout(2000);
+    await waitForMovement(page, true, 3000);
     await page.screenshot({ path: 'test-results/screenshots/mobile-05-lever-pulled.png' });
 
     await leverControl.dispatchEvent('touchend');
-    await page.waitForTimeout(1000);
+    await waitForMovement(page, false, 2000).catch(() => {});
     await page.screenshot({ path: 'test-results/screenshots/mobile-06-lever-released.png' });
   });
 
@@ -63,6 +65,7 @@ test.describe('Beppo Laughs - Mobile Controls', () => {
     await seedInput.fill('tap zone test');
     await startBtn.click();
 
+    await waitForGameState(page, 'playing', 15000);
     await expect(page.getByText(/CELLS:/)).toBeVisible({ timeout: 15000 });
 
     // Look for tap zones (left/right sides for steering)
@@ -72,9 +75,10 @@ test.describe('Beppo Laughs - Mobile Controls', () => {
     if (tapZoneCount > 0) {
       await page.screenshot({ path: 'test-results/screenshots/mobile-tap-zones.png' });
 
-      // Test tapping a zone
+      // Test tapping a zone - wait for any state changes
       await tapZones.first().tap();
-      await page.waitForTimeout(500);
+      // Wait briefly for tap to register, use short timeout as fallback
+      await page.waitForTimeout(300);
       await page.screenshot({ path: 'test-results/screenshots/mobile-tap-zone-activated.png' });
     }
   });
@@ -87,6 +91,7 @@ test.describe('Beppo Laughs - Mobile Controls', () => {
     await seedInput.fill('gesture test');
     await startBtn.click();
 
+    await waitForGameState(page, 'playing', 15000);
     await expect(page.getByText(/CELLS:/)).toBeVisible({ timeout: 15000 });
     await page.screenshot({ path: 'test-results/screenshots/mobile-gestures-01.png' });
 
@@ -98,7 +103,8 @@ test.describe('Beppo Laughs - Mobile Controls', () => {
       await page.mouse.down();
       await page.mouse.move(viewport.width * 0.8, viewport.height * 0.5);
       await page.mouse.up();
-      await page.waitForTimeout(500);
+      // Wait briefly for gesture to process
+      await page.waitForTimeout(300);
       await page.screenshot({ path: 'test-results/screenshots/mobile-gestures-swipe-right.png' });
 
       // Swipe left
@@ -106,7 +112,8 @@ test.describe('Beppo Laughs - Mobile Controls', () => {
       await page.mouse.down();
       await page.mouse.move(viewport.width * 0.2, viewport.height * 0.5);
       await page.mouse.up();
-      await page.waitForTimeout(500);
+      // Wait briefly for gesture to process
+      await page.waitForTimeout(300);
       await page.screenshot({ path: 'test-results/screenshots/mobile-gestures-swipe-left.png' });
     }
   });
@@ -119,6 +126,7 @@ test.describe('Beppo Laughs - Mobile Controls', () => {
     await seedInput.fill('fork selection mobile');
     await startBtn.click();
 
+    await waitForGameState(page, 'playing', 15000);
     await expect(page.getByText(/CELLS:/)).toBeVisible({ timeout: 15000 });
 
     const leverControl = page.getByTestId('lever-control');
@@ -126,9 +134,9 @@ test.describe('Beppo Laughs - Mobile Controls', () => {
     // Move to find a fork
     for (let attempt = 0; attempt < 5; attempt++) {
       await leverControl.dispatchEvent('touchstart');
-      await page.waitForTimeout(2500);
+      await waitForMovement(page, true, 3000);
       await leverControl.dispatchEvent('touchend');
-      await page.waitForTimeout(1000);
+      await waitForMovement(page, false, 2000).catch(() => {});
 
       // Check for fork
       const forkButtons = page.locator('[data-testid^="button-fork-"]');
@@ -141,7 +149,10 @@ test.describe('Beppo Laughs - Mobile Controls', () => {
 
         // Test tapping a fork button
         await forkButtons.first().tap();
-        await page.waitForTimeout(500);
+        await page
+          .locator('[data-has-fork="true"]')
+          .waitFor({ state: 'detached', timeout: 2000 })
+          .catch(() => {});
         await page.screenshot({
           path: 'test-results/screenshots/mobile-fork-selected.png',
         });
@@ -158,6 +169,7 @@ test.describe('Beppo Laughs - Mobile Controls', () => {
     await seedInput.fill('mobile exit test');
     await startBtn.click();
 
+    await waitForGameState(page, 'playing', 15000);
     await expect(page.getByText(/CELLS:/)).toBeVisible({ timeout: 15000 });
 
     // Tap mobile exit button
@@ -166,7 +178,7 @@ test.describe('Beppo Laughs - Mobile Controls', () => {
     await page.screenshot({ path: 'test-results/screenshots/mobile-before-exit.png' });
 
     await mobileExitBtn.tap();
-    await page.waitForTimeout(1000);
+    await waitForGameState(page, 'menu', 5000);
 
     // Should return to main menu
     await expect(page.getByRole('heading', { name: 'BEPPO LAUGHS' })).toBeVisible({
@@ -196,6 +208,7 @@ test.describe('Beppo Laughs - Tablet Controls', () => {
     const startBtn = page.getByTestId('button-start-game');
     await startBtn.click();
 
+    await waitForGameState(page, 'playing', 15000);
     await expect(page.getByText(/CELLS:/)).toBeVisible({ timeout: 15000 });
     await page.screenshot({ path: 'test-results/screenshots/tablet-game.png', fullPage: true });
 

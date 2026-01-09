@@ -8,6 +8,7 @@ vi.mock('../../game/store', () => ({
     setAccelerating: vi.fn(),
     setBraking: vi.fn(),
     accelerating: false,
+    braking: false,
     carSpeed: 0,
     pendingFork: null,
     isGameOver: false,
