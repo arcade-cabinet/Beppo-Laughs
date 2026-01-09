@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { ErrorFallback } from '@/components/ErrorFallback';
 import { HUD } from '@/components/game/HUD';
 import { MainMenu } from '@/components/game/MainMenu';
 import { Scene } from '@/components/game/Scene';
@@ -130,7 +132,20 @@ export default function Home() {
       {!isPlaying && <MainMenu onStart={handleStart} />}
 
       {isPlaying && (
-        <>
+        <ErrorBoundary
+          fallback={({ error, resetError }) => (
+            <ErrorFallback
+              error={error}
+              resetError={resetError}
+              title="The game encountered an error"
+              message="Something went wrong while playing. Click restart to return to the main menu."
+            />
+          )}
+          onReset={() => {
+            resetGame();
+            setIsPlaying(false);
+          }}
+        >
           <div className="absolute inset-0 z-0 w-full h-full">
             <Scene seed={seed} />
           </div>
@@ -171,7 +186,7 @@ export default function Home() {
               TRY AGAIN
             </button>
           )}
-        </>
+        </ErrorBoundary>
       )}
 
       {/* Rotate Device Prompt */}
