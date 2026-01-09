@@ -4,15 +4,34 @@ import { describe, expect, it, vi } from 'vitest';
 import { useGameStore } from '../../game/store';
 import { HUD } from './HUD';
 
-// Mock beppo video asset
+// Mock beppo video asset - DEFAULT TO EMPTY for tests, or override in specific tests
 vi.mock('@assets/generated_videos/beppo_clown_emerging_laughing_game_over.mp4', () => ({
-  default: 'mock-video-url',
+  default: '',
 }));
+
+// Mock VIDEO_ASSETS to return empty string by default
+vi.mock('../../game/textures', async () => {
+  const actual = await vi.importActual('../../game/textures');
+  return {
+    ...actual,
+    VIDEO_ASSETS: {
+      BEPPO_GAME_OVER: {
+        url: '', // Default to empty
+        name: 'Beppo Game Over',
+        description: 'Beppo laughing as player loses',
+      },
+    },
+  };
+});
 
 // Mock framer-motion
 vi.mock('framer-motion', () => ({
   motion: {
-    div: ({ children, ...props }: ComponentProps<'div'>) => <div {...props}>{children}</div>,
+    div: ({ children, animate, ...props }: any) => (
+      <div data-opacity={animate?.opacity} {...props}>
+        {children}
+      </div>
+    ),
     h1: ({ children, ...props }: ComponentProps<'h1'>) => <h1 {...props}>{children}</h1>,
   },
   AnimatePresence: ({ children }: { children?: ReactNode }) => <>{children}</>,
@@ -61,12 +80,23 @@ describe('HUD', () => {
     expect(screen.getByText('ESCAPED!')).toBeInTheDocument();
   });
 
-  it('renders game over overlay when isGameOver is true', () => {
+  it('renders game over overlay immediately when video is missing', () => {
     const gameOverState = { ...mockState, isGameOver: true };
     mockUseGameStore.mockImplementation((selector) =>
       selector ? selector(gameOverState) : gameOverState,
     );
     render(<HUD />);
-    expect(screen.getByText('BEPPO FOUND YOU')).toBeInTheDocument();
+    const gameOverText = screen.getByText('BEPPO FOUND YOU');
+    expect(gameOverText).toBeInTheDocument();
+
+    // Check the parent container opacity
+    const textContainer = gameOverText.closest('div[data-opacity]');
+    // With empty video URL, videoEnded is set to true immediately, so opacity should be 1
+    expect(textContainer).toHaveAttribute('data-opacity', '1');
+
+    // Ensure video is not rendered
+    // Testing library queries by role might not find <video> by default role.
+    const videos = document.getElementsByTagName('video');
+    expect(videos.length).toBe(0);
   });
 });
