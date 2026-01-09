@@ -1,41 +1,42 @@
 import { useGameStore } from '../../game/store';
 
+// Helper functions moved outside component to avoid recreation on every render
+const getDirectionAngle = (gridDirection: 'north' | 'south' | 'east' | 'west'): number => {
+  // Grid direction to world angle (matching RailPlayer's calculation)
+  switch (gridDirection) {
+    case 'north':
+      return 0; // Looking down -Z
+    case 'east':
+      return Math.PI / 2; // Looking down +X
+    case 'south':
+      return Math.PI; // Looking down +Z
+    case 'west':
+      return -Math.PI / 2; // Looking down -X
+  }
+};
+
+const getCameraRelativeDirection = (
+  gridDirection: 'north' | 'south' | 'east' | 'west',
+  cameraRotation: number,
+): 'forward' | 'back' | 'left' | 'right' => {
+  const targetAngle = getDirectionAngle(gridDirection);
+  let relativeAngle = targetAngle - cameraRotation;
+
+  // Normalize to [-π, π]
+  while (relativeAngle > Math.PI) relativeAngle -= Math.PI * 2;
+  while (relativeAngle < -Math.PI) relativeAngle += Math.PI * 2;
+
+  // Determine direction based on relative angle
+  const absAngle = Math.abs(relativeAngle);
+  if (absAngle < Math.PI / 4) return 'forward';
+  if (absAngle > (3 * Math.PI) / 4) return 'back';
+  return relativeAngle > 0 ? 'right' : 'left';
+};
+
 export function ForkPrompt() {
   const { pendingFork, selectForkDirection, isGameOver, hasWon, cameraRotation } = useGameStore();
 
   if (!pendingFork || isGameOver || hasWon) return null;
-
-  // Calculate camera-relative direction for each option
-  const getDirectionAngle = (gridDirection: 'north' | 'south' | 'east' | 'west'): number => {
-    // Grid direction to world angle (matching RailPlayer's calculation)
-    switch (gridDirection) {
-      case 'north':
-        return 0; // Looking down -Z
-      case 'east':
-        return Math.PI / 2; // Looking down +X
-      case 'south':
-        return Math.PI; // Looking down +Z
-      case 'west':
-        return -Math.PI / 2; // Looking down -X
-    }
-  };
-
-  const getCameraRelativeDirection = (
-    gridDirection: 'north' | 'south' | 'east' | 'west',
-  ): 'forward' | 'back' | 'left' | 'right' => {
-    const targetAngle = getDirectionAngle(gridDirection);
-    let relativeAngle = targetAngle - cameraRotation;
-
-    // Normalize to [-π, π]
-    while (relativeAngle > Math.PI) relativeAngle -= Math.PI * 2;
-    while (relativeAngle < -Math.PI) relativeAngle += Math.PI * 2;
-
-    // Determine direction based on relative angle
-    const absAngle = Math.abs(relativeAngle);
-    if (absAngle < Math.PI / 4) return 'forward';
-    if (absAngle > (3 * Math.PI) / 4) return 'back';
-    return relativeAngle > 0 ? 'right' : 'left';
-  };
 
   const getHandPosition = (relativeDir: 'forward' | 'back' | 'left' | 'right') => {
     switch (relativeDir) {
@@ -71,7 +72,7 @@ export function ForkPrompt() {
   return (
     <div className="absolute inset-0 pointer-events-none z-40">
       {pendingFork.options.map((option, _idx) => {
-        const relativeDir = getCameraRelativeDirection(option.direction);
+        const relativeDir = getCameraRelativeDirection(option.direction, cameraRotation);
         return (
           <button
             key={option.nodeId}

@@ -5,9 +5,10 @@ import { useGameStore } from '../../game/store';
 
 interface RailPlayerProps {
   geometry: MazeGeometry;
+  autoSpeed?: number; // Configurable auto-movement speed (default: 3.0)
 }
 
-export function RailPlayer({ geometry }: RailPlayerProps) {
+export function RailPlayer({ geometry, autoSpeed = 3.0 }: RailPlayerProps) {
   const { camera } = useThree();
 
   const initialized = useRef(false);
@@ -125,7 +126,7 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
     }
 
     // Automatic constant-speed movement when target is set
-    const autoSpeed = 3.0; // Constant comfortable speed
+    // autoSpeed is now configurable via props (default: 3.0)
 
     // Update position if moving toward target
     if (targetNodeRef.current && currentNodeRef.current) {
