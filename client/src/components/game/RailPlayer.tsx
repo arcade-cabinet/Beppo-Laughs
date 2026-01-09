@@ -164,10 +164,7 @@ export function RailPlayer({ geometry, autoSpeed = 3.0 }: RailPlayerProps) {
       if (edgeProgress.current >= 1) {
         // Arrived at node
 
-        // For visual stopping distance at Dead Ends:
-        // If it's a dead end (no moves or 1 move which is back?), we might want to offset.
-        // But logic is simpler if we snap to node.
-        // We will handle stopping distance via offsets if needed, but for now exact node position.
+        // TODO: Refine dead-end stopping distance/offsets; currently we snap exactly to the node.
 
         camera.position.x = toNode.worldX;
         camera.position.z = toNode.worldZ;
