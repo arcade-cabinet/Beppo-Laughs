@@ -33,45 +33,50 @@ const getCameraRelativeDirection = (
   return relativeAngle > 0 ? 'right' : 'left';
 };
 
+const getHandPosition = (relativeDir: 'forward' | 'back' | 'left' | 'right'): string => {
+  switch (relativeDir) {
+    case 'forward':
+      return 'top-1/3 left-1/2 -translate-x-1/2';
+    case 'back':
+      return 'bottom-1/3 left-1/2 -translate-x-1/2';
+    case 'right':
+      return 'top-1/2 right-8 -translate-y-1/2';
+    case 'left':
+      return 'top-1/2 left-8 -translate-y-1/2';
+  }
+};
+
+const getRotation = (relativeDir: 'forward' | 'back' | 'left' | 'right'): string => {
+  switch (relativeDir) {
+    case 'forward':
+      return 'rotate-0';
+    case 'back':
+      return 'rotate-180';
+    case 'right':
+      return 'rotate-90';
+    case 'left':
+      return '-rotate-90';
+  }
+};
+
+const getLabel = (relativeDir: 'forward' | 'back' | 'left' | 'right', isExit: boolean): string => {
+  if (isExit) return 'EXIT!';
+  return relativeDir.toUpperCase();
+};
+
+// Static style constant to avoid recreation on every render
+const HAND_GLOW_STYLE = {
+  filter: 'drop-shadow(0 0 20px #ff69b4) drop-shadow(0 0 40px #ff1493)',
+} as const;
+
 export function ForkPrompt() {
   const { pendingFork, selectForkDirection, isGameOver, hasWon, cameraRotation } = useGameStore();
 
   if (!pendingFork || isGameOver || hasWon) return null;
 
-  const getHandPosition = (relativeDir: 'forward' | 'back' | 'left' | 'right') => {
-    switch (relativeDir) {
-      case 'forward':
-        return 'top-1/3 left-1/2 -translate-x-1/2';
-      case 'back':
-        return 'bottom-1/3 left-1/2 -translate-x-1/2';
-      case 'right':
-        return 'top-1/2 right-8 -translate-y-1/2';
-      case 'left':
-        return 'top-1/2 left-8 -translate-y-1/2';
-    }
-  };
-
-  const getRotation = (relativeDir: 'forward' | 'back' | 'left' | 'right') => {
-    switch (relativeDir) {
-      case 'forward':
-        return 'rotate-0';
-      case 'back':
-        return 'rotate-180';
-      case 'right':
-        return 'rotate-90';
-      case 'left':
-        return '-rotate-90';
-    }
-  };
-
-  const getLabel = (relativeDir: 'forward' | 'back' | 'left' | 'right', isExit: boolean) => {
-    if (isExit) return 'EXIT!';
-    return relativeDir.toUpperCase();
-  };
-
   return (
     <div className="absolute inset-0 pointer-events-none z-40">
-      {pendingFork.options.map((option, _idx) => {
+      {pendingFork.options.map((option) => {
         const relativeDir = getCameraRelativeDirection(option.direction, cameraRotation);
         return (
           <button
@@ -83,9 +88,7 @@ export function ForkPrompt() {
                        w-24 h-24 flex flex-col items-center justify-center
                        transition-all duration-200 hover:scale-110 active:scale-95
                        animate-pulse`}
-            style={{
-              filter: 'drop-shadow(0 0 20px #ff69b4) drop-shadow(0 0 40px #ff1493)',
-            }}
+            style={HAND_GLOW_STYLE}
           >
             <div className={`text-7xl ${getRotation(relativeDir)}`}>🖐️</div>
             <div

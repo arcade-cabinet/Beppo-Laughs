@@ -8,7 +8,24 @@ interface RailPlayerProps {
   autoSpeed?: number; // Configurable auto-movement speed (default: 3.0)
 }
 
+// Helper function to smooth camera rotation toward target angle
+function smoothRotateToward(
+  currentRotation: number,
+  targetRotation: number,
+  delta: number,
+  speed: number = 5,
+): number {
+  let diff = targetRotation - currentRotation;
+  // Normalize to [-π, π]
+  while (diff > Math.PI) diff -= Math.PI * 2;
+  while (diff < -Math.PI) diff += Math.PI * 2;
+  return currentRotation + diff * delta * speed;
+}
+
 export function RailPlayer({ geometry, autoSpeed = 3.0 }: RailPlayerProps) {
+  // Validate autoSpeed to ensure it's positive
+  const validatedSpeed = autoSpeed > 0 ? autoSpeed : 3.0;
+
   const { camera } = useThree();
 
   const initialized = useRef(false);
@@ -118,9 +135,7 @@ export function RailPlayer({ geometry, autoSpeed = 3.0 }: RailPlayerProps) {
 
         // Rotate camera to face new direction of travel
         const targetRotation = getDirectionAngle(currentNodeRef.current, newTarget);
-        const rotDiff = targetRotation - camera.rotation.y;
-        const wrappedDiff = ((rotDiff + Math.PI) % (Math.PI * 2)) - Math.PI;
-        camera.rotation.y += wrappedDiff * Math.min(1, delta * 5);
+        camera.rotation.y = smoothRotateToward(camera.rotation.y, targetRotation, delta);
         gameState.setCameraRotation(camera.rotation.y);
       }
     }
@@ -137,7 +152,7 @@ export function RailPlayer({ geometry, autoSpeed = 3.0 }: RailPlayerProps) {
       const dz = toNode.worldZ - fromNode.worldZ;
       const edgeLength = Math.sqrt(dx * dx + dz * dz);
 
-      const progressDelta = (autoSpeed * delta) / edgeLength;
+      const progressDelta = (validatedSpeed * delta) / edgeLength;
       edgeProgress.current += progressDelta;
 
       if (edgeProgress.current >= 1) {
@@ -189,11 +204,7 @@ export function RailPlayer({ geometry, autoSpeed = 3.0 }: RailPlayerProps) {
       // Smooth rotation to face direction of travel (like steering a car)
       if (targetNodeRef.current && currentNodeRef.current) {
         const targetRotation = getDirectionAngle(currentNodeRef.current, targetNodeRef.current);
-        let diff = targetRotation - camera.rotation.y;
-        while (diff > Math.PI) diff -= Math.PI * 2;
-        while (diff < -Math.PI) diff += Math.PI * 2;
-
-        camera.rotation.y += diff * delta * 5;
+        camera.rotation.y = smoothRotateToward(camera.rotation.y, targetRotation, delta);
         gameState.setCameraRotation(camera.rotation.y);
       }
 
