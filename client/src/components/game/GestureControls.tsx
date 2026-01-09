@@ -25,50 +25,63 @@ export function GestureControls() {
       if (distance < swipeThreshold) return;
 
       const angle = Math.atan2(-dy, dx);
-      const worldAngle = angle - cameraRotation;
+      // Map screen angle to world angle
+      // Screen Up (PI/2) -> North (0)
+      // Screen Right (0) -> East (-PI/2)
+      // Screen Left (PI) -> West (PI/2)
+      // Screen Down (-PI/2) -> South (PI)
+      // Formula: worldAngle = angle - PI/2 + cameraRotation
+      const worldAngle = angle - Math.PI / 2 + cameraRotation;
 
       let intendedDirection: 'north' | 'south' | 'east' | 'west';
 
       const normalizedAngle = ((worldAngle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
 
+      // North is 0. Range [7/4 PI, 1/4 PI] or [-PI/4, PI/4]
+      // East is -PI/2 (3PI/2). Range [5/4 PI, 7/4 PI]
+      // South is PI. Range [3/4 PI, 5/4 PI]
+      // West is PI/2. Range [1/4 PI, 3/4 PI]
+
       if (normalizedAngle >= Math.PI * 0.25 && normalizedAngle < Math.PI * 0.75) {
-        intendedDirection = 'north';
-      } else if (normalizedAngle >= Math.PI * 0.75 && normalizedAngle < Math.PI * 1.25) {
         intendedDirection = 'west';
-      } else if (normalizedAngle >= Math.PI * 1.25 && normalizedAngle < Math.PI * 1.75) {
+      } else if (normalizedAngle >= Math.PI * 0.75 && normalizedAngle < Math.PI * 1.25) {
         intendedDirection = 'south';
-      } else {
+      } else if (normalizedAngle >= Math.PI * 1.25 && normalizedAngle < Math.PI * 1.75) {
         intendedDirection = 'east';
+      } else {
+        intendedDirection = 'north';
       }
 
       const move = availableMoves.find((m) => m.direction === intendedDirection);
 
       if (move) {
-        console.log('Swipe detected:', intendedDirection, '-> moving to', move.nodeId);
         startMoveTo(move.nodeId, 1.0);
       } else {
         const sortedMoves = [...availableMoves].sort((a, b) => {
           const getAngle = (dir: string) => {
             switch (dir) {
               case 'north':
-                return Math.PI / 2;
-              case 'south':
-                return -Math.PI / 2;
-              case 'east':
                 return 0;
-              case 'west':
+              case 'south':
                 return Math.PI;
+              case 'east':
+                return (3 * Math.PI) / 2; // -PI/2
+              case 'west':
+                return Math.PI / 2;
               default:
                 return 0;
             }
           };
           const angleA = Math.abs(normalizedAngle - getAngle(a.direction));
           const angleB = Math.abs(normalizedAngle - getAngle(b.direction));
-          return angleA - angleB;
+          // Handle wrap-around diff for circle
+          const diffA = Math.min(angleA, 2 * Math.PI - angleA);
+          const diffB = Math.min(angleB, 2 * Math.PI - angleB);
+
+          return diffA - diffB;
         });
 
         if (sortedMoves.length > 0) {
-          console.log('Swipe fallback to closest direction:', sortedMoves[0].direction);
           startMoveTo(sortedMoves[0].nodeId, 1.0);
         }
       }

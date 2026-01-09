@@ -25,22 +25,23 @@ vi.mock('../../game/store', () => {
   };
 });
 
-// Mock drei to avoid Font loading issues with Text
-vi.mock('@react-three/drei', () => ({
-  Text: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
-}));
-
-// Mock useFrame
+// Mock useThree to provide size
 vi.mock('@react-three/fiber', async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,
-    useFrame: (_callback: unknown) => {
-      // We can't easily simulate the frame loop here without complex setup,
-      // but we can manually invoke if needed.
-    },
+    useFrame: (_callback: unknown) => {},
+    useThree: () => ({
+      size: { width: 800, height: 600 }, // Default landscape
+    }),
   };
 });
+
+// Mock drei to avoid Font loading issues with Text
+vi.mock('@react-three/drei', () => ({
+  Text: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+  useTexture: () => null,
+}));
 
 describe('ClownCarCockpit', () => {
   beforeEach(() => {
@@ -88,7 +89,7 @@ describe('ClownCarCockpit', () => {
   });
 
   describe('static positioning behavior', () => {
-    it('maintains cockpit at exactly position [0, -0.5, -0.3] relative to camera', async () => {
+    it('maintains cockpit at exactly position [0, -0.35, -0.5] relative to camera', async () => {
       const renderer = await ReactThreeTestRenderer.create(<ClownCarCockpit />);
       const rootGroup = getRootGroup(renderer);
 
@@ -96,8 +97,8 @@ describe('ClownCarCockpit', () => {
       if (rootGroup) {
         const pos = rootGroup.props.position as [number, number, number];
         expect(pos[0]).toBe(0);
-        expect(pos[1]).toBe(-0.5);
-        expect(pos[2]).toBe(-0.3);
+        expect(pos[1]).toBe(-0.35);
+        expect(pos[2]).toBe(-0.5);
       }
     });
 
@@ -113,8 +114,8 @@ describe('ClownCarCockpit', () => {
       if (rootGroup) {
         const pos = rootGroup.props.position as [number, number, number];
         expect(pos[0]).toBe(0);
-        expect(pos[1]).toBe(-0.5);
-        expect(pos[2]).toBe(-0.3);
+        expect(pos[1]).toBe(-0.35);
+        expect(pos[2]).toBe(-0.5);
       }
     });
   });

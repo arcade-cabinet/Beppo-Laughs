@@ -33,6 +33,8 @@ export function RailPlayer({ geometry, autoSpeed = 3.0 }: RailPlayerProps) {
   const targetNodeRef = useRef<RailNode | null>(null);
   const edgeProgress = useRef(0);
 
+  const CAMERA_HEIGHT = 1.0; // Sitting down height
+
   const checkForFork = useCallback(
     (node: RailNode) => {
       const gameState = useGameStore.getState();
@@ -86,7 +88,7 @@ export function RailPlayer({ geometry, autoSpeed = 3.0 }: RailPlayerProps) {
     const centerNode = geometry.railNodes.get(geometry.centerNodeId);
     if (centerNode) {
       useGameStore.getState().setCurrentNode(geometry.centerNodeId);
-      camera.position.set(centerNode.worldX, 0.15, centerNode.worldZ);
+      camera.position.set(centerNode.worldX, CAMERA_HEIGHT, centerNode.worldZ);
       currentNodeRef.current = centerNode;
       targetNodeRef.current = null;
       edgeProgress.current = 0;
@@ -96,10 +98,12 @@ export function RailPlayer({ geometry, autoSpeed = 3.0 }: RailPlayerProps) {
       const firstConn = centerNode.connections[0];
       const firstNode = geometry.railNodes.get(firstConn);
       if (firstNode) {
-        const lookDir = Math.atan2(
-          firstNode.worldX - centerNode.worldX,
-          -(firstNode.worldZ - centerNode.worldZ),
-        );
+        // Calculate lookDir: Math.atan2(-dx, -dz)
+        // dx = to.x - from.x, dz = to.z - from.z
+        const dx = firstNode.worldX - centerNode.worldX;
+        const dz = firstNode.worldZ - centerNode.worldZ;
+        const lookDir = Math.atan2(-dx, -dz);
+
         camera.rotation.y = lookDir;
         useGameStore.getState().setCameraRotation(lookDir);
       }
@@ -110,7 +114,9 @@ export function RailPlayer({ geometry, autoSpeed = 3.0 }: RailPlayerProps) {
   }, [geometry, camera, checkForFork]);
 
   const getDirectionAngle = (from: RailNode, to: RailNode): number => {
-    return Math.atan2(to.worldX - from.worldX, -(to.worldZ - from.worldZ));
+    const dx = to.worldX - from.worldX;
+    const dz = to.worldZ - from.worldZ;
+    return Math.atan2(-dx, -dz);
   };
 
   useFrame((_state, delta) => {
@@ -122,7 +128,7 @@ export function RailPlayer({ geometry, autoSpeed = 3.0 }: RailPlayerProps) {
 
     // Stop at forks and exits - player must make choice
     if (pendingFork || nearbyExit) {
-      camera.position.y = 0.15;
+      camera.position.y = CAMERA_HEIGHT;
       return;
     }
 
@@ -157,6 +163,12 @@ export function RailPlayer({ geometry, autoSpeed = 3.0 }: RailPlayerProps) {
 
       if (edgeProgress.current >= 1) {
         // Arrived at node
+
+        // For visual stopping distance at Dead Ends:
+        // If it's a dead end (no moves or 1 move which is back?), we might want to offset.
+        // But logic is simpler if we snap to node.
+        // We will handle stopping distance via offsets if needed, but for now exact node position.
+
         camera.position.x = toNode.worldX;
         camera.position.z = toNode.worldZ;
 
@@ -209,9 +221,9 @@ export function RailPlayer({ geometry, autoSpeed = 3.0 }: RailPlayerProps) {
       }
 
       // NO HEAD BOB - Smooth rail glide at "sitting in car" height
-      camera.position.y = 0.15;
+      camera.position.y = CAMERA_HEIGHT;
     } else {
-      camera.position.y = 0.15;
+      camera.position.y = CAMERA_HEIGHT;
     }
 
     // Reset tilts - ensure camera is level

@@ -3,15 +3,16 @@ import { useGameStore } from '../../game/store';
 // Helper functions moved outside component to avoid recreation on every render
 const getDirectionAngle = (gridDirection: 'north' | 'south' | 'east' | 'west'): number => {
   // Grid direction to world angle (matching RailPlayer's calculation)
+  // North=0, East=-90 (-PI/2), South=180 (PI), West=90 (PI/2)
   switch (gridDirection) {
     case 'north':
       return 0; // Looking down -Z
     case 'east':
-      return Math.PI / 2; // Looking down +X
+      return -Math.PI / 2; // Looking down +X (Physically Right)
     case 'south':
       return Math.PI; // Looking down +Z
     case 'west':
-      return -Math.PI / 2; // Looking down -X
+      return Math.PI / 2; // Looking down -X (Physically Left)
   }
 };
 
@@ -30,7 +31,13 @@ const getCameraRelativeDirection = (
   const absAngle = Math.abs(relativeAngle);
   if (absAngle < Math.PI / 4) return 'forward';
   if (absAngle > (3 * Math.PI) / 4) return 'back';
-  return relativeAngle > 0 ? 'right' : 'left';
+
+  // With North=0, East=-PI/2 (Right), West=PI/2 (Left)
+  // If target is East (-PI/2) and Camera is North (0). Relative = -PI/2.
+  // We want 'right'. So Negative is Right.
+  // If target is West (PI/2) and Camera is North (0). Relative = PI/2.
+  // We want 'left'. So Positive is Left.
+  return relativeAngle > 0 ? 'left' : 'right';
 };
 
 const getHandPosition = (relativeDir: 'forward' | 'back' | 'left' | 'right'): string => {
@@ -75,10 +82,7 @@ export function ForkPrompt() {
   if (!pendingFork || isGameOver || hasWon) return null;
 
   return (
-    <div
-      className="absolute inset-0 pointer-events-none z-40"
-      data-has-fork="true"
-    >
+    <div className="absolute inset-0 pointer-events-none z-40" data-has-fork="true">
       {pendingFork.options.map((option) => {
         const relativeDir = getCameraRelativeDirection(option.direction, cameraRotation);
         return (
