@@ -25,9 +25,7 @@ function TexturedWall({
   useLayoutEffect(() => {
     if (!meshRef.current) return;
 
-    // We need to clone the geometry to modify its UVs safely without affecting others
-    // Actually, each <boxGeometry> creates a new BufferGeometry instance unless shared.
-    // In R3F, <boxGeometry> inside a component creates a new instance.
+    // Each boxGeometry here creates a unique BufferGeometry instance, allowing safe UV modification.
     const geometry = meshRef.current.geometry;
 
     // Update UVs so texture scaling matches wall dimensions and avoids visible tiling seams.
