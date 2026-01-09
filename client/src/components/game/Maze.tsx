@@ -1,8 +1,8 @@
 import { useTexture } from '@react-three/drei';
 import type React from 'react';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { DoubleSide, RepeatWrapping, type BufferGeometry, type BoxGeometry, type Mesh } from 'three';
-import * as THREE from 'three';
+import type * as THREE from 'three';
+import { DoubleSide, type Mesh, RepeatWrapping } from 'three';
 import { ASSET_IMAGE_BASE, loadAssetCatalog, pickSeededAsset } from '../../game/assetCatalog';
 import { DEFAULT_CONFIG, type MazeGeometry, type WallSegment } from '../../game/maze/geometry';
 import { useGameStore } from '../../game/store';
@@ -13,22 +13,18 @@ interface MazeProps {
 }
 
 // Custom component to handle per-instance UV scaling
-function TexturedWall({
-  wall,
-  texture
-}: {
-  wall: WallSegment;
-  texture: THREE.Texture
-}) {
+function TexturedWall({ wall, texture }: { wall: WallSegment; texture: THREE.Texture }) {
   const meshRef = useRef<Mesh>(null);
 
   useLayoutEffect(() => {
     if (!meshRef.current) return;
 
-    // Each boxGeometry here creates a unique BufferGeometry instance, allowing safe UV modification.
+    // We need to clone the geometry to modify its UVs safely without affecting others
+    // Actually, each <boxGeometry> creates a new BufferGeometry instance unless shared.
+    // In R3F, <boxGeometry> inside a component creates a new instance.
     const geometry = meshRef.current.geometry;
 
-    // Update UVs so texture scaling matches wall dimensions and avoids visible tiling seams.
+    // Check if UVs need update to avoid loops?
     // Texture scale factor: aim for roughly 1 repeat per 5 units of world space
     const TEXTURE_SCALE = 5.0;
 
@@ -88,16 +84,10 @@ function TexturedWall({
     }
 
     uvAttribute.needsUpdate = true;
-
-  }, [wall, texture]);
+  }, [wall]);
 
   return (
-    <mesh
-      ref={meshRef}
-      position={[wall.x, wall.height / 2, wall.z]}
-      castShadow
-      receiveShadow
-    >
+    <mesh ref={meshRef} position={[wall.x, wall.height / 2, wall.z]} castShadow receiveShadow>
       <boxGeometry args={[wall.width, wall.height, wall.depth]} />
       <meshStandardMaterial
         map={texture}

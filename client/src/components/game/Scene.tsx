@@ -1,7 +1,7 @@
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import * as THREE from 'three';
 import type { PointLight } from 'three';
+import * as THREE from 'three';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { ErrorFallback } from '@/components/ErrorFallback';
 import { useGameStore } from '@/game/store';
@@ -115,9 +115,6 @@ export function Scene({ seed }: SceneProps) {
     const layout = generateMaze(13, 13, seed);
     const geometry = buildGeometry(layout, DEFAULT_CONFIG);
     setMazeData({ layout, geometry });
-    console.log('Generated 2D maze:', layout.width, 'x', layout.height);
-    console.log('Center:', layout.center, 'Exits:', layout.exits);
-    console.log('Rail nodes:', geometry.railNodes.size);
 
     const store = useGameStore.getState();
 
