@@ -30,7 +30,7 @@ function TexturedWall({
     // In R3F, <boxGeometry> inside a component creates a new instance.
     const geometry = meshRef.current.geometry;
 
-    // Check if UVs need update to avoid loops?
+    // Update UVs so texture scaling matches wall dimensions and avoids visible tiling seams.
     // Texture scale factor: aim for roughly 1 repeat per 5 units of world space
     const TEXTURE_SCALE = 5.0;
 
