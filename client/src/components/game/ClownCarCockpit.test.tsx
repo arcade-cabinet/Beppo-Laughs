@@ -89,7 +89,7 @@ describe('ClownCarCockpit', () => {
   });
 
   describe('static positioning behavior', () => {
-    it('maintains cockpit at exactly position [0, -0.35, -0.5] relative to camera', async () => {
+    it('maintains cockpit at exactly position [0, 0.05, -0.5] relative to camera', async () => {
       const renderer = await ReactThreeTestRenderer.create(<ClownCarCockpit />);
       const rootGroup = getRootGroup(renderer);
 
@@ -97,7 +97,7 @@ describe('ClownCarCockpit', () => {
       if (rootGroup) {
         const pos = rootGroup.props.position as [number, number, number];
         expect(pos[0]).toBe(0);
-        expect(pos[1]).toBe(-0.35);
+        expect(pos[1]).toBe(0.05);
         expect(pos[2]).toBe(-0.5);
       }
     });
@@ -114,7 +114,7 @@ describe('ClownCarCockpit', () => {
       if (rootGroup) {
         const pos = rootGroup.props.position as [number, number, number];
         expect(pos[0]).toBe(0);
-        expect(pos[1]).toBe(-0.35);
+        expect(pos[1]).toBe(0.05);
         expect(pos[2]).toBe(-0.5);
       }
     });

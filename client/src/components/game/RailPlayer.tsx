@@ -33,7 +33,7 @@ export function RailPlayer({ geometry, autoSpeed = 3.0 }: RailPlayerProps) {
   const targetNodeRef = useRef<RailNode | null>(null);
   const edgeProgress = useRef(0);
 
-  const CAMERA_HEIGHT = 1.0; // Sitting down height
+  const CAMERA_HEIGHT = 1.4; // Sitting down height - restored to pre-PR#100 value for better visibility
 
   const checkForFork = useCallback(
     (node: RailNode) => {

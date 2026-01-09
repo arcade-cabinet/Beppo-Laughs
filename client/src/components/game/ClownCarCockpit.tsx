@@ -388,9 +388,9 @@ export function ClownCarCockpit() {
   const scale = 1.0;
 
   // Position relative to camera: Center and Bottom
-  // Modified to [0, -0.35, -0.5] to fit with Camera Height 1.0
+  // Modified to [0, 0.05, -0.5] to fit with Camera Height 1.4 (restored from pre-PR#100)
   return (
-    <group ref={cockpitRef} position={[0, -0.35, -0.5]} scale={[scale, scale, scale]}>
+    <group ref={cockpitRef} position={[0, 0.05, -0.5]} scale={[scale, scale, scale]}>
       {/* === DASHBOARD BASE (From Prototype Aesthetic) === */}
       <group position={[0, 0.3, -0.3]} rotation={[0.4, 0, 0]}>
         {/* Main Dashboard Block */}
