@@ -1,6 +1,6 @@
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import type { PointLight } from 'three';
+import * as THREE from 'three';
 import { useGameStore } from '@/game/store';
 import { loadAssetCatalog } from '../../game/assetCatalog';
 import { generateMaze, type MazeLayout } from '../../game/maze/core';
@@ -79,7 +79,8 @@ export function Scene({ seed }: SceneProps) {
     null,
   );
   const [catalog, setCatalog] = useState<Awaited<ReturnType<typeof loadAssetCatalog>>>(null);
-  const { fear, despair, maxSanity, currentNode, blockades, isMoving } = useGameStore();
+  const { fear, despair, maxSanity, currentNode, blockades, isMoving, graphicsQuality } =
+    useGameStore();
 
   useEffect(() => {
     if (!mazeData || !currentNode || isMoving) return;
@@ -184,7 +185,17 @@ export function Scene({ seed }: SceneProps) {
       <AudioManager />
 
       <div className="w-full h-full">
-        <Canvas shadows camera={{ position: [0, 1.2, 0], fov: 90, near: 0.1, far: 100 }}>
+        <Canvas
+          shadows
+          camera={{ position: [0, 0.15, -2.2], fov: 78, near: 0.1, far: 100 }}
+          gl={{ antialias: graphicsQuality !== 'low', alpha: false }}
+          onCreated={({ gl }) => {
+            if (graphicsQuality !== 'low') {
+              gl.toneMapping = THREE.ACESFilmicToneMapping;
+              gl.toneMappingExposure = 1.1;
+            }
+          }}
+        >
           <color attach="background" args={[bgColor]} />
 
           {/* Fog for depth perception - essential for 3D feel */}
@@ -266,7 +277,7 @@ export function Scene({ seed }: SceneProps) {
           </Suspense>
 
           {/* GPU post-processing effects for horror atmosphere */}
-          <HorrorEffects />
+          {graphicsQuality !== 'low' && <HorrorEffects />}
         </Canvas>
       </div>
 
