@@ -324,6 +324,19 @@ function Lever({ position }: { position: [number, number, number] }) {
   );
 }
 
+/**
+ * Renders the interactive clown car cockpit and hood scene positioned relative to the camera.
+ *
+ * The component builds the dashboard, meters (fear, despair, speedometer), steering wheel,
+ * lever, optional hood with instanced polka dots and rivets, side panels, and footwell.
+ * Dynamic elements update each frame: fear/despair meter fills and instanced meshes are
+ * initialized once during layout. Hood rendering is omitted when the viewport is portrait.
+ *
+ * @returns The React element containing the full cockpit group ready to be added to the scene.
+ *
+ * @example
+ * <ClownCarCockpit />
+ */
 export function ClownCarCockpit() {
   const { size } = useThree();
   const isPortrait = size.height > size.width;
