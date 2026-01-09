@@ -68,7 +68,7 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
     const centerNode = geometry.railNodes.get(geometry.centerNodeId);
     if (centerNode) {
       useGameStore.getState().setCurrentNode(geometry.centerNodeId);
-      camera.position.set(centerNode.worldX, 1.2, centerNode.worldZ);
+      camera.position.set(centerNode.worldX, 0.15, centerNode.worldZ);
       currentNodeRef.current = centerNode;
       targetNodeRef.current = null;
       edgeProgress.current = 0;
@@ -104,7 +104,7 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
 
     // Stop at forks and exits - player must make choice
     if (pendingFork || nearbyExit) {
-      camera.position.y = 1.2;
+      camera.position.y = 0.15;
       return;
     }
 
@@ -158,6 +158,25 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
           gameState.setNearbyExit(null);
         }
 
+        // Journal Entry Generation
+        if (!gameState.visitedCells.has(toNode.id) || Math.random() < 0.2) {
+          const exits = toNode.connections.length;
+          const isDeadEnd = exits === 1;
+          const description = isDeadEnd
+            ? 'Hit a dead end. The canvas walls are closing in.'
+            : exits > 2
+              ? 'The path splits here. Too many choices...'
+              : 'Moving deeper into the maze.';
+
+          gameState.addJournalEntry(description);
+
+          // Chance to corrupt if insane
+          const insanity = gameState.getSanityLevel(); // 100 is sane, 0 insane
+          if (insanity < 50 && Math.random() < 0.3) {
+            gameState.corruptJournal();
+          }
+        }
+
         checkForFork(toNode);
       } else {
         // Interpolate along path - LINEAR for smooth rail feel
@@ -178,9 +197,9 @@ export function RailPlayer({ geometry }: RailPlayerProps) {
       }
 
       // NO HEAD BOB - Smooth rail glide at "sitting in car" height
-      camera.position.y = 1.2;
+      camera.position.y = 0.15;
     } else {
-      camera.position.y = 1.2;
+      camera.position.y = 0.15;
     }
 
     // Reset tilts - ensure camera is level

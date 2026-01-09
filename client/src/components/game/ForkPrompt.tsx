@@ -9,14 +9,20 @@ export function ForkPrompt() {
   const getDirectionAngle = (gridDirection: 'north' | 'south' | 'east' | 'west'): number => {
     // Grid direction to world angle (matching RailPlayer's calculation)
     switch (gridDirection) {
-      case 'north': return 0;           // Looking down -Z
-      case 'east': return Math.PI / 2;  // Looking down +X
-      case 'south': return Math.PI;     // Looking down +Z
-      case 'west': return -Math.PI / 2; // Looking down -X
+      case 'north':
+        return 0; // Looking down -Z
+      case 'east':
+        return Math.PI / 2; // Looking down +X
+      case 'south':
+        return Math.PI; // Looking down +Z
+      case 'west':
+        return -Math.PI / 2; // Looking down -X
     }
   };
 
-  const getCameraRelativeDirection = (gridDirection: 'north' | 'south' | 'east' | 'west'): 'forward' | 'back' | 'left' | 'right' => {
+  const getCameraRelativeDirection = (
+    gridDirection: 'north' | 'south' | 'east' | 'west',
+  ): 'forward' | 'back' | 'left' | 'right' => {
     const targetAngle = getDirectionAngle(gridDirection);
     let relativeAngle = targetAngle - cameraRotation;
 
@@ -92,11 +98,11 @@ export function ForkPrompt() {
       })}
 
       <div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
                       text-center pointer-events-none"
       >
         <div
-          className="text-pink-400 text-xl font-bold animate-pulse 
+          className="text-pink-400 text-xl font-bold animate-pulse
                         drop-shadow-lg"
           style={{ textShadow: '0 0 10px #ff69b4' }}
         >

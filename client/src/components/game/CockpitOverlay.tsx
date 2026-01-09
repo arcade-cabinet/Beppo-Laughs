@@ -29,7 +29,6 @@ export function CockpitOverlay() {
       {/* Dashboard at bottom - ALWAYS visible */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/80 via-black/60 to-transparent">
         <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
-
           {/* Fear Gauge - Left */}
           <div className="w-40">
             <div className="font-creepy text-red-500 text-sm mb-1">FEAR</div>
@@ -38,7 +37,7 @@ export function CockpitOverlay() {
                 className="h-full bg-gradient-to-r from-red-900 to-red-500 transition-all duration-300"
                 style={{
                   width: `${fearPercent}%`,
-                  boxShadow: fearPercent > 50 ? '0 0 10px rgba(220, 38, 38, 0.6)' : 'none'
+                  boxShadow: fearPercent > 50 ? '0 0 10px rgba(220, 38, 38, 0.6)' : 'none',
                 }}
               />
             </div>
@@ -53,8 +52,10 @@ export function CockpitOverlay() {
             className={`pointer-events-auto flex flex-col items-center transition-all duration-200
                        ${pendingFork ? 'cursor-pointer hover:scale-110 active:scale-95' : 'opacity-50 cursor-not-allowed'}`}
           >
-            <div className={`w-16 h-16 rounded-full bg-gradient-to-b from-red-600 to-red-800 border-4 border-red-900 flex items-center justify-center
-                           ${pendingFork ? 'animate-pulse' : ''}`}>
+            <div
+              className={`w-16 h-16 rounded-full bg-gradient-to-b from-red-600 to-red-800 border-4 border-red-900 flex items-center justify-center
+                           ${pendingFork ? 'animate-pulse' : ''}`}
+            >
               <div className="w-8 h-8 rounded-full bg-red-500" />
             </div>
             <div className="font-creepy text-white/40 text-xs mt-1">START</div>
@@ -68,11 +69,13 @@ export function CockpitOverlay() {
                 className="h-full bg-gradient-to-r from-blue-500 to-blue-900 transition-all duration-300 ml-auto"
                 style={{
                   width: `${despairPercent}%`,
-                  boxShadow: despairPercent > 50 ? '0 0 10px rgba(59, 130, 246, 0.6)' : 'none'
+                  boxShadow: despairPercent > 50 ? '0 0 10px rgba(59, 130, 246, 0.6)' : 'none',
                 }}
               />
             </div>
-            <div className="font-mono text-blue-400/60 text-xs mt-1 text-right">{Math.round(despairPercent)}%</div>
+            <div className="font-mono text-blue-400/60 text-xs mt-1 text-right">
+              {Math.round(despairPercent)}%
+            </div>
           </div>
         </div>
       </div>
@@ -82,8 +85,9 @@ export function CockpitOverlay() {
         <div className="absolute inset-0 bg-gradient-to-t from-orange-900/20 via-transparent to-transparent" />
 
         {/* Rusty hood edge */}
-        <div className="absolute bottom-32 left-0 right-0 h-8 bg-gradient-to-b from-orange-800/40 to-transparent"
-             style={{ clipPath: 'polygon(0 50%, 5% 0, 95% 0, 100% 50%, 95% 100%, 5% 100%)' }}
+        <div
+          className="absolute bottom-32 left-0 right-0 h-8 bg-gradient-to-b from-orange-800/40 to-transparent"
+          style={{ clipPath: 'polygon(0 50%, 5% 0, 95% 0, 100% 50%, 95% 100%, 5% 100%)' }}
         />
       </div>
     </div>
