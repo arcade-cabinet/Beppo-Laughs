@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@google/genai':
-        specifier: ^1.34.0
-        version: 1.34.0(bufferutil@4.1.0)
+        specifier: ^1.35.0
+        version: 1.35.0(bufferutil@4.1.0)
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.70.0(react@19.2.3))
@@ -147,8 +147,8 @@ importers:
         specifier: ^1.18.2
         version: 1.18.2
       framer-motion:
-        specifier: ^12.23.24
-        version: 12.24.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+        specifier: ^12.25.0
+        version: 12.25.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       input-otp:
         specifier: ^1.4.2
         version: 1.4.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -192,8 +192,8 @@ importers:
         specifier: ^7.66.0
         version: 7.70.0(react@19.2.3)
       react-resizable-panels:
-        specifier: ^4.2.1
-        version: 4.2.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+        specifier: ^4.3.3
+        version: 4.3.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       recharts:
         specifier: ^3.6.0
         version: 3.6.0(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react-is@18.3.1)(react@19.2.3)(redux@5.0.1)
@@ -1066,8 +1066,8 @@ packages:
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
 
-  '@google/genai@1.34.0':
-    resolution: {integrity: sha512-vu53UMPvjmb7PGzlYu6Tzxso8Dfhn+a7eQFaS2uNemVtDZKwzSpJ5+ikqBbXplF7RGB1STcVDqCkPvquiwb2sw==}
+  '@google/genai@1.35.0':
+    resolution: {integrity: sha512-ZC1d0PSM5eS73BpbVIgL3ZsmXeMKLVJurxzww1Z9axy3B2eUB3ioEytbQt4Qu0Od6qPluKrTDew9pSi9kEuPaw==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
       '@modelcontextprotocol/sdk': ^1.24.0
@@ -3324,8 +3324,8 @@ packages:
   fraction.js@5.3.4:
     resolution: {integrity: sha512-1X1NTtiJphryn/uLQz3whtY6jK3fTqoE3ohKs0tT+Ujr1W59oopxmoEh7Lu5p6vBaPbgoM0bzveAW4Qi5RyWDQ==}
 
-  framer-motion@12.24.0:
-    resolution: {integrity: sha512-ggTMRkIDPc76lHmM+dRT1MmVfFV6t/y+jkWjWuzR7FG5xRvnAAl/5wFPjzSkLE8Nu5E5uIQRCNxmIXtWJVo6XQ==}
+  framer-motion@12.25.0:
+    resolution: {integrity: sha512-mlWqd0rApIjeyhTCSNCqPYsUAEhkcUukZxH3ke6KbstBRPcxhEpuIjmiUQvB+1E9xkEm5SpNHBgHCapH/QHTWg==}
     peerDependencies:
       '@emotion/is-prop-valid': '*'
       react: ^18.0.0 || ^19.0.0
@@ -3968,11 +3968,11 @@ packages:
   modern-screenshot@4.6.7:
     resolution: {integrity: sha512-0GhgI6i6le4AhKzCvLYjwEmsP47kTsX45iT5yuAzsLTi/7i3Rjxe8fbH2VjGJLuyOThwsa0CdQAPd4auoEtsZg==}
 
-  motion-dom@12.24.0:
-    resolution: {integrity: sha512-RD2kZkFd/GH4fITI8IJvypGgn0vIu5vkrJaXIAkYqORGs5P0CKDHKNvswmoY1H+tbUAOPSh6VtUqoAmc/3Gvig==}
+  motion-dom@12.24.11:
+    resolution: {integrity: sha512-DlWOmsXMJrV8lzZyd+LKjG2CXULUs++bkq8GZ2Sr0R0RRhs30K2wtY+LKiTjhmJU3W61HK+rB0GLz6XmPvTA1A==}
 
-  motion-utils@12.23.28:
-    resolution: {integrity: sha512-0W6cWd5Okoyf8jmessVK3spOmbyE0yTdNKujHctHH9XdAE4QDuZ1/LjSXC68rrhsJU+TkzXURC5OdSWh9ibOwQ==}
+  motion-utils@12.24.10:
+    resolution: {integrity: sha512-x5TFgkCIP4pPsRLpKoI86jv/q8t8FQOiM/0E8QKBzfMozWHfkKap2gA1hOki+B5g3IsBNpxbUnfOum1+dgvYww==}
 
   mrmime@2.0.1:
     resolution: {integrity: sha512-Y3wQdFg2Va6etvQ5I82yUhGdsKrcYox6p7FfL1LbK2J4V01F9TGlepTIhnK24t7koZibmg82KGglhA1XK5IsLQ==}
@@ -4362,8 +4362,8 @@ packages:
       '@types/react':
         optional: true
 
-  react-resizable-panels@4.2.2:
-    resolution: {integrity: sha512-BxDTFHxDCyCRPK54X5hpnhoLZbBslUrTTelQDRHo4107FXODjPSTqEWOPlFxE/ho0Vw4JrsRgaWdx6GIK073XA==}
+  react-resizable-panels@4.3.3:
+    resolution: {integrity: sha512-7ZmYcoOiipVwwz8X9O/HiRbm8THM6qnXo7p5dPI6ivzdDoteHo3iXS1pijs8Z4/XU8V1RwhuGgJiZU5G7Zy0KQ==}
     peerDependencies:
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
@@ -5948,7 +5948,7 @@ snapshots:
 
   '@floating-ui/utils@0.2.10': {}
 
-  '@google/genai@1.34.0(bufferutil@4.1.0)':
+  '@google/genai@1.35.0(bufferutil@4.1.0)':
     dependencies:
       google-auth-library: 10.5.0
       ws: 8.19.0(bufferutil@4.1.0)
@@ -8322,10 +8322,10 @@ snapshots:
 
   fraction.js@5.3.4: {}
 
-  framer-motion@12.24.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
+  framer-motion@12.25.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
     dependencies:
-      motion-dom: 12.24.0
-      motion-utils: 12.23.28
+      motion-dom: 12.24.11
+      motion-utils: 12.24.10
       tslib: 2.8.1
     optionalDependencies:
       react: 19.2.3
@@ -9159,11 +9159,11 @@ snapshots:
 
   modern-screenshot@4.6.7: {}
 
-  motion-dom@12.24.0:
+  motion-dom@12.24.11:
     dependencies:
-      motion-utils: 12.23.28
+      motion-utils: 12.24.10
 
-  motion-utils@12.23.28: {}
+  motion-utils@12.24.10: {}
 
   mrmime@2.0.1: {}
 
@@ -9491,7 +9491,7 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.7
 
-  react-resizable-panels@4.2.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
+  react-resizable-panels@4.3.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
     dependencies:
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
