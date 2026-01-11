@@ -1,0 +1,188 @@
+
+  describe('resetAudio', () => {
+    it('should reset all audio settings to default values', () => {
+      const { result } = renderHook(() => useAudioStore());
+
+      // Modify all settings from defaults
+      act(() => {
+        result.current.setMasterVolume(0.3);
+        result.current.setMusicVolume(0.4);
+        result.current.setSfxVolume(0.5);
+        result.current.setMusicEnabled(false);
+        result.current.setSfxEnabled(false);
+      });
+
+      // Verify settings were changed
+      expect(result.current.masterVolume).toBe(0.3);
+      expect(result.current.musicVolume).toBe(0.4);
+      expect(result.current.sfxVolume).toBe(0.5);
+      expect(result.current.musicEnabled).toBe(false);
+      expect(result.current.sfxEnabled).toBe(false);
+
+      // Reset to defaults
+      act(() => {
+        result.current.resetAudio();
+      });
+
+      // Verify all settings are back to defaults
+      expect(result.current.masterVolume).toBe(1);
+      expect(result.current.musicVolume).toBe(0.7);
+      expect(result.current.sfxVolume).toBe(0.8);
+      expect(result.current.musicEnabled).toBe(true);
+      expect(result.current.sfxEnabled).toBe(true);
+    });
+
+    it('should reset audio when all values are already at defaults', () => {
+      const { result } = renderHook(() => useAudioStore());
+
+      // Ensure we start at defaults
+      act(() => {
+        result.current.resetAudio();
+      });
+
+      const beforeState = {
+        masterVolume: result.current.masterVolume,
+        musicVolume: result.current.musicVolume,
+        sfxVolume: result.current.sfxVolume,
+        musicEnabled: result.current.musicEnabled,
+        sfxEnabled: result.current.sfxEnabled,
+      };
+
+      // Reset again
+      act(() => {
+        result.current.resetAudio();
+      });
+
+      // State should remain unchanged
+      expect(result.current.masterVolume).toBe(beforeState.masterVolume);
+      expect(result.current.musicVolume).toBe(beforeState.musicVolume);
+      expect(result.current.sfxVolume).toBe(beforeState.sfxVolume);
+      expect(result.current.musicEnabled).toBe(beforeState.musicEnabled);
+      expect(result.current.sfxEnabled).toBe(beforeState.sfxEnabled);
+    });
+
+    it('should reset audio when only some values differ from defaults', () => {
+      const { result } = renderHook(() => useAudioStore());
+
+      // Change only master and music volume
+      act(() => {
+        result.current.setMasterVolume(0.2);
+        result.current.setMusicVolume(0.3);
+      });
+
+      expect(result.current.masterVolume).toBe(0.2);
+      expect(result.current.musicVolume).toBe(0.3);
+
+      // Reset
+      act(() => {
+        result.current.resetAudio();
+      });
+
+      // All values should be at defaults
+      expect(result.current.masterVolume).toBe(1);
+      expect(result.current.musicVolume).toBe(0.7);
+      expect(result.current.sfxVolume).toBe(0.8);
+      expect(result.current.musicEnabled).toBe(true);
+      expect(result.current.sfxEnabled).toBe(true);
+    });
+
+    it('should reset audio when volumes are at extreme values', () => {
+      const { result } = renderHook(() => useAudioStore());
+
+      // Set extreme values
+      act(() => {
+        result.current.setMasterVolume(0);
+        result.current.setMusicVolume(0);
+        result.current.setSfxVolume(1);
+      });
+
+      expect(result.current.masterVolume).toBe(0);
+      expect(result.current.musicVolume).toBe(0);
+      expect(result.current.sfxVolume).toBe(1);
+
+      // Reset
+      act(() => {
+        result.current.resetAudio();
+      });
+
+      expect(result.current.masterVolume).toBe(1);
+      expect(result.current.musicVolume).toBe(0.7);
+      expect(result.current.sfxVolume).toBe(0.8);
+    });
+
+    it('should reset audio multiple times consecutively', () => {
+      const { result } = renderHook(() => useAudioStore());
+
+      // Modify, reset, modify again, reset again
+      act(() => {
+        result.current.setMasterVolume(0.5);
+        result.current.resetAudio();
+      });
+
+      expect(result.current.masterVolume).toBe(1);
+
+      act(() => {
+        result.current.setMusicVolume(0.1);
+        result.current.resetAudio();
+      });
+
+      expect(result.current.musicVolume).toBe(0.7);
+
+      act(() => {
+        result.current.setSfxEnabled(false);
+        result.current.resetAudio();
+      });
+
+      expect(result.current.sfxEnabled).toBe(true);
+    });
+
+    it('should handle rapid state changes before reset', () => {
+      const { result } = renderHook(() => useAudioStore());
+
+      // Rapid changes
+      act(() => {
+        result.current.setMasterVolume(0.1);
+        result.current.setMasterVolume(0.2);
+        result.current.setMasterVolume(0.3);
+        result.current.setMusicEnabled(false);
+        result.current.setMusicEnabled(true);
+        result.current.setMusicEnabled(false);
+        result.current.setSfxVolume(0.9);
+      });
+
+      // Final state before reset
+      expect(result.current.masterVolume).toBe(0.3);
+      expect(result.current.musicEnabled).toBe(false);
+      expect(result.current.sfxVolume).toBe(0.9);
+
+      // Reset should still work correctly
+      act(() => {
+        result.current.resetAudio();
+      });
+
+      expect(result.current.masterVolume).toBe(1);
+      expect(result.current.musicEnabled).toBe(true);
+      expect(result.current.sfxVolume).toBe(0.8);
+    });
+
+    it('should maintain independence from other store mutations after reset', () => {
+      const { result } = renderHook(() => useAudioStore());
+
+      // Reset first
+      act(() => {
+        result.current.resetAudio();
+      });
+
+      // Then change individual values
+      act(() => {
+        result.current.setMasterVolume(0.5);
+      });
+
+      // Other values should remain at defaults
+      expect(result.current.masterVolume).toBe(0.5);
+      expect(result.current.musicVolume).toBe(0.7);
+      expect(result.current.sfxVolume).toBe(0.8);
+      expect(result.current.musicEnabled).toBe(true);
+      expect(result.current.sfxEnabled).toBe(true);
+    });
+  });

@@ -22,6 +22,19 @@ function smoothRotateToward(
   return currentRotation + diff * delta * speed;
 }
 
+/**
+ * Controls the camera movement along the maze's rail network, handling initialization,
+ * automatic traversal, fork/exit pauses, smooth rotation toward travel direction, and
+ * journal/visit bookkeeping via the global game store.
+ *
+ * The component positions and orients the scene camera on the maze rail, advances it
+ * at a constant configurable speed, pauses for player choices at forks or exits,
+ * updates available moves, generates journal entries on node arrival, and keeps the
+ * camera level at a fixed sitting height. Renders no visual elements.
+ *
+ * @param geometry - MazeGeometry that provides railNodes and the centerNodeId used for initialization
+ * @param autoSpeed - Desired travel speed in world units per second (default: 3.0). A non-positive value will fall back to 3.0.
+ */
 export function RailPlayer({ geometry, autoSpeed = 3.0 }: RailPlayerProps) {
   // Validate autoSpeed to ensure it's positive
   const validatedSpeed = autoSpeed > 0 ? autoSpeed : 3.0;
@@ -33,7 +46,7 @@ export function RailPlayer({ geometry, autoSpeed = 3.0 }: RailPlayerProps) {
   const targetNodeRef = useRef<RailNode | null>(null);
   const edgeProgress = useRef(0);
 
-  const CAMERA_HEIGHT = 1.0; // Sitting down height
+  const CAMERA_HEIGHT = 1.4; // Sitting down height - restored to pre-PR#100 value for better visibility
 
   const checkForFork = useCallback(
     (node: RailNode) => {

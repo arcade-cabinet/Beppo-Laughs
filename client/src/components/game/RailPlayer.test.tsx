@@ -155,3 +155,95 @@ describe('RailPlayer', () => {
     });
   });
 });
+
+  describe('camera height restoration (PR#114)', () => {
+    it('sets camera to restored height of 1.4', async () => {
+      const geometry = createMockGeometry();
+      const renderer = await ReactThreeTestRenderer.create(
+        <RailPlayer geometry={geometry} />
+      );
+
+      await renderer.advanceFrames(5, 16);
+
+      const camera = renderer.scene.camera;
+      // Verify restored pre-PR#100 camera height
+      expect(camera.position.y).toBe(1.4);
+    });
+
+    it('maintains camera height of 1.4 throughout movement', async () => {
+      const geometry = createMockGeometry();
+      const renderer = await ReactThreeTestRenderer.create(
+        <RailPlayer geometry={geometry} autoSpeed={5} />
+      );
+
+      // Advance multiple frames to simulate movement
+      await renderer.advanceFrames(30, 16);
+
+      const camera = renderer.scene.camera;
+      // Camera should stay at 1.4 regardless of movement
+      expect(camera.position.y).toBe(1.4);
+    });
+
+    it('camera height provides better visibility than previous 1.0', async () => {
+      const geometry = createMockGeometry();
+      const renderer = await ReactThreeTestRenderer.create(
+        <RailPlayer geometry={geometry} />
+      );
+
+      await renderer.advanceFrames(5, 16);
+
+      const camera = renderer.scene.camera;
+      // 1.4 is higher than the old 1.0 value
+      expect(camera.position.y).toBeGreaterThan(1.0);
+      expect(camera.position.y).toBe(1.4);
+    });
+
+    it('camera height is set during initialization', async () => {
+      const geometry = createMockGeometry();
+      const renderer = await ReactThreeTestRenderer.create(
+        <RailPlayer geometry={geometry} />
+      );
+
+      // Check immediately after first frame
+      await renderer.advanceFrames(1, 16);
+
+      const camera = renderer.scene.camera;
+      expect(camera.position.y).toBe(1.4);
+    });
+
+    it('camera remains level (no x/z tilt) at height 1.4', async () => {
+      const geometry = createMockGeometry();
+      const renderer = await ReactThreeTestRenderer.create(
+        <RailPlayer geometry={geometry} />
+      );
+
+      await renderer.advanceFrames(10, 16);
+
+      const camera = renderer.scene.camera;
+      // Verify camera stays level (no tilting)
+      expect(camera.rotation.x).toBe(0);
+      expect(camera.rotation.z).toBe(0);
+      expect(camera.position.y).toBe(1.4);
+    });
+
+    it('validates autoSpeed with camera at height 1.4', async () => {
+      const geometry = createMockGeometry();
+      
+      // Test with various speeds
+      const speeds = [0, -1, 1, 3, 10];
+      
+      for (const speed of speeds) {
+        const renderer = await ReactThreeTestRenderer.create(
+          <RailPlayer geometry={geometry} autoSpeed={speed} />
+        );
+
+        await renderer.advanceFrames(5, 16);
+        const camera = renderer.scene.camera;
+        
+        // Camera height should be consistent regardless of speed
+        expect(camera.position.y).toBe(1.4);
+        
+        renderer.unmount();
+      }
+    });
+  });

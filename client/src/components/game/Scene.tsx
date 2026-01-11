@@ -67,15 +67,14 @@ function getDirectionFromDelta(dx: number, dy: number): 'north' | 'south' | 'eas
 }
 
 /**
- * Renders the 3D maze scene driven by the provided seed.
+ * Render the interactive 3D maze scene generated from a deterministic seed.
  *
- * Generates maze geometry from `seed`, loads the asset catalog, updates game state
- * (current node, available moves, blockades and blockade requirements), and renders
- * the interactive 3D scene including lighting, maze geometry, spawn objects, villains,
- * audio, post-processing, and UI controls.
+ * Generates maze geometry, loads assets, updates related game state (current node,
+ * available moves, blockades and requirements), and returns the scene UI containing
+ * 3D rendering, audio, post-processing, and HTML overlays.
  *
  * @param seed - Seed string used to deterministically generate the maze and spawn plan
- * @returns A React element that renders the full 3D maze scene, or `null` while the maze is being generated
+ * @returns A React element rendering the 3D maze scene, or `null` while maze data is not yet available
  */
 export function Scene({ seed }: SceneProps) {
   const [mazeData, setMazeData] = useState<{ layout: MazeLayout; geometry: MazeGeometry } | null>(
@@ -137,9 +136,10 @@ export function Scene({ seed }: SceneProps) {
   const avgInsanity = maxSanity > 0 ? (fear + despair) / 2 / maxSanity : 0;
 
   // Fog calculations for atmosphere and depth perception
-  // Adjusted to ensure maze visibility while hiding edges
-  const fogNear = Math.max(8, 15 - avgInsanity * 5); // Start fog further out (was 2)
-  const fogFar = Math.max(25, 45 - avgInsanity * 15); // End fog further out (was 15)
+  // Significantly increased visibility ranges to fix visual regression
+  // At avgInsanity=0: fogNear=20, fogFar=60 (provides clear maze visibility)
+  const fogNear = Math.max(10, 20 - avgInsanity * 8); // Start fog much further out
+  const fogFar = Math.max(35, 60 - avgInsanity * 20); // End fog much further out
   const fogHue = 30 + avgInsanity * 60;
   const fogColor = `hsl(${fogHue}, ${30 - avgInsanity * 15}%, ${15 - avgInsanity * 5}%)`;
 
